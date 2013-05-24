@@ -1,50 +1,95 @@
-<apex:page controller="myBuyOrderExtension" sidebar="false" tabStyle="Account">
-<apex:stylesheet value="{!URLFOR($Resource.CTresource,'/CTresource/jquery/css/ui-lightness/jquery-ui-1.8.18.custom.css')}"/>
-<apex:stylesheet value="{!URLFOR($Resource.CTresource,'/CTresource/css/screen.css')}"/>
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/jquery/js/jquery-1.7.1.min.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/jquery/js/jquery-ui-1.8.18.custom.min.js')}" />
-<script src="https://maps.google.com/maps/api/js?sensor=true" type="text/javascript"></script>
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/map/markerclusterer.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/map/ui/jquery.ui.map.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/blockui/jquery.blockUI.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/date/date.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/highchart/js/highcharts.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/highchart/js/modules/exporting.js')}" />
-<apex:stylesheet value="{!URLFOR($Resource.CTresource,'/CTresource/DataTables-1.9.4/media/css/jquery.dataTables.css')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/DataTables-1.9.4/media/js/jquery.dataTables.min.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/qtip/jquery.qtip-1.0.0-rc3.min.js')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/pajinate/jquery.pajinate.min.js')}" />
-<apex:stylesheet value="{!URLFOR($Resource.CTresource,'/CTresource/pajinate/pajinate.css')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/carouFredSel-6.2.0/jquery.carouFredSel-6.2.0.js')}" />
-<apex:stylesheet value="{!URLFOR($Resource.CTresource,'/CTresource/toast/css/jquery.toastmessage.css')}" />
-<apex:includeScript value="{!URLFOR($Resource.CTresource,'/CTresource/toast/jquery.toastmessage.js')}" />
+{% extends "/template/base.html" %}
 
+{% block customJS %}
 <script type="text/javascript">
     var j$ = jQuery.noConflict();
     var googleSearchStart=1;
     var googleSearchStep=8;
+
+	// post-submit callback 
+	function showResponse(responseText, statusText, xhr, j$form)  { 
+		// for normal html responses, the first argument to the success callback 
+		// is the XMLHttpRequest object's responseText property 
+ 
+ 		// if the ajaxForm method was passed an Options Object with the dataType 
+ 		// property set to 'xml' then the first argument to the success callback 
+ 		// is the XMLHttpRequest object's responseXML property 
+  
+  		// if the ajaxForm method was passed an Options Object with the dataType 
+  		// property set to 'json' then the first argument to the success callback 
+  		// is the json data object returned by the server 
+   
+   		alert('status: ' + statusText + '\n\nresponseText: \n' + responseText + 
+   		'\n\nThe output div should have already been updated with the responseText.'); 
+
+		switch (responseText){
+			case '-1':
+				j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
+				break;
+			case '-2':
+				j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
+				break;
+			case '0':
+				j$(0).toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
+				break;
+			default:
+				break;
+		}
+   	} 
+
+	// pre-submit callback 
+	function showRequest(formData, jqForm, options) { 
+    	// formData is an array; here we use $.param to convert it to a string to display it 
+        // but the form plugin does this for you automatically when it submits the data 
+        var queryString = j$.param(formData); 
+             
+ 		// jqForm is a jQuery object encapsulating the form element.  To access the 
+ 		// DOM element for the form do this: 
+ 		// var formElement = jqForm[0]; 
+  		
+  		alert('About to submit: \n\n' + queryString); 
+   		
+   		// here we could return false to prevent the form from being submitted; 
+   		// returning anything other than false will allow the form submit to continue 
+   		//return true; 
+
+    	// term service agreed
+    	var agree=j$('#checkbox-agree-term-service').hasClass('ariel-checkbox-checked');
+    	if (!agree){
+    		j$().toastmessage('showWarningToast', 'You need to agree to the Term of Service.');
+    		return false;
+    	}else{
+	    	// validation
+	    	var user=j$.trim(j$('#review-client-name').html());
+	    	var name=j$.trim(j$('#review-product-name').html());
+	    	var qty=j$.trim(j$('#review-qty').html());
+	    	var price=j$.trim(j$('#review-price').html());
+	    	var image=j$('#review-product-image').attr('src');
+
+	    	if (user=='' || name=='' || qty=='' || price=='' || image==''){
+	    		j$().toastmessage('showWarningToast', 'Information is missing. Publishing failed.');
+	    		return false;
+	    	}
+    	}
+   		return true;
+   	}                                                           
     
     function createNewBuyOrder(clientName,product,qty,price,image){
-		myBuyOrderExtension.createNewBuyOrder(clientName,product,qty,price,image,function(result,success){
-			if (success){
-				switch (result){
-					case -1:
-						j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
-						break;
-					case -2:
-						j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
-						break;
-					case 0:
-						j$(0).toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
-						break;
-					default:
-						break;
-				}
-				
-			}else{
-				console.log('error');
-			}
-		},{escape:true});     
+    	url='/new/buyorder';
+		j$.ajax({
+			method:'post',
+    		url: url,
+          	dataType: 'json',
+      		data: {
+      			'client':clientName,
+      			'product':product,
+      			'qty':qty,
+      			'price':price,
+      			'image':image
+      		},
+        	success: function(data, textStatus, jqXHR){
+        	}
+        });      
     }
     
     function googleImageSearch(term){
@@ -101,28 +146,10 @@
     }
     
     j$(document).ready(function(){		
-    	j$('#publish-new-buy-order-btn').live('click',function(){
-    		// term service agreed
-    		var agree=j$('#checkbox-agree-term-service').hasClass('ariel-checkbox-checked');
-    		if (!agree){
-    			j$().toastmessage('showWarningToast', 'You need to agree to the Term of Service.');
-    		}else{
-	    		// validation
-	    		var user=j$.trim(j$('#review-client-name').html());
-	    		var name=j$.trim(j$('#review-product-name').html());
-	    		var qty=j$.trim(j$('#review-qty').html());
-	    		var price=j$.trim(j$('#review-price').html());
-	    		var image=j$('#review-product-image').attr('src');
-	
-	    		if (user=='' || name=='' || qty=='' || price=='' || image==''){
-	    			j$().toastmessage('showWarningToast', 'Information is missing. Publishing failed.');
-	    		}else{
-	    			createNewBuyOrder(user,name,qty,price,image);
-	    		}    		
-    		}
+    	j$('#publish-new-buy-order-btn').on('click',function(){
     	});
     	
-    	j$('input[name="name"]').live('change',function(){
+    	j$('input[name="name"]').on('change',function(){
     		googleSearchStart=1;
     		
     		var term=j$.trim(j$('input[name="name"]').val());
@@ -133,7 +160,7 @@
     	});
     	
     	// mimic checkbox checked
-    	j$('.ariel-pinterest-item').live('click',function(){
+    	j$(document).on('click','.ariel-pinterest-item',function(){
     		var checked=j$(this).find('.ariel-checkbox').hasClass('ariel-checkbox-checked');
     		
     		j$.each(j$('.ariel-pinterest-item'),function(index,item){
@@ -151,12 +178,15 @@
     			var meChecked=j$(item).find('.ariel-checkbox').hasClass('ariel-checkbox-checked');
     			if (meChecked){
     				j$('#review-product-image').attr('src',j$(item).find('img:first').attr('src'));
+    				
+    				// set input value
+    				j$('input[name="url"]').val(j$(item).find('img:first').attr('src'));
     			}
     		});
     	});
     	
     	// google image search show more, using a search offset
-    	j$('.show-more').live('click',function(){
+    	j$('.show-more').on('click',function(){
     		googleSearchStart+=googleSearchStep;
     		
     		var term=j$.trim(j$('input[name="name"]').val());
@@ -167,45 +197,54 @@
     	});
     	
     	// link inputs to review sections
-    	j$('#input-client-name').live('change',function(){
+    	j$('#input-client-name').on('change',function(){
     		j$('#review-client-name').html(j$(this).val());
     	});
-    	j$('#input-product-name').live('change',function(){
+    	j$('#input-product-name').on('change',function(){
     		if (j$(this).val().length>=80){
 				j$().toastmessage('showWarningToast', 'Name is too long. Max is 80 characters.');    		
     		}else{
 				j$('#review-product-name').html(j$(this).val());    		
     		}
     	});    	
-    	j$('#input-price').live('change',function(){
+    	j$('#input-price').on('change',function(){
     		j$('#review-price').html(j$(this).val());
     		
     		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$(this).val());
     		j$('#review-order-total').html(total);
     	});
-    	j$('#input-qty').live('change',function(){
+    	j$('#input-qty').on('change',function(){
     		j$('#review-qty').html(j$(this).val());
 
     		var total=parseFloat(j$('#input-price').val())*parseFloat(j$(this).val());
     		j$('#review-order-total').html(total);    		
     	});
     	
-    	j$('#btn-apply-user-input-image').live('click',function(){
+    	j$('#btn-apply-user-input-image').on('click',function(){
     		j$('#user-input-image').attr('src',j$(this).siblings('input').val());
     	});  
     	
-    	j$('.ariel-checkbox-regular').live('click',function(){
+    	j$('.ariel-checkbox-regular').on('click',function(){
     		j$(this).toggleClass('ariel-checkbox-checked');
     	});  	    	
+    	
+    	// bind 'myForm' and provide a simple callback function 
+    	var options={
+    		dataType: 'json',
+    		beforeSubmit: showRequest,
+    		success: showResponse
+    	};
+    	j$('#myForm').keydown(function(e) {
+    	  	return e.which !== 13;
+    	}).ajaxForm(options,function() { 
+    		alert("Thank you for your comment!"); 
+    	}); 
     });	
 </script>
+{% endblock %}
 
-<style>
-body{
-	font-family: Verdana, Geneva, sans-serif;	
-}
-
-</style>
+{% block main %}
+<form id="myForm" action="/new/buyorder" method="post"> 
 
 <h1 class="ariel-blue">Create a new order</h1>
 <p class="ariel-blue ariel-p">
@@ -220,13 +259,13 @@ items to give you a starting point for your listing.
 <tr><td>
 Choose only one client
 </td><td>
-<input name="user" type="text" id="input-client-name" placeholder="eg. John Smith"/>
+<input name="client" type="text" id="input-client-name" placeholder="eg. John Smith"/>
 </td></tr>
 
 <tr><td>
 Write about the product
 </td><td>
-<input name="name" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
 </td></tr>
 
 <tr><td>
@@ -264,6 +303,8 @@ None of these matches yours? Find your own picture and copy and paste url of you
 Picture link
 </td><td>
 <input type="url" class="url" placeholder="http://..."/>
+<input type="url" name="url" style="display:none;"/>
+
 <span class="ariel-button" id="btn-apply-user-input-image">Use</span>
 </td></tr>
 </table>
@@ -324,7 +365,13 @@ Picture link
 	<div class="image-select-pane" style="border:none;">
 	<div style="float:right;">
 	<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of Service</a>
-	<div class="ariel-button" style="margin-top:15px;" id="publish-new-buy-order-btn">Publish</div>
+	<div class="ariel-button" style="margin-top:15px;">
+		<input style="border:none;background:transparent;" type="submit" value="Publish" />
 	</div>
 	</div>
-</apex:page>3
+	</div>
+
+</form>
+
+{% endblock %}
+
