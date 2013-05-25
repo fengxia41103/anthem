@@ -6,9 +6,13 @@ class MyBaseModel(ndb.Model):
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
 	# object owner tied to login user
-	owner=ndb.StringProperty()
+	owner=ndb.StringProperty() # user id
 	last_modified_by=ndb.StringProperty()
-	
+
+class AccountingSlip(MyBaseModel):
+	type=ndb.StringProperty()
+	amount=ndb.FloatProperty()
+		
 class BuyOrderFill(MyBaseModel):
 	# seller fill
 	qty=ndb.IntegerProperty()
@@ -20,7 +24,7 @@ class BuyOrderFill(MyBaseModel):
 	receivable=ndb.ComputedProperty(lambda self: self.client_price*self.qty)
 	
 	# status
-	status=ndb.StringProperty(repeated=True)
+	status=ndb.StringProperty()
 	
 	# accounting
 	over_short=ndb.ComputedProperty(lambda self: self.receivable-self.payable)
@@ -33,6 +37,9 @@ class BuyOrderCart(MyBaseModel):
 	
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
+	
+	# a cart has multiple accounting slips for withdraws and deposits
+	banks=ndb.StructuredProperty(AccountingSlip,repeated=True)
 	
 class BuyOrder(MyBaseModel):
 	# standard fields

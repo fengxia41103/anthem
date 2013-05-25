@@ -1,15 +1,16 @@
+from google.appengine.api import users
+from google.appengine.ext import ndb
+from google.appengine.api import users
+
 import os
 import urllib
 import json
 import cgi
 import logging
 
-from google.appengine.api import users
-from google.appengine.ext import ndb
-
 import jinja2
 import webapp2
-
+from models import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -34,8 +35,17 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		qty=self.request.POST['qty']
 		price=self.request.POST['price']
 		image=self.request.POST['url']
-		self.response.write(json.dumps({'me':'this'}))
 		
+		# create a new buy order and add to store
+		creator=users.get_current_user()
+		order=BuyOrder()
+		order.owner=creator.user_id()
+		order.name=product
+		order.description=''
+		order.price=price
+		order.qty=qty
+		order.image=image
+		order.put()		
 		
 class Test(webapp2.RequestHandler):
 	def post(self):
