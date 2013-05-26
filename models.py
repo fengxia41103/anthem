@@ -38,9 +38,6 @@ class BuyOrderCart(MyBaseModel):
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
 	
-	# a cart has multiple accounting slips for withdraws and deposits
-	banks=ndb.StructuredProperty(AccountingSlip,repeated=True)
-	
 class BuyOrder(MyBaseModel):
 	# standard fields
 	name=ndb.StringProperty()
@@ -48,6 +45,3 @@ class BuyOrder(MyBaseModel):
 	image=ndb.StringProperty()
 	qty=ndb.IntegerProperty()
 	price=ndb.FloatProperty()
-
-	# an order has multiple carts
-	carts=ndb.StructuredProperty(BuyOrderCart,repeated=True)

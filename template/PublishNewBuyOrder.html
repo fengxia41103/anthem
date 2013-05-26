@@ -62,6 +62,7 @@
 	    	// validation
 	    	var user=j$.trim(j$('#review-client-name').html());
 	    	var name=j$.trim(j$('#review-product-name').html());
+	    	var description=j$.trim(j$('#review-product-description').html());
 	    	var qty=j$.trim(j$('#review-qty').html());
 	    	var price=j$.trim(j$('#review-price').html());
 	    	var image=j$('#review-product-image').attr('src');
@@ -73,24 +74,6 @@
     	}
    		return true;
    	}                                                           
-    
-    function createNewBuyOrder(clientName,product,qty,price,image){
-    	url='/new/buyorder';
-		j$.ajax({
-			method:'post',
-    		url: url,
-          	dataType: 'json',
-      		data: {
-      			'client':clientName,
-      			'product':product,
-      			'qty':qty,
-      			'price':price,
-      			'image':image
-      		},
-        	success: function(data, textStatus, jqXHR){
-        	}
-        });      
-    }
     
     function googleImageSearch(term){
 		var html;
@@ -149,10 +132,10 @@
     	j$('#publish-new-buy-order-btn').on('click',function(){
     	});
     	
-    	j$('input[name="name"]').on('change',function(){
+    	j$('#input-product-name').on('change',function(){
     		googleSearchStart=1;
     		
-    		var term=j$.trim(j$('input[name="name"]').val());
+    		var term=j$.trim(j$(this).val());
     		if (term.length==0) return;
     		
     		// using google custom search api to populate the image
@@ -189,7 +172,7 @@
     	j$('.show-more').on('click',function(){
     		googleSearchStart+=googleSearchStep;
     		
-    		var term=j$.trim(j$('input[name="name"]').val());
+    		var term=j$.trim(j$('#input-product-name').val());
     		if (term.length==0) return;
     		
     		// using google custom search api to populate the image
@@ -201,10 +184,17 @@
     		j$('#review-client-name').html(j$(this).val());
     	});
     	j$('#input-product-name').on('change',function(){
-    		if (j$(this).val().length>=80){
-				j$().toastmessage('showWarningToast', 'Name is too long. Max is 80 characters.');    		
+    		if (j$(this).val().length>=500){
+				j$().toastmessage('showWarningToast', 'Name is too long. Max is 500 characters.');    		
     		}else{
 				j$('#review-product-name').html(j$(this).val());    		
+    		}
+    	});    	
+    	j$('#input-product-description').on('change',function(){
+    		if (j$(this).val().length>=500){
+				j$().toastmessage('showWarningToast', 'Description is too long. Max is 500 characters.');    		
+    		}else{
+				j$('#review-product-description').html(j$(this).val());    		
     		}
     	});    	
     	j$('#input-price').on('change',function(){
@@ -263,9 +253,15 @@ Choose only one client
 </td></tr>
 
 <tr><td>
-Write about the product
+Product name
 </td><td>
 <input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+</td></tr>
+
+<tr><td>
+Write about the product
+</td><td>
+<input name="description" type="text" id="input-product-description" placeholder="eg. Serial number starts with NO233xxx"/>
 </td></tr>
 
 <tr><td>
@@ -331,6 +327,12 @@ Picture link
 		Product name
 		</td><td>
 		<span id="review-product-name"></span>
+		</td></tr>
+		
+		<tr><td>
+		Product details
+		</td><td>
+		<span id="review-product-description"></span>
 		</td></tr>
 		
 		<tr><td>

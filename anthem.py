@@ -32,6 +32,7 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 	def post(self):
 		client=self.request.POST['client']
 		product=self.request.POST['product']
+		description=self.request.POST['description']
 		qty=self.request.POST['qty']
 		price=self.request.POST['price']
 		image=self.request.POST['url']
@@ -40,15 +41,14 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		creator=users.get_current_user()
 		order=BuyOrder()
 		order.owner=creator.user_id()
+		order.last_modified_by=creator.user_id()
 		order.name=product
-		order.description=''
-		order.price=price
-		order.qty=qty
+		order.description=description
+		order.price=float(price)
+		order.qty=int(qty)
 		order.image=image
 		order.put()		
 		
-class Test(webapp2.RequestHandler):
-	def post(self):
-		name=self.request.POST['name']
-		comment=self.request.POST['comment']
-		self.response.write(str(json.dumps({'me':'this'})))		
+class BrowseBuyOrder(webapp2.RequestHandler):
+	def get(self):
+		pass
