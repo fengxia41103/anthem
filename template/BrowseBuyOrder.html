@@ -84,7 +84,7 @@
 	    		'/buyorder/browse',
 	    		{'id':id,'price':price,'qty':qty},
 	    		function(result){
-	    			console.log(result);
+	    			j$().toastmessage('showSuccessToast','Your shopping cart has been updated.');
 	    		}	
 		    );
 	    });

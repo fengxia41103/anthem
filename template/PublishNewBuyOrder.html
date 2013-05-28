@@ -20,16 +20,16 @@
    
    		//alert('status: ' + statusText + '\n\nresponseText: \n' + responseText + 
    		//'\n\nThe output div should have already been updated with the responseText.'); 
-
+		
 		switch (responseText){
-			case '-1':
+			case -1:
 				j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
 				break;
-			case '-2':
+			case -2:
 				j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
 				break;
-			case '0':
-				j$(0).toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
+			case 0:
+				j$().toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
 				break;
 			default:
 				break;

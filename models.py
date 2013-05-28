@@ -7,7 +7,7 @@ class Contact(ndb.Model):
 	nickname=ndb.StringProperty() # user name
 	shipping_address=ndb.StringProperty()
 	phone=ndb.PickleProperty() # a list
-	
+
 class MyBaseModel(ndb.Model):
 	# two time stamps
 	created_time=ndb.DateTimeProperty(auto_now_add=True)
@@ -28,7 +28,7 @@ class Billing(MyBaseModel):
 class AccountingSlip(MyBaseModel):
 	payor=ndb.KeyProperty(kind='Contact')
 	receiver=ndb.KeyProperty(kind='Contact')
-	type=ndb.StringProperty()
+	type=ndb.StringProperty() # in ['withdraw', 'deposit']
 	amount=ndb.FloatProperty()
 		
 class BuyOrder(MyBaseModel):
@@ -69,6 +69,12 @@ class BuyOrderCart(MyBaseModel):
 	
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
-	
+	total_payable=ndb.ComputedProperty(lambda self: sum([f.payable for f in self.fills]))
+	total_receivable=ndb.ComputedProperty(lambda self:sum([f.receivable for f in self.fills]))
+	profit=ndb.ComputedProperty(lambda self: self.receivable-self.payable)
+	gross_margin=ndb.ComputedProperty(lambda self: self.profit/self.total_payable*100.0)
+		
 	# a cart has multiple bank slips
 	account_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
+
+	

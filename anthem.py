@@ -57,7 +57,7 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		price=float(self.request.POST['price'])
 		image=self.request.POST['url'].strip()
 		
-		# maanage contact -- who is posting this WTB? usually a DOC
+		# manage contact -- who is posting this WTB? usually a DOC
 		creator=users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id())		
 		
@@ -98,8 +98,6 @@ class ListBuyOrder(webapp2.RequestHandler):
 		
 		# list of buyorder to browse
 		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
-				
-		
 		data=[]
 		for q in queries:
 			d=q.to_dict()
@@ -108,7 +106,6 @@ class ListBuyOrder(webapp2.RequestHandler):
 			# place holder
 			d['filled by me']=0
 			data.append(d)
-		logging.info(data)
 		self.response.write(json.dumps(data,cls=ComplexEncoder))	
 						
 class BrowseBuyOrder(webapp2.RequestHandler):
@@ -122,8 +119,62 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 	def post(self):
 		# add a new buyorder fill to cart 
 		buyorder_id=self.request.POST['id']
-		price=self.request.POST['price']
-		qty=self.request.POST['qty']
+		price=float(self.request.POST['price'])
+		qty=int(self.request.POST['qty']) # allowing negative!
 
-		# get open cart
+		# get BuyOrder instance
+		buyorder=BuyOrder.get_by_id(int(buyorder_id))
+		assert buyorder!=None
+		
+		# manage contact -- who is posting this WTB? usually a DOC
+		creator=users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id())		
+		
+		# get open cart where terminal_seller == current login user
+		# BuyOrder was creatd with a particular termianl_buyer specified
+		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
+		# Note: this means that a serller can have multiple OPEN cart as the same time, each identified
+		# by the (terminal_buyer,terminal_seller) pair
+		cart_query=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')	
+		my_cart=None
+		open_carts=cart_query.filter(BuyOrderCart.terminal_buyer==buyorder.terminal_buyer,BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
+		if not open_carts.count():
+			# if no such cart, create one
+			my_cart=BuyOrderCart(terminal_buyer=buyorder.terminal_buyer,terminal_seller=me.key,status='Open')
+			my_cart.owner=me.key
+			my_cart.last_modified_by=me.key
+			my_cart.put()
+		else:
+			# each buyer-seller pair for a particular login user can only have 1 OPEN cart at a time!
+			# this is the 1-open-cart rule!
+			assert open_carts.count()==1
+			my_cart=open_carts.get()
+			
+		# we have established an OPEN cart
+		existing=False
+		for i in xrange(len(my_cart.fills)):
+			f=my_cart.fills[i]
+			if f.order==buyorder.key:
+				logging.info('Already in my cart!.....')
+				
+				# it's already in the cart, just update qty
+				existing=True
+				f.qty+=qty
+				f.last_modified_by=me.key
+				break
+				
+		if not existing:
+			logging.info('Not in my cart! Create a new fill!')
+			
+			# if not existing, create a new fill and add to cart
+			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=0)
+			f.owner=me.key
+			f.last_modified_by=me.key
+			f.put()
+			
+			# add to my cart
+			my_cart.fills.append(f)
+			
+		# update cart
+		my_cart.put()
 		
