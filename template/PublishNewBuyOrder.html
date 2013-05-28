@@ -66,10 +66,18 @@
 	    	var price=j$.trim(j$('#review-price').html());
 	    	var image=j$('#review-product-image').attr('src');
 
-	    	if (user=='' || name=='' || qty=='' || price=='' || image==''){
-	    		j$().toastmessage('showWarningToast', 'Information is missing. Publishing failed.');
-	    		return false;
-	    	}
+	    	if (name==''){
+	    		j$().toastmessage('showErrorToast', 'Product name is required!');
+				return false;
+			}
+	    	if (qty==''){
+	    		j$().toastmessage('showErrorToast', 'Product quantity is required!');
+				return false;
+			}
+	    	if (price==''){
+	    		j$().toastmessage('showErrorToast', 'Product price is required!');
+				return false;
+			}
     	}
    		return true;
    	}                                                           

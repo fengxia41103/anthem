@@ -28,6 +28,10 @@ class ComplexEncoder(json.JSONEncoder):
 			return delta.total_seconds()
 		elif isinstance(obj,users.User):
 			return {'email':obj.email(),'id':obj.user_id(),'nickname':obj.nickname()}
+		elif isinstance(obj,ndb.Key):
+			if obj.kind()=='Contact':
+				contact=obj.get()
+				return {'name':contact.nickname,'email':contact.email,'id':contact.user_id}
 		else:
 			return json.JSONEncoder.default(self, obj)
 
@@ -46,29 +50,55 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 
 	def post(self):
 		# create a new buyorder
-		client=self.request.POST['client']
-		product=self.request.POST['product']
-		description=self.request.POST['description']
-		qty=self.request.POST['qty']
-		price=self.request.POST['price']
-		image=self.request.POST['url']
+		client_email=self.request.POST['client'].strip()
+		product=self.request.POST['product'].strip()
+		description=self.request.POST['description'].strip()
+		qty=int(self.request.POST['qty'])
+		price=float(self.request.POST['price'])
+		image=self.request.POST['url'].strip()
 		
+		# maanage contact -- who is posting this WTB? usually a DOC
+		creator=users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id())		
+		
+		# update email and user name
+		# this is to keep Google user account in sync with internal Contact model
+		me.email=creator.email()
+		me.nickname=creator.nickname()
+		me.put()
+		
+		# manage contact -- who is the client, optional
+		buyer=None
+		if client_email: # if not blank
+			b_query=Contact.query(Contact.email==client_email)
+			if b_query.count():
+				assert b_query.count()==1 # email is unique throughout system!
+				buyer=b_query.get()
+			else: # no contact yet, create one
+				buyer=Contact(email=client_email)
+				buyer.put()
+				
 		# create a new buy order and add to store
 		order=BuyOrder()
-		order.owner=users.get_current_user()
-		order.last_modified_by=users.get_current_user()
+		order.owner=me.key
+		order.last_modified_by=me.key
+		if buyer: # buyer info is optional at post
+			order.terminal_buyer=buyer.key
 		order.name=product
 		order.description=description
 		order.price=float(price)
 		order.qty=int(qty)
 		order.image=image
-		order.put()		
+		order.put()
+		self.response.write('0')
 
 class ListBuyOrder(webapp2.RequestHandler):
-	def get(self):
+	def post(self):
+		filter=self.request.get('filter')
+		
 		# list of buyorder to browse
-		#filter=rquest.post['filter']
-		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(10)
+		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
+				
 		
 		data=[]
 		for q in queries:

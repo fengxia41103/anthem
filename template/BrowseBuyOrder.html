@@ -6,11 +6,10 @@
     
     // get unfilled order list
     function getBuyOrderList(filterString){
-		var filter='';
-		j$.getJSON('/buyorder/list',
-			function(result){
-				console.log(result);
-				
+		j$.post('/buyorder/list',
+			{'filter':filterString},
+			function(resp){
+				var result=j$.parseJSON(resp);
 				var html='';
 				for (var i=0;i<result.length;i++){
 					var order=result[i];
@@ -43,7 +42,7 @@
 					html+='</a>';					
 					html+='</p>';
 					
-					html+='<p class="product-list-item-footer-user">'+order['owner']['nickname']+'</p>';
+					html+='<p class="product-list-item-footer-user">'+order['owner']['name']+'</p>';
 					html+='</div>';
 				}
 				j$('#unfilledOrderPinterest').html(html);
@@ -95,21 +94,26 @@
 	    // 2. or hit ENTER key inside input box to cause a change
 	    j$('#btn-filter-pinterest-list').click(function(){
 	    	var term=j$(this).siblings('input:first').val();
+	    	console.log(term);
+    		getBuyOrderList(term);
 	    });
 	    
 	    j$('#input-filter-pinterest-list').on('change',function(){
+    		getBuyOrderList(j$(this).val());
 	    });
 	    
 	    // hot tag search, clicking on a tag will fire a search
 	    j$('ul#pinterest-filters li').on('click',function(){
 	    	var term=j$(this).text();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
+    		getBuyOrderList(term);	    	
 	    });
 	    
 	    // click on user name will start a search and add a tag
 	    j$(document).on('click','p.product-list-item-footer-user',function(){
 	    	var term=j$(this).html();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
+    		getBuyOrderList(term);	    	
 	    });
 	    
 	    // shopping cart animation
