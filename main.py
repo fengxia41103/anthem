@@ -29,8 +29,9 @@ routes = [
 	Route('/auth/<provider>/callback', handler='handlers.AuthHandler:_auth_callback', name='auth_callback'),
 
 	# Anthem
-	Route('/new/buyorder', handler='anthem.PublishNewBuyOrder'),  	
-	Route('/browse/buyorder', handler='anthem.BrowseBuyOrder'),  
+	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),  	
+	Route('/buyorder/list', handler='anthem.ListBuyOrder'),  
+	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder'),  
 	
 ]
 

@@ -6,7 +6,8 @@ class MyBaseModel(ndb.Model):
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
 	# object owner tied to login user
-	owner=ndb.StringProperty() # user id
+	owner_id=ndb.StringProperty() # user id
+	owner_name=ndb.StringProperty() # user name
 	last_modified_by=ndb.StringProperty()
 
 class AccountingSlip(MyBaseModel):
@@ -45,3 +46,4 @@ class BuyOrder(MyBaseModel):
 	image=ndb.StringProperty()
 	qty=ndb.IntegerProperty()
 	price=ndb.FloatProperty()
+	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)

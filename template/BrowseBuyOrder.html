@@ -1,0 +1,172 @@
+{% extends "/template/base.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+    var j$ = jQuery.noConflict();
+    
+    // get unfilled order list
+    function getBuyOrderList(filterString){
+		var filter='';
+		j$.getJSON('/buyorder/list',
+			function(result){
+				console.log(result);
+				
+				var html='';
+				for (var i=0;i<result.length;i++){
+					var order=result[i];
+					var id=order['id'];
+				
+					// compose the action div
+					html+='<div class="pin shadow">';
+					
+					// add a command center
+					html+='<div class="pin-command-center" style="display:none;">';
+  					html+='<input item="qty" type="number" value="1" /> x $';
+  					html+='<input item="price" type="number" value="'+order['price']+'" />';
+  					
+					html+='<button item="button-new-buyorder-fill" item-id="'+id+'">Fill</button>';
+					html+='</div>';+' &hearts;'
+					html+='<a href="">';			
+					html+='<img src="'+order['image']+'"/>';
+					html+='</a>';
+					html+='<p>'+order['name']+'</p>';
+					html+='<p><span class="product-stat">'+order['qty']+'</span><span class="product-stat-label">qty</span>';
+					html+='<span class="product-stat">'+order['price']+'</span><span class="product-stat-label">$</span>';
+					html+='<a href="">';															
+					if (order['filled by me']!= undefined){				
+						html +='<span class="product-stat-by-me redheart shadow">';	
+					}else{
+						html +='<span class="product-stat-by-me redheart shadow" style="display:none;">';	
+					}
+					html+=order['filled by me']+' &hearts;';
+					html+='</span>';
+					html+='</a>';					
+					html+='</p>';
+					
+					html+='<p class="product-list-item-footer-user">'+order['owner_name']+'</p>';
+					html+='</div>';
+				}
+				j$('#unfilledOrderPinterest').html(html);
+				
+				// update filter tags
+				if (filterString!=undefined && filterString.length>0){
+					// check if the keywork already on the list
+					var found=false;
+					var current=j$('ul#pinterest-filters li');
+					for (var c=0; c<current.length;c++){
+						if (j$(current[c]).text()==filterString){
+							found=true;
+							break;
+						}
+					}
+					if (found==false){
+						j$('ul#pinterest-filters').prepend('<li>'+filterString+'</li>').children('li:last').remove();
+					}
+				}			
+			}		
+		);	
+	}
+	        
+    j$(document).ready(function(){
+    	getBuyOrderList('');
+    	return;
+    	    	
+		j$('.pin').live('mouseenter',function(){
+			j$(this).children('.pin-command-center').fadeIn({duration:800});
+		}).live('mouseleave',function(){
+			j$(this).children('.pin-command-center').fadeOut({duration:1000});
+		});
+		
+	    // fill order shortcut    
+    	j$('button[item="button-new-buyorder-fill"]').live('click',function(){
+	    	var id=j$(this).attr('item-id');
+	    	var price=j$(this).prev('input').val();
+	    	var qty=j$(this).prev('input').prev('input').val();
+	    });
+	    
+	    // two ways to search
+	    // 1. click the Search button
+	    // 2. or hit ENTER key inside input box to cause a change
+	    j$('#btn-filter-pinterest-list').click(function(){
+	    	var term=j$(this).siblings('input:first').val();
+	    });
+	    
+	    j$('#input-filter-pinterest-list').live('change',function(){
+	    });
+	    
+	    // hot tag search, clicking on a tag will fire a search
+	    j$('ul#pinterest-filters li').live('click',function(){
+	    	var term=j$(this).text();
+	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
+	    });
+	    
+	    // click on user name will start a search and add a tag
+	    j$('p.product-list-item-footer-user').live('click',function(){
+	    	var term=j$(this).html();
+	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
+	    });
+	    
+	    // shopping cart animation
+	    j$('#shopping-cart-collapse-switch').live('click',function(){
+	    	j$('#shopping-cart').slideToggle(600,function(){
+	    		j$('#shopping-cart-visible-switch').fadeIn(400);
+	    	});
+	    	
+	    });
+	    j$('#shopping-cart-visible-switch').live('click',function(){
+	    	j$(this).hide();
+	    	j$('#shopping-cart').slideToggle(600);
+	    });
+    });    	
+</script>
+{% endblock %}
+
+{% block main %}
+
+	<div class="searchbox">
+	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-filter-pinterest-list" title="Search is case insensitive. Multiple terms are delimited by comma."/>
+	<button id="btn-filter-pinterest-list">Search</button>
+    <ul id="pinterest-filters">
+    	{% for item in hotTags %}
+    		<li>{!item}</li>
+    	{% endfor %}																
+    </ul>
+    </div>
+    
+    <div id="shopping-cart-container" style="display:none;">
+	<div id="shopping-cart" class="alpha60" style="display:none;">
+		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
+			Close
+		</span>	
+		<table id="this-cart">
+		<thead>
+		<tr>
+			<td>Buy Order</td><td>Quantity</td><td>Price</td>
+		</tr>
+		</thead>
+		
+		<tbody>
+		{% for f in fills %}
+		<tr>
+			<td>{{ f.name }}</td>
+			<td>{{ f.qty }}</td>
+			<td>{{ f.price }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+		</table>
+		
+		<a href=""><button>Review order</button></a>
+		<label>Total</label><span class="border-top-red" id="this-cart-total">
+		{{ total_payable }}
+		</span> 
+
+	</div>
+	<div id="shopping-cart-visible-switch">Cart Items &nbsp;
+	<span id="cart-item-count">{{ fills|length }}</span>
+	</div>    
+	</div>
+	
+    <div id="unfilledOrderPinterest" class="css3-columns"></div>
+
+{% endblock %}

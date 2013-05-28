@@ -2,7 +2,6 @@
 
 {% block customJS %}
 <script type="text/javascript">
-    var j$ = jQuery.noConflict();
     var googleSearchStart=1;
     var googleSearchStep=8;
 
@@ -234,7 +233,7 @@
 {% endblock %}
 
 {% block main %}
-<form id="myForm" action="/new/buyorder" method="post"> 
+<form id="myForm" action="/buyorder/new" method="post"> 
 
 <h1 class="ariel-blue">Create a new order</h1>
 <p class="ariel-blue ariel-p">

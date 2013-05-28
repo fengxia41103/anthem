@@ -16,8 +16,11 @@
 	
 	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
 		
+	<script type="text/javascript">
+	var j$=jQuery.noConflict();
+	</script>	
 	
-{% block customJS %}{% endblock %}
+	{% block customJS %}{% endblock %}
 </head>
 
 {% autoescape true %}
