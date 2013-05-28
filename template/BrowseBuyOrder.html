@@ -43,7 +43,7 @@
 					html+='</a>';					
 					html+='</p>';
 					
-					html+='<p class="product-list-item-footer-user">'+order['owner_name']+'</p>';
+					html+='<p class="product-list-item-footer-user">'+order['owner']['nickname']+'</p>';
 					html+='</div>';
 				}
 				j$('#unfilledOrderPinterest').html(html);
@@ -66,22 +66,28 @@
 			}		
 		);	
 	}
-	        
+
     j$(document).ready(function(){
     	getBuyOrderList('');
-    	return;
     	    	
-		j$('.pin').live('mouseenter',function(){
+		j$(document).on('mouseenter','.pin',function(){
 			j$(this).children('.pin-command-center').fadeIn({duration:800});
-		}).live('mouseleave',function(){
+		}).on('mouseleave','.pin',function(){
 			j$(this).children('.pin-command-center').fadeOut({duration:1000});
 		});
 		
 	    // fill order shortcut    
-    	j$('button[item="button-new-buyorder-fill"]').live('click',function(){
+    	j$(document).on('click','button[item="button-new-buyorder-fill"]',function(){
 	    	var id=j$(this).attr('item-id');
 	    	var price=j$(this).prev('input').val();
 	    	var qty=j$(this).prev('input').prev('input').val();
+	    	j$.post(
+	    		'/buyorder/browse',
+	    		{'id':id,'price':price,'qty':qty},
+	    		function(result){
+	    			console.log(result);
+	    		}	
+		    );
 	    });
 	    
 	    // two ways to search
@@ -91,38 +97,38 @@
 	    	var term=j$(this).siblings('input:first').val();
 	    });
 	    
-	    j$('#input-filter-pinterest-list').live('change',function(){
+	    j$('#input-filter-pinterest-list').on('change',function(){
 	    });
 	    
 	    // hot tag search, clicking on a tag will fire a search
-	    j$('ul#pinterest-filters li').live('click',function(){
+	    j$('ul#pinterest-filters li').on('click',function(){
 	    	var term=j$(this).text();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
 	    });
 	    
 	    // click on user name will start a search and add a tag
-	    j$('p.product-list-item-footer-user').live('click',function(){
+	    j$(document).on('click','p.product-list-item-footer-user',function(){
 	    	var term=j$(this).html();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
 	    });
 	    
 	    // shopping cart animation
-	    j$('#shopping-cart-collapse-switch').live('click',function(){
+	    j$('#shopping-cart-collapse-switch').on('click',function(){
 	    	j$('#shopping-cart').slideToggle(600,function(){
 	    		j$('#shopping-cart-visible-switch').fadeIn(400);
 	    	});
 	    	
 	    });
-	    j$('#shopping-cart-visible-switch').live('click',function(){
+	    j$('#shopping-cart-visible-switch').on('click',function(){
 	    	j$(this).hide();
 	    	j$('#shopping-cart').slideToggle(600);
 	    });
+	    
     });    	
 </script>
 {% endblock %}
 
 {% block main %}
-
 	<div class="searchbox">
 	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-filter-pinterest-list" title="Search is case insensitive. Multiple terms are delimited by comma."/>
 	<button id="btn-filter-pinterest-list">Search</button>
@@ -168,5 +174,4 @@
 	</div>
 	
     <div id="unfilledOrderPinterest" class="css3-columns"></div>
-
 {% endblock %}

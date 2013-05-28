@@ -1,5 +1,4 @@
 from google.appengine.api import users
-from google.appengine.ext import ndb
 
 import os
 import urllib
@@ -12,7 +11,11 @@ import jinja2
 import webapp2
 from models import *
 
-class DateEncoder(json.JSONEncoder):
+JINJA_ENVIRONMENT = jinja2.Environment(
+	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+	extensions=['jinja2.ext.autoescape'])
+        
+class ComplexEncoder(json.JSONEncoder):
 	def default(self, obj):
 		if isinstance(obj, datetime.date):
 			epoch = datetime.datetime.utcfromtimestamp(0)
@@ -23,13 +26,11 @@ class DateEncoder(json.JSONEncoder):
 			epoch = datetime.datetime.utcfromtimestamp(0)
 			delta = obj - epoch
 			return delta.total_seconds()
+		elif isinstance(obj,users.User):
+			return {'email':obj.email(),'id':obj.user_id(),'nickname':obj.nickname()}
 		else:
 			return json.JSONEncoder.default(self, obj)
 
-JINJA_ENVIRONMENT = jinja2.Environment(
-	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-	extensions=['jinja2.ext.autoescape'])
-        
 class MainPage(webapp2.RequestHandler):
 	def get(self):
 		self.response.headers['Content-Type']='text/plain'
@@ -37,12 +38,14 @@ class MainPage(webapp2.RequestHandler):
 
 class PublishNewBuyOrder(webapp2.RequestHandler):
 	def get(self):
+		# load publish buyorder page
 		template_values = {}
 	
 		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
 		self.response.write(template.render(template_values))
 
 	def post(self):
+		# create a new buyorder
 		client=self.request.POST['client']
 		product=self.request.POST['product']
 		description=self.request.POST['description']
@@ -51,11 +54,9 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		image=self.request.POST['url']
 		
 		# create a new buy order and add to store
-		creator=users.get_current_user()
 		order=BuyOrder()
-		order.owner_id=creator.user_id()
-		order.owner_name=creator.nickname()
-		order.last_modified_by=creator.user_id()
+		order.owner=users.get_current_user()
+		order.last_modified_by=users.get_current_user()
 		order.name=product
 		order.description=description
 		order.price=float(price)
@@ -65,6 +66,7 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 
 class ListBuyOrder(webapp2.RequestHandler):
 	def get(self):
+		# list of buyorder to browse
 		#filter=rquest.post['filter']
 		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(10)
 		
@@ -76,14 +78,22 @@ class ListBuyOrder(webapp2.RequestHandler):
 			# place holder
 			d['filled by me']=0
 			data.append(d)
-		#self.response.write(json.dumps([p.to_dict() for p in queries],cls=DateEncoder))		
 		logging.info(data)
-		self.response.write(json.dumps(data,cls=DateEncoder))	
+		self.response.write(json.dumps(data,cls=ComplexEncoder))	
 						
 class BrowseBuyOrder(webapp2.RequestHandler):
 	def get(self):
-		# return a buy order list based on filter string
+		# load buyorder browse page
 		template_values = {}
 	
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
+		
+	def post(self):
+		# add a new buyorder fill to cart 
+		buyorder_id=self.request.POST['id']
+		price=self.request.POST['price']
+		qty=self.request.POST['qty']
+
+		# get open cart
+		
