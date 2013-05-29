@@ -155,8 +155,6 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		for i in xrange(len(my_cart.fills)):
 			f=my_cart.fills[i]
 			if f.order==buyorder.key:
-				logging.info('Already in my cart!.....')
-				
 				# it's already in the cart, just update qty
 				existing=True
 				f.qty+=qty
@@ -164,8 +162,6 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 				break
 				
 		if not existing:
-			logging.info('Not in my cart! Create a new fill!')
-			
 			# if not existing, create a new fill and add to cart
 			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=0)
 			f.owner=me.key
@@ -176,5 +172,6 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			my_cart.fills.append(f)
 			
 		# update cart
-		my_cart.put()
-		
+		if my_cart.payable:
+			my_cart.gross_margin=my_cart.profit/my_cart.payable*100.0
+		my_cart.put()		

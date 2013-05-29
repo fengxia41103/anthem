@@ -69,11 +69,13 @@ class BuyOrderCart(MyBaseModel):
 	
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
-	total_payable=ndb.ComputedProperty(lambda self: sum([f.payable for f in self.fills]))
-	total_receivable=ndb.ComputedProperty(lambda self:sum([f.receivable for f in self.fills]))
+	
+	# some status
+	payable=ndb.ComputedProperty(lambda self: sum([f.payable for f in self.fills]))
+	receivable=ndb.ComputedProperty(lambda self:sum([f.receivable for f in self.fills]))
 	profit=ndb.ComputedProperty(lambda self: self.receivable-self.payable)
-	gross_margin=ndb.ComputedProperty(lambda self: self.profit/self.total_payable*100.0)
-		
+	gross_margin=ndb.FloatProperty() # since payable can be 0, division will fail, so set value manually
+			
 	# a cart has multiple bank slips
 	account_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
 
