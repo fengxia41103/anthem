@@ -92,20 +92,22 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		self.response.write('0')
 
 class BrowseBuyOrder(webapp2.RequestHandler):
-	def get(self):
-		# load buyorder browse page
-		template_values = {}
-		template_values['url']=uri_for('buyorder-browse')
-		
+	def update_contact(self):
 		# manage contact -- who is posting this WTB? usually a DOC
 		# update email and user name
 		# this is to keep Google user account in sync with internal Contact model
 		user = users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
 			email=user.email(),
-			nickname=user.nickname())		
+			nickname=user.nickname())				
+		return me
+				
+	def get(self):
+		# load buyorder browse page
+		template_values = {}
+		template_values['url']=uri_for('buyorder-browse')
 		
-		template_values['user']=user
+		template_values['user']=self.update_contact()
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 			
@@ -156,10 +158,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		assert buyorder!=None
 		
 		# manage contact -- who is posting this WTB? usually a DOC
-		creator=users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),
-			email=creator.email(),
-			nickname=creator.nickname())		
+		creator=self.update_contact()
 		
 		# get open cart where terminal_seller == current login user
 		# BuyOrder was creatd with a particular termianl_buyer specified

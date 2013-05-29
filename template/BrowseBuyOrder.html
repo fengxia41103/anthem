@@ -135,7 +135,7 @@
 {% block main %}
 	<h1>
 	{% if user %}
-		Welcome, {{ user.nickname() }}! (<a href="{{url_logout}}">Logout</a>)
+		Welcome, {{ user.nickname }}! (<a href="{{url_logout}}">Logout</a>)
 	{% else %}
 		<a href="{{url_login}}">Sign in or register</a>
 	{% endif %}
