@@ -63,7 +63,6 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		# this is to keep Google user account in sync with internal Contact model
 		creator=users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),
-			user_id=creator.user_id(),
 			email=creator.email(),
 			nickname=creator.nickname())		
 		
@@ -103,7 +102,6 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		# this is to keep Google user account in sync with internal Contact model
 		user = users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
-			user_id=user.user_id(),
 			email=user.email(),
 			nickname=user.nickname())		
 		
@@ -125,10 +123,10 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			
 		# list of buyorder to browse
 		if owner_id:
-			contact=Contact.query(Contact.user_id==owner_id).get()
-			queries=BuyOrder.query(BuyOrder.owner==contact.key)
+			queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
 		elif nd:
-			queries=BuyOrder.query(BuyOrder.tags.IN(nd.lower().split(' ')))
+			# this will be OR tag test, meaning that any tag is in the ND list will be True
+			queries=BuyOrder.query(BuyOrder.tags.IN(nd.lower().replace(',',' ').split(' ')))
 		else:
 			queries=BuyOrder.query()
 		
@@ -159,7 +157,9 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		
 		# manage contact -- who is posting this WTB? usually a DOC
 		creator=users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),user_id=creator.user_id().string_id())		
+		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),
+			email=creator.email(),
+			nickname=creator.nickname())		
 		
 		# get open cart where terminal_seller == current login user
 		# BuyOrder was creatd with a particular termianl_buyer specified

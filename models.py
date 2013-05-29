@@ -2,7 +2,7 @@ from google.appengine.ext import ndb
 from google.appengine.api.users import User
 
 class Contact(ndb.Model):
-	user_id=ndb.StringProperty() # user id
+	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
 	nickname=ndb.StringProperty() # user name
 	shipping_address=ndb.StringProperty()
@@ -40,7 +40,9 @@ class BuyOrder(MyBaseModel):
 	price=ndb.FloatProperty()
 	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)
 
-	tags=ndb.ComputedProperty(lambda self: list(set([f for f in self.name.lower().split(' ')]+[f for f in self.description.lower().split(' ')])), repeated=True)
+	# tags is a string list tokenized self.name and self.description by white space
+	# TODO: use NLTK package
+	tags=ndb.ComputedProperty(lambda self: list(set([f for f in self.name.lower().replace(',',' ').split(' ')]+[f for f in self.description.lower().replace(',',' ').split(' ')])), repeated=True)
 	
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference
