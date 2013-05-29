@@ -59,14 +59,13 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		image=self.request.POST['url'].strip()
 		
 		# manage contact -- who is posting this WTB? usually a DOC
-		creator=users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id())		
-		
 		# update email and user name
 		# this is to keep Google user account in sync with internal Contact model
-		me.email=creator.email()
-		me.nickname=creator.nickname()
-		me.put()
+		creator=users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),
+			user_id=creator.user_id(),
+			email=creator.email(),
+			nickname=creator.nickname())		
 		
 		# manage contact -- who is the client, optional
 		buyer=None
@@ -95,16 +94,37 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 
 class BrowseBuyOrder(webapp2.RequestHandler):
 	def get(self):
-		try:
-			filter=request.GET['filter']
-		except:
-			filter=None
-
 		# load buyorder browse page
 		template_values = {}
+		template_values['url']=uri_for('buyorder-browse')
+		
+		# manage contact -- who is posting this WTB? usually a DOC
+		# update email and user name
+		# this is to keep Google user account in sync with internal Contact model
+		user = users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
+			user_id=user.user_id(),
+			email=user.email(),
+			nickname=user.nickname())		
+		
+		template_values['user']=user
+		template_values['url_login']=users.create_login_url(self.request.url)
+		template_values['url_logout']=users.create_logout_url('/')
+			
+		# logged in
+		try:
+			owner_id=self.request.GET['owner']
+		except:
+			owner_id=None
 
 		# list of buyorder to browse
-		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
+		if owner_id:
+			contact=Contact.query(Contact.user_id==owner_id).get()
+			queries=BuyOrder.query(BuyOrder.owner==contact.key).order(-BuyOrder.created_time).fetch(100)
+		else:
+			queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
+		
+		# compose data structure for template
 		data=[]
 		for q in queries:
 			d={}
@@ -114,7 +134,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			d['filled by me']=0
 			data.append(d)
 		
-		template_values={'buyorders':data, 'url':uri_for('buyorder-browse')}
+		template_values['buyorders']=data
 			
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
@@ -131,7 +151,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		
 		# manage contact -- who is posting this WTB? usually a DOC
 		creator=users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id())		
+		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),user_id=creator.user_id().string_id())		
 		
 		# get open cart where terminal_seller == current login user
 		# BuyOrder was creatd with a particular termianl_buyer specified

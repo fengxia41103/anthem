@@ -76,7 +76,7 @@
 		
 	    // fill order shortcut    
     	j$(document).on('click','button[item="button-new-buyorder-fill"]',function(){
-	    	var id=j$(this).attr('item-id');
+	    	var id=j$(this).attr('itemID');
 	    	var price=j$(this).prev('input').val();
 	    	var qty=j$(this).prev('input').prev('input').val();
 	    	j$.post(
@@ -131,7 +131,25 @@
 </script>
 {% endblock %}
 
+{% block header %}
+	{% if user %}
+		<div id="cssmenu">
+			<ul>
+			
+			</ul>
+		</div>
+	{% endif %}
+{% endblock %}
+
 {% block main %}
+	<h1>
+	{% if user %}
+		Welcome, {{ user.nickname() }}! (<a href="{{url_logout}}">Logout</a>)
+	{% else %}
+		<a href="{{url_login}}">Sign in or register</a>
+	{% endif %}
+	</h1>
+
 	<div class="searchbox">
 	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-filter-pinterest-list" title="Search is case insensitive. Multiple terms are delimited by comma."/>
 	<button id="btn-filter-pinterest-list">Search</button>
@@ -183,10 +201,11 @@
 		<div class="pin-command-center" style="display:none;">
   		<input item="qty" type="number" value="1" /> x $
   		<input item="price" type="number" value="{{ b.order.price }}" />
-		<button item="button-new-buyorder-fill" itemID="{{ b.order.key.id }}">Fill</button>
+		<button item="button-new-buyorder-fill" itemID="{{ b.order.key.id() }}">Fill</button>
 		</div>
 		<img src="{{ b.order.image }}" />
-		<p>{{ b.name }}</p>			
+		<h3>{{ b.order.name }}</h3>			
+		<p>{{ b.order.description }}</p>			
 		<p>
 			<span class="product-stat">{{ b.order.qty }}</span>
 			<span class="product-stat-label">qty</span>
