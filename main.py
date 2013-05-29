@@ -30,8 +30,7 @@ routes = [
 
 	# Anthem
 	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),  	
-	Route('/buyorder/list', handler='anthem.ListBuyOrder'),  
-	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder'),  
+	Route('/buyorder/browse/', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),  
 	
 ]
 

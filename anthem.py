@@ -1,4 +1,6 @@
+import webapp2
 from google.appengine.api import users
+from webapp2 import uri_for,redirect
 
 import os
 import urllib
@@ -8,7 +10,6 @@ import logging
 import datetime
 
 import jinja2
-import webapp2
 from models import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -92,27 +93,29 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		order.put()
 		self.response.write('0')
 
-class ListBuyOrder(webapp2.RequestHandler):
-	def post(self):
-		filter=self.request.get('filter')
-		
+class BrowseBuyOrder(webapp2.RequestHandler):
+	def get(self):
+		try:
+			filter=request.GET['filter']
+		except:
+			filter=None
+
+		# load buyorder browse page
+		template_values = {}
+
 		# list of buyorder to browse
 		queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
 		data=[]
 		for q in queries:
-			d=q.to_dict()
-			d['id']=q.key.id()
-			
+			d={}
+			d['order']=q
+
 			# place holder
 			d['filled by me']=0
 			data.append(d)
-		self.response.write(json.dumps(data,cls=ComplexEncoder))	
-						
-class BrowseBuyOrder(webapp2.RequestHandler):
-	def get(self):
-		# load buyorder browse page
-		template_values = {}
-	
+		
+		template_values={'buyorders':data, 'url':uri_for('buyorder-browse')}
+			
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
 		

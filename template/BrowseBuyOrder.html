@@ -67,7 +67,6 @@
 	}
 
     j$(document).ready(function(){
-    	getBuyOrderList('');
     	    	
 		j$(document).on('mouseenter','.pin',function(){
 			j$(this).children('.pin-command-center').fadeIn({duration:800});
@@ -113,7 +112,7 @@
 	    j$(document).on('click','p.product-list-item-footer-user',function(){
 	    	var term=j$(this).html();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
-    		getBuyOrderList(term);	    	
+			console.log('here: '+term);
 	    });
 	    
 	    // shopping cart animation
@@ -177,5 +176,33 @@
 	</div>    
 	</div>
 	
-    <div id="unfilledOrderPinterest" class="css3-columns"></div>
+    <div id="unfilledOrderPinterest" class="css3-columns">
+    {% for b in buyorders %}
+		<div class="pin shadow">
+		
+		<div class="pin-command-center" style="display:none;">
+  		<input item="qty" type="number" value="1" /> x $
+  		<input item="price" type="number" value="{{ b.order.price }}" />
+		<button item="button-new-buyorder-fill" itemID="{{ b.order.key.id }}">Fill</button>
+		</div>
+		<img src="{{ b.order.image }}" />
+		<p>{{ b.name }}</p>			
+		<p>
+			<span class="product-stat">{{ b.order.qty }}</span>
+			<span class="product-stat-label">qty</span>
+			
+			<span class="product-stat">{{ b.order.price }}</span>
+			<span class="product-stat-label">$</span>
+			
+			<span class="product-stat-by-me redheart shadow">
+			&hearts;
+			</span>
+		</p>
+		<a href="{{url}}?owner={{b.order.owner.id()}}">
+		<p class="product-list-item-footer-user">{{ 
+		b.order.owner.get().nickname }}</p>
+		</a>
+		</div>
+    {% endfor %}
+    </div>
 {% endblock %}
