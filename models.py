@@ -26,9 +26,9 @@ class Billing(MyBaseModel):
 	secret=ndb.StringProperty() # key code, whatever else
 
 class AccountingSlip(MyBaseModel):
-	payor=ndb.KeyProperty(kind='Contact')
-	receiver=ndb.KeyProperty(kind='Contact')
-	type=ndb.StringProperty() # in ['withdraw', 'deposit']
+	party_a=ndb.KeyProperty(kind='Contact')
+	party_b=ndb.KeyProperty(kind='Contact')
+	type=ndb.StringProperty(choices=['withdraw','deposit']) # in ['withdraw', 'deposit']
 	amount=ndb.FloatProperty()
 		
 class BuyOrder(MyBaseModel):
@@ -67,9 +67,10 @@ class BuyOrderCart(MyBaseModel):
 	terminal_seller=ndb.KeyProperty(kind='Contact')
 	terminal_buyer=ndb.KeyProperty(kind='Contact')
 	
-	status=ndb.StringProperty()
-	shipping_status=ndb.StringProperty()
+	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'])
+	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
 	shipping_carrier=ndb.StringProperty()
+	shipping_cost=ndb.FloatProperty()
 	
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
@@ -77,7 +78,7 @@ class BuyOrderCart(MyBaseModel):
 	# some status
 	payable=ndb.ComputedProperty(lambda self: sum([f.payable for f in self.fills]))
 	receivable=ndb.ComputedProperty(lambda self:sum([f.receivable for f in self.fills]))
-	profit=ndb.ComputedProperty(lambda self: self.receivable-self.payable)
+	profit=ndb.ComputedProperty(lambda self: self.receivable-self.payable-self.shipping_cost)
 	gross_margin=ndb.FloatProperty() # since payable can be 0, division will fail, so set value manually
 			
 	# a cart has multiple bank slips

@@ -151,7 +151,7 @@
     </ul>
     </div>
     
-    <div id="shopping-cart-container" style="display:none;">
+    <div id="shopping-cart-container">
 	<div id="shopping-cart" class="alpha60" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
@@ -164,9 +164,9 @@
 		</thead>
 		
 		<tbody>
-		{% for f in fills %}
+		{% for f in cart.fills %}
 		<tr>
-			<td>{{ f.name }}</td>
+			<td>{{ f.order.get().name }}</td>
 			<td>{{ f.qty }}</td>
 			<td>{{ f.price }}</td>
 		</tr>
@@ -176,12 +176,12 @@
 		
 		<a href=""><button>Review order</button></a>
 		<label>Total</label><span class="border-top-red" id="this-cart-total">
-		{{ total_payable }}
+		{{ cart.payable }}
 		</span> 
 
 	</div>
 	<div id="shopping-cart-visible-switch">Cart Items &nbsp;
-	<span id="cart-item-count">{{ fills|length }}</span>
+	<span id="cart-item-count">{{ cart.fills|length }}</span>
 	</div>    
 	</div>
 	

@@ -92,7 +92,7 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		self.response.write('0')
 
 class BrowseBuyOrder(webapp2.RequestHandler):
-	def update_contact(self):
+	def get_contact(self):
 		# manage contact -- who is posting this WTB? usually a DOC
 		# update email and user name
 		# this is to keep Google user account in sync with internal Contact model
@@ -101,16 +101,37 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			email=user.email(),
 			nickname=user.nickname())				
 		return me
-				
+
+	def get_open_cart(self):
+		# get contact
+		me=self.get_contact()
+		
+		# get open cart where terminal_seller == current login user
+		# if BuyOrder was creatd with a particular termianl_buyer specified
+		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
+		# 
+		# RULE -- single OPEN cart per terminal_seller rule
+		open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
+		assert open_cart.count()<2
+		if open_cart.count():
+			my_cart=open_cart.get() # if there is one
+		else:
+			# if no such cart, create one
+			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open')
+			my_cart.owner=me.key
+			my_cart.last_modified_by=me.key
+			my_cart.put()
+		return my_cart
+							
 	def get(self):
 		# load buyorder browse page
 		template_values = {}
 		template_values['url']=uri_for('buyorder-browse')
 		
-		template_values['user']=self.update_contact()
+		template_values['user']=self.get_contact()
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
-			
+
 		# filters
 		# filter by owner id
 		try:
@@ -132,6 +153,15 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		else:
 			queries=BuyOrder.query()
 		
+		# my open cart
+		open_cart=template_values['cart']=self.get_open_cart()
+		if len(open_cart.fills):
+			# cart has some fills already, we will enforce
+			# a filter to display only BuyOrders from the same owner
+			# RULE -- unique (intermediate-buyer,terminal-seller) OPEN cart rule
+			owner_key = open_cart.fills[0].order.get().owner
+			queries=queries.filter(BuyOrder.owner==owner_key)
+				
 		# compose data structure for template
 		data=[]
 		for q in queries.order(-BuyOrder.created_time).fetch(100):
@@ -143,6 +173,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			data.append(d)
 		
 		template_values['buyorders']=data
+		
 			
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
@@ -158,27 +189,8 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		assert buyorder!=None
 		
 		# manage contact -- who is posting this WTB? usually a DOC
-		creator=self.update_contact()
-		
-		# get open cart where terminal_seller == current login user
-		# BuyOrder was creatd with a particular termianl_buyer specified
-		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
-		# Note: this means that a serller can have multiple OPEN cart as the same time, each identified
-		# by the (terminal_buyer,terminal_seller) pair
-		cart_query=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')	
-		my_cart=None
-		open_carts=cart_query.filter(BuyOrderCart.terminal_buyer==buyorder.terminal_buyer,BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
-		if not open_carts.count():
-			# if no such cart, create one
-			my_cart=BuyOrderCart(terminal_buyer=buyorder.terminal_buyer,terminal_seller=me.key,status='Open')
-			my_cart.owner=me.key
-			my_cart.last_modified_by=me.key
-			my_cart.put()
-		else:
-			# each buyer-seller pair for a particular login user can only have 1 OPEN cart at a time!
-			# this is the 1-open-cart rule!
-			assert open_carts.count()==1
-			my_cart=open_carts.get()
+		my_cart=self.get_open_cart()
+		assert my_cart!=None
 			
 		# we have established an OPEN cart
 		existing=False
@@ -193,6 +205,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 				
 		if not existing:
 			# if not existing, create a new fill and add to cart
+			me=self.get_contact()
 			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=0)
 			f.owner=me.key
 			f.last_modified_by=me.key
@@ -204,4 +217,4 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		# update cart
 		if my_cart.payable:
 			my_cart.gross_margin=my_cart.profit/my_cart.payable*100.0
-		my_cart.put()		
+		my_cart.put()
