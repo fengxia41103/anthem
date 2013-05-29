@@ -93,12 +93,10 @@
 	    // 2. or hit ENTER key inside input box to cause a change
 	    j$('#btn-filter-pinterest-list').click(function(){
 	    	var term=j$(this).siblings('input:first').val();
-	    	console.log(term);
-    		getBuyOrderList(term);
 	    });
 	    
-	    j$('#input-filter-pinterest-list').on('change',function(){
-    		getBuyOrderList(j$(this).val());
+	    j$('#input-pinterest-filter').on('change',function(){
+    		j$('a#link-pinterest-filter').attr('href','{{url}}?nd='+j$(this).val());
 	    });
 	    
 	    // hot tag search, clicking on a tag will fire a search
@@ -106,13 +104,6 @@
 	    	var term=j$(this).text();
 	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
     		getBuyOrderList(term);	    	
-	    });
-	    
-	    // click on user name will start a search and add a tag
-	    j$(document).on('click','p.product-list-item-footer-user',function(){
-	    	var term=j$(this).html();
-	    	j$('#btn-filter-pinterest-list').siblings('input:first').val(term);
-			console.log('here: '+term);
 	    });
 	    
 	    // shopping cart animation
@@ -151,8 +142,8 @@
 	</h1>
 
 	<div class="searchbox">
-	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-filter-pinterest-list" title="Search is case insensitive. Multiple terms are delimited by comma."/>
-	<button id="btn-filter-pinterest-list">Search</button>
+	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>
+	<a id="link-pinterest-filter" href="" class="ariel-button">Search</a>
     <ul id="pinterest-filters">
     	{% for item in hotTags %}
     		<li>{!item}</li>

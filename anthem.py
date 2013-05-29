@@ -111,22 +111,30 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 			
-		# logged in
+		# filters
+		# filter by owner id
 		try:
 			owner_id=self.request.GET['owner']
 		except:
 			owner_id=None
-
+		# filter by Name or Description string match
+		try:
+			nd=self.request.GET['nd']
+		except:
+			nd=None
+			
 		# list of buyorder to browse
 		if owner_id:
 			contact=Contact.query(Contact.user_id==owner_id).get()
-			queries=BuyOrder.query(BuyOrder.owner==contact.key).order(-BuyOrder.created_time).fetch(100)
+			queries=BuyOrder.query(BuyOrder.owner==contact.key)
+		elif nd:
+			queries=BuyOrder.query(BuyOrder.tags.IN(nd.lower().split(' ')))
 		else:
-			queries=BuyOrder.query().order(-BuyOrder.created_time).fetch(100)
+			queries=BuyOrder.query()
 		
 		# compose data structure for template
 		data=[]
-		for q in queries:
+		for q in queries.order(-BuyOrder.created_time).fetch(100):
 			d={}
 			d['order']=q
 

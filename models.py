@@ -13,7 +13,7 @@ class MyBaseModel(ndb.Model):
 	created_time=ndb.DateTimeProperty(auto_now_add=True)
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
-	# object owner tied to login user
+	# object owner tied to a Contact
 	owner=ndb.KeyProperty(kind='Contact')
 	last_modified_by=ndb.KeyProperty(kind='Contact')
 
@@ -24,7 +24,7 @@ class Billing(MyBaseModel):
 	account_number=ndb.StringProperty() # account #, credit card #, and so on
 	expiration_date=ndb.DateProperty()
 	secret=ndb.StringProperty() # key code, whatever else
-	
+
 class AccountingSlip(MyBaseModel):
 	payor=ndb.KeyProperty(kind='Contact')
 	receiver=ndb.KeyProperty(kind='Contact')
@@ -40,6 +40,8 @@ class BuyOrder(MyBaseModel):
 	price=ndb.FloatProperty()
 	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)
 
+	tags=ndb.ComputedProperty(lambda self: list(set([f for f in self.name.lower().split(' ')]+[f for f in self.description.lower().split(' ')])), repeated=True)
+	
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference
 	order=ndb.KeyProperty(kind='BuyOrder')
