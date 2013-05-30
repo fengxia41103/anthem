@@ -84,6 +84,25 @@
 	    		{'id':id,'price':price,'qty':qty},
 	    		function(result){
 	    			j$().toastmessage('showSuccessToast','Your shopping cart has been updated.');
+					var data=[];
+					var fills=j$.parseJSON(result)['fills'];
+					
+					for (var i=0; i<fills.length; i++){
+						var f=fills[i];
+						data.push([f['order']['name'],f['order']['description'],f['qty'],f['price']]);
+					}
+					// redraw cart table
+					var oTable=j$('#this-cart').dataTable();
+					oTable.fnClearTable();
+					oTable.fnAddData(data);
+					oTable.fnDraw();
+					//oTable.fnAdjustColumnSizing();
+					
+					// update total item count
+					j$('#cart-item-count').html(fills.length);
+					
+					// refresh filter to limit list to relevant items
+					// this is to enforce the buyer-seller pair rule
 	    		}	
 		    );
 	    });
@@ -117,7 +136,28 @@
 	    	j$(this).hide();
 	    	j$('#shopping-cart').slideToggle(600);
 	    });
-	    
+
+		// cart table
+		var data=[];
+		{% for f in cart.fills %}
+			data.push(["{{f.order.get().name|title}}","{{f.order.get().description|truncate(30,True)}}",{{f.qty}},{{f.price}}]);
+		{% endfor %}
+		j$('#this-cart').dataTable({
+			"aaData":data,
+		    "aoColumns":[
+		    	{ "sTitle": "Product"},
+		    	{ "sTitle": "Description"},
+		    	{ "sTitle": "Quantity"},
+		    	{ "sTitle": "Price"}
+		    	],
+			//"sScrollY": "400px",
+			"sDom": "frtiS",
+			"bFilter":false,
+			"bPaginate":false,
+			"bInfo":false,
+			"bDeferRender": true,
+			"bAutoWidth": false
+		});	    	
     });    	
 </script>
 {% endblock %}
@@ -195,7 +235,7 @@
 		<button item="button-new-buyorder-fill" itemID="{{ b.order.key.id() }}">Fill</button>
 		</div>
 		<img src="{{ b.order.image }}" />
-		<h3>{{ b.order.name }}</h3>			
+		<h3>{{ b.order.name|title }}</h3>			
 		<p>{{ b.order.description }}</p>			
 		<p>
 			<span class="product-stat">{{ b.order.qty }}</span>

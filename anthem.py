@@ -32,7 +32,10 @@ class ComplexEncoder(json.JSONEncoder):
 		elif isinstance(obj,ndb.Key):
 			if obj.kind()=='Contact':
 				contact=obj.get()
-				return {'name':contact.nickname,'email':contact.email,'id':contact.user_id}
+				return {'name':contact.nickname,'email':contact.email,'id':contact.key.id()}
+			elif obj.kind()=='BuyOrder':
+				o=obj.get()
+				return {'name':o.name,'description':o.description,'id':o.key.id()}
 		else:
 			return json.JSONEncoder.default(self, obj)
 
@@ -120,6 +123,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open')
 			my_cart.owner=me.key
 			my_cart.last_modified_by=me.key
+			my_cart.shipping_cost=0
 			my_cart.put()
 		return my_cart
 							
@@ -170,11 +174,9 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 
 			# place holder
 			d['filled by me']=0
-			data.append(d)
-		
-		template_values['buyorders']=data
-		
-			
+			data.append(d)		
+		template_values['buyorders']=data		
+
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
 		
@@ -188,12 +190,13 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		buyorder=BuyOrder.get_by_id(int(buyorder_id))
 		assert buyorder!=None
 		
-		# manage contact -- who is posting this WTB? usually a DOC
+		# there is one and only one open cart		
 		my_cart=self.get_open_cart()
 		assert my_cart!=None
 			
 		# we have established an OPEN cart
 		existing=False
+		me=self.get_contact()
 		for i in xrange(len(my_cart.fills)):
 			f=my_cart.fills[i]
 			if f.order==buyorder.key:
@@ -205,16 +208,14 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 				
 		if not existing:
 			# if not existing, create a new fill and add to cart
-			me=self.get_contact()
 			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=0)
 			f.owner=me.key
 			f.last_modified_by=me.key
-			f.put()
-			
-			# add to my cart
 			my_cart.fills.append(f)
 			
 		# update cart
 		if my_cart.payable:
 			my_cart.gross_margin=my_cart.profit/my_cart.payable*100.0
 		my_cart.put()
+		
+		self.response.write(json.dumps(my_cart.to_dict(),cls=ComplexEncoder))

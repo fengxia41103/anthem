@@ -67,6 +67,7 @@ class BuyOrderCart(MyBaseModel):
 	terminal_seller=ndb.KeyProperty(kind='Contact')
 	terminal_buyer=ndb.KeyProperty(kind='Contact')
 	
+	# shipping related
 	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'])
 	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
 	shipping_carrier=ndb.StringProperty()
