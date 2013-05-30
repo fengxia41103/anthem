@@ -35,7 +35,7 @@ class ComplexEncoder(json.JSONEncoder):
 				return {'name':contact.nickname,'email':contact.email,'id':contact.key.id()}
 			elif obj.kind()=='BuyOrder':
 				o=obj.get()
-				return {'name':o.name,'description':o.description,'id':o.key.id()}
+				return {'name':o.name,'description':o.description,'id':o.key.id(),'owner':o.owner}
 		else:
 			return json.JSONEncoder.default(self, obj)
 
@@ -114,13 +114,16 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
 		# 
 		# RULE -- single OPEN cart per terminal_seller rule
-		open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
+		#open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
+		open_cart=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status=='Open')
 		assert open_cart.count()<2
 		if open_cart.count():
 			my_cart=open_cart.get() # if there is one
 		else:
 			# if no such cart, create one
-			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open')
+			# we are making this cart and Contact an entity group
+			# this will enforce data consistency
+			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open',parent=me.key)
 			my_cart.owner=me.key
 			my_cart.last_modified_by=me.key
 			my_cart.shipping_cost=0

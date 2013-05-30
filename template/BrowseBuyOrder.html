@@ -103,6 +103,15 @@
 					
 					// refresh filter to limit list to relevant items
 					// this is to enforce the buyer-seller pair rule
+					buyer=fills[0].order.owner.name;
+					var match=[];
+					j$('.product-list-item-footer-user').each(function(index,item){
+						if (j$(item).html()!=buyer) match.push(item);
+					});
+					
+					for (var i=0;i<match.length;i++){
+						j$(match[i]).parents('div.pin').remove();
+					}
 	    		}	
 		    );
 	    });
@@ -249,8 +258,7 @@
 			</span>
 		</p>
 		<a href="{{url}}?owner={{b.order.owner.id()}}">
-		<p class="product-list-item-footer-user">{{ 
-		b.order.owner.get().nickname }}</p>
+		<p class="product-list-item-footer-user" name="{{b.order.owner.get().nickname}}">{{ b.order.owner.get().nickname }}</p>
 		</a>
 		</div>
     {% endfor %}
