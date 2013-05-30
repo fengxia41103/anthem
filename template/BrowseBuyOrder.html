@@ -87,9 +87,11 @@
 					var data=[];
 					var fills=j$.parseJSON(result)['fills'];
 					
+					var total_payable=0;
 					for (var i=0; i<fills.length; i++){
 						var f=fills[i];
 						data.push([f['order']['name'],f['order']['description'],f['qty'],f['price']]);
+						total_payable+=parseInt(f['qty'])*parseFloat(f['price']);
 					}
 					// redraw cart table
 					var oTable=j$('#this-cart').dataTable();
@@ -100,6 +102,9 @@
 					
 					// update total item count
 					j$('#cart-item-count').html(fills.length);
+					
+					// update total payable
+					j$('#this-cart-total').html(total_payable);
 					
 					// refresh filter to limit list to relevant items
 					// this is to enforce the buyer-seller pair rule
@@ -164,8 +169,7 @@
 			"bFilter":false,
 			"bPaginate":false,
 			"bInfo":false,
-			"bDeferRender": true,
-			"bAutoWidth": false
+			"bDeferRender": true
 		});	    	
     });    	
 </script>

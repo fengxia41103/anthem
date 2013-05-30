@@ -1,7 +1,6 @@
 import webapp2
 from google.appengine.api import users
 from webapp2 import uri_for,redirect
-
 import os
 import urllib
 import json
@@ -44,8 +43,57 @@ class MainPage(webapp2.RequestHandler):
 		self.response.headers['Content-Type']='text/plain'
 		self.response.write('hey feng')
 
-class PublishNewBuyOrder(webapp2.RequestHandler):
+class MyBaseHandler(webapp2.RequestHandler):
+	def get_contact(self):
+		# manage contact -- who is using my service?
+		# update email and user name
+		# this is to keep Google user account in sync with internal Contact model
+		user = users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
+			email=user.email(),
+			nickname=user.nickname())
+			
+		# initiate membership
+		# TODO: this needs to be replaced by a Membership signup page
+		if not me.memberships:
+			m=Membership(role='Super')
+			m.member_pay(1)
+			me.memberships.append(m)
+			me.put()
+		return me
+
+	def get_open_cart(self,me):
+		# get open cart where terminal_seller == current login user
+		# if BuyOrder was creatd with a particular termianl_buyer specified
+		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
+		# 
+		# RULE -- single OPEN cart per terminal_seller rule
+		# open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
+		open_cart=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status=='Open')
+		assert open_cart.count()<2
+		if open_cart.count():
+			my_cart=open_cart.get() # if there is one
+		else:
+			# if no such cart, create one
+			# we are making this cart and Contact an entity group
+			# this will enforce data consistency
+			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open',parent=me.key)
+			my_cart.owner=me.key
+			my_cart.last_modified_by=me.key
+			my_cart.shipping_cost=0
+			my_cart.put()
+		return my_cart
+							
+
+class PublishNewBuyOrder(MyBaseHandler):
 	def get(self):
+		me=self.get_contact()
+		if not me.can_be_doc():
+			template_values = {}
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(template_values))
+			return		
+
 		# load publish buyorder page
 		template_values = {}
 	
@@ -53,6 +101,10 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		self.response.write(template.render(template_values))
 
 	def post(self):
+		# Assumption: user hits GET first before POST
+		# so we don't need to check contact role anymore
+		me=self.get_contact()
+		
 		# create a new buyorder
 		client_email=self.request.POST['client'].strip()
 		product=self.request.POST['product'].strip()
@@ -61,14 +113,6 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		price=float(self.request.POST['price'])
 		image=self.request.POST['url'].strip()
 		
-		# manage contact -- who is posting this WTB? usually a DOC
-		# update email and user name
-		# this is to keep Google user account in sync with internal Contact model
-		creator=users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',creator.user_id()).string_id(),
-			email=creator.email(),
-			nickname=creator.nickname())		
-		
 		# manage contact -- who is the client, optional
 		buyer=None
 		if client_email: # if not blank
@@ -76,8 +120,13 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 			if b_query.count():
 				assert b_query.count()==1 # email is unique throughout system!
 				buyer=b_query.get()
-			else: # no contact yet, create one
+			else: 
+				# no contact yet, create one
+				# Note: crearting a Contact this way will 
 				buyer=Contact(email=client_email)
+				m=Membership(role='Client')
+				m.member_pay(0)
+				buyer.memberships.append(m)
 				buyer.put()
 				
 		# create a new buy order and add to store
@@ -94,48 +143,19 @@ class PublishNewBuyOrder(webapp2.RequestHandler):
 		order.put()
 		self.response.write('0')
 
-class BrowseBuyOrder(webapp2.RequestHandler):
-	def get_contact(self):
-		# manage contact -- who is posting this WTB? usually a DOC
-		# update email and user name
-		# this is to keep Google user account in sync with internal Contact model
-		user = users.get_current_user()
-		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
-			email=user.email(),
-			nickname=user.nickname())				
-		return me
-
-	def get_open_cart(self):
-		# get contact
-		me=self.get_contact()
-		
-		# get open cart where terminal_seller == current login user
-		# if BuyOrder was creatd with a particular termianl_buyer specified
-		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
-		# 
-		# RULE -- single OPEN cart per terminal_seller rule
-		#open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
-		open_cart=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status=='Open')
-		assert open_cart.count()<2
-		if open_cart.count():
-			my_cart=open_cart.get() # if there is one
-		else:
-			# if no such cart, create one
-			# we are making this cart and Contact an entity group
-			# this will enforce data consistency
-			my_cart=BuyOrderCart(terminal_seller=me.key,status='Open',parent=me.key)
-			my_cart.owner=me.key
-			my_cart.last_modified_by=me.key
-			my_cart.shipping_cost=0
-			my_cart.put()
-		return my_cart
-							
+class BrowseBuyOrder(MyBaseHandler):
 	def get(self):
+		me=self.get_contact()
+		if not me.can_be_nur():
+			template_values = {}
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(template_values))
+			return		
+	
 		# load buyorder browse page
 		template_values = {}
-		template_values['url']=uri_for('buyorder-browse')
-		
-		template_values['user']=self.get_contact()
+		template_values['url']=uri_for('buyorder-browse')		
+		template_values['user']=me
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 
@@ -161,7 +181,7 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 			queries=BuyOrder.query()
 		
 		# my open cart
-		open_cart=template_values['cart']=self.get_open_cart()
+		open_cart=template_values['cart']=self.get_open_cart(me)
 		if len(open_cart.fills):
 			# cart has some fills already, we will enforce
 			# a filter to display only BuyOrders from the same owner
@@ -184,6 +204,10 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		self.response.write(template.render(template_values))
 		
 	def post(self):
+		# Assumption: user has already hit GET before he can evern POST
+		# so we don't need to check Contact here
+		me=self.get_contact()
+		
 		# add a new buyorder fill to cart 
 		buyorder_id=self.request.POST['id']
 		price=float(self.request.POST['price'])
@@ -194,12 +218,11 @@ class BrowseBuyOrder(webapp2.RequestHandler):
 		assert buyorder!=None
 		
 		# there is one and only one open cart		
-		my_cart=self.get_open_cart()
+		my_cart=self.get_open_cart(me)
 		assert my_cart!=None
 			
 		# we have established an OPEN cart
-		existing=False
-		me=self.get_contact()
+		existing=False		
 		for i in xrange(len(my_cart.fills)):
 			f=my_cart.fills[i]
 			if f.order==buyorder.key:
