@@ -1,0 +1,422 @@
+{% extends "/template/base.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+    j$(document).ready(function(){
+    	// get rid of stock btn class
+    	j$('input').removeClass('btn');
+    
+    	j$('input[type="number"]').prop('disabled', true);
+    	
+    	switch('{!thisCart.cart.Status__c}'){
+    		case 'Open':
+    		case 'Rejected':
+    			j$('input[type="number"]').prop('disabled', false);
+    			break;
+    		default:
+    			j$('button[item="remove-btn"]').remove();
+    			break;
+    	}
+    	
+    	switch ("{!IF(thisCart.isInternalUser,true,false)}"){
+    		case 'true':
+    			j$('input[type="number"]').prop('disabled', false);
+    			break;    			
+    	}
+		    
+		// remove item from cart
+		j$('button[item="remove-btn"]').on('click',function(){
+			// call Server to remove this FillOrder from Cart
+			var id=j$(this).attr('itemId');
+		
+			myBuyOrderExtension.deleteOrderFill(id,function(result,success){
+				if (success){
+					j$().toastmessage('showNoticeToast', "Item has been removed from this order.");
+					dummy();
+				}else{
+					console.log('error');
+				}
+		    },{escape:true}); 
+		});
+				
+		// update qty and price
+		j$('input[item="bid-qty"]').on('change',function(){
+			var fillId=j$(this).attr('itemId');
+			var newVal=j$(this).val();
+			myBuyOrderExtension.updateFillQty(fillId,newVal,function(result,success){
+				if (success){
+					// notification
+					j$().toastmessage('showNoticeToast', "New quantity of "+newVal+' has been received');
+					dummy2();
+				}else{
+					console.log('error');
+				}
+		    },{escape:true}); 				
+		});
+		
+		j$('input[item="bid-price"]').on('change',function(){
+			var fillId=j$(this).attr('itemId');
+			var newVal=j$(this).val();
+			myBuyOrderExtension.updateFillPrice(fillId,newVal,function(result,success){
+				if (success){
+					// notification
+					j$().toastmessage('showNoticeToast', "New price of "+newVal+' has been received');
+					dummy2();
+				}else{
+					console.log('error');
+				}
+		    },{escape:true}); 				
+		});
+		
+		j$('input[item="client-price"]').on('change',function(){
+			var fillId=j$(this).attr('itemId');
+			var newVal=j$(this).val();
+			myBuyOrderExtension.updateFillClientPrice(fillId,newVal,function(result,success){
+				if (success){
+					// notification
+					j$().toastmessage('showNoticeToast', "New client price of "+newVal+' has been received');
+					dummy2();
+				}else{
+					console.log('error');
+				}
+		    },{escape:true}); 				
+		});
+				
+		// assign client
+		j$("select#select-client").val('{!thisCart.cart.Client__c}');	
+		j$('select#select-client').on('change',function(){
+			var clientId=j$(this).val();
+			var cartId=j$(this).attr('itemId');
+			myBuyOrderExtension.assignClientToCart(cartId,clientId,function(result,success){
+				if (success){
+					// notification
+					j$().toastmessage('showNoticeToast', 'Client assignment has changed');
+					dummy3();
+				}else{
+					console.log('error');
+				}
+		    },{escape:true}); 				
+		});	
+		
+		// full screen switch
+		j$('#full-screen-switch-1').on('click',function(){
+			j$('.arrow_box').fadeIn(500);	
+			j$(this).toggle();
+			j$('#full-screen-switch-2').toggle();
+		});
+		j$('#full-screen-switch-2').on('click',function(){
+			j$('.arrow_box').fadeOut(500);	
+			j$(this).toggle();
+			j$('#full-screen-switch-1').toggle();	
+		});
+	    
+	    // shopping cart animation
+	    j$('#shopping-cart-collapse-switch').on('click',function(){
+	    	j$(this).parents('div.top-header-pane').slideToggle(600,function(){
+	    		j$('#shopping-cart-visible-switch').fadeIn(400);
+	    	});
+	    	
+	    });
+	    j$('#shopping-cart-visible-switch').on('click',function(){
+	    	j$(this).hide();
+	    	j$(this).parents('div.top-header-pane').slideToggle(600);
+	    });				
+    });
+</script>
+{% endblock %}
+
+{% block main %}
+<style>
+input{
+	border:1px #EEEEE0 solid;
+    background-color:none;
+    padding: 5px;
+    max-width:70%;
+}
+.ariel-table select{
+    background-color:#ebebeb;
+    border:1px solid #00bec6; 
+    width: 385px;
+    height: 40px;
+    border-radius: 4px;
+    webkit-border-radius: 4px;
+    moz-border-radius:4px;
+    padding: 10px 0 10px 10px;
+    line-height:1;
+}
+
+.top-header-pane{
+    background: #FFEC8B; /* Old browsers */
+    position:fixed;
+    top:50px;
+    right:0;
+    border-radius: 0 0 10px 10px;
+    border: 1px white solid; 
+    padding: 10px;
+    z-index:999;
+}
+
+.sf-table td:nth-child(2n+1){
+	font-weight:bold;
+	width:25%;
+}
+.sf-table{
+	border-collapse: collapse;
+}
+.sf-table tr{
+	border: solid;
+  	border-width: 1px 0;
+}
+.sf-table tr:first-child {
+  border-top: none;
+}
+.sf-table tr:last-child {
+    border-bottom: none;
+}
+
+.sf-table td{
+}
+</style>
+
+<apex:pageBlock >
+	<button class="my-button">Submit for Approval</button>
+	<button class="my-button">Approve</button>
+	<button class="my-button">Reject</button>
+	
+	{#
+	<apex:form id="command-button">
+		<apex:commandButton value="Submit for Approval" action="{!submitCartApproval}" styleClass="my-button" rendered="{!thisCart.canSubmitApproval}"/>
+		<apex:commandButton value="Approve" action="{!approveCart}" styleClass="my-button" rendered="{!thisCart.canApproveReject}" />
+		<apex:commandButton value="Reject" action="{!rejectCart}" styleClass="my-button" rendered="{!thisCart.canApproveReject}" />
+	</apex:form>
+	#}
+	
+	<div class="top-header-pane">
+		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
+			Close
+		</span>		
+		<table class="ariel-table">
+		<tr><td>
+			Select a carrier
+		</td><td>
+			<select>
+				<opton value="this">this</option>
+				<opton value="that">that</option>
+			</select>
+
+		</td></tr>
+		
+		<tr><td>
+			Enter tracking number
+		</td><td>
+			<input type="text" id="input-tracking-number" placeholder="eg. a random number"/>
+		</td></tr>
+		
+		<tr><td>
+			Enter number of packages
+		</td><td>
+			<input type="number" id="input-number-of-package" placeholder="eg. 5"/>
+		</td></tr>
+		
+		<tr><td>
+			Upload shipping label file
+		</td><td>
+			<input type="file" id="input-shipping-label-file" />
+		</td></tr>
+		
+		<tr><td>
+			Enter shipping cost
+		</td><td>
+			<input type="number" step="any" placeholder=""/>
+		</td></tr>
+		</table>
+		Please verify the shipment information and click the "Create Shipment" button below.
+		Shiping label file will be emailed to all buyers and sellers.
+		<button class="my-button">Create Shipment</button>
+	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;
+	</div>
+	</div>   
+	
+	<div>
+	<h3>Fill Order Summary</h3>
+	<table class="sf-table ariel-table">
+		<tr><td>Cart Name</td>
+			<td>Cart# {{ cart.id }}</td>
+			<td>Created Date</td>
+			<td>{{ cart.created_time }}</td>
+		</tr><tr>
+			<td>Buyer Name</td>
+			<td>
+				{% if cart.terminal_buyer %}
+					{{ cart.terminal_buyer.get().nickname }}
+				{% endif %}
+			</td>
+			<td>Seller Name</td>
+			<td>{{ cart.terminal_seller.get().nickname }}</td>
+		</tr>
+	</table>
+	</div>					
+	{#
+	<apex:pageBlockSection title="Fill Order Summary" columns="2" id="cart-summary">
+		<apex:outputText value="{!thisCart.cart.Name}"/>
+		<apex:outputField value="{!thisCart.cart.CreatedDate}" />
+		
+		<apex:outputField value="{!thisCart.cart.Buyer__c}"/>
+		<apex:outputField label="Seller" value="{!thisCart.cart.Owner.Name}"/>
+		<apex:outputField value="{!thisCart.cart.Client__c}" rendered="{!thisCart.isInternalUser}"/>		
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection title="Status" id="cart-status">
+		<apex:outputField value="{!thisCart.cart.Status__c}"/>
+		<apex:outputText value="{!thisCart.cart.Shipping_Status__c}"/>	
+		<apex:outputField value="{!thisCart.cart.Seller_Satisfied__c}"/>
+		<apex:outputField value="{!thisCart.cart.Client_Satisfied__c}"/>			
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection title="Profit" id="cart-profit" rendered="{!thisCart.isInternalUser}">
+		<!-- apex:outputText label="Buyer" value="{!IF(v==v2,'',thisCart.fills[0].Buy_Order__r.Owner.Name)}"/-->
+		<apex:outputField value="{!thisCart.cart.Over_Short__c}" />
+		<apex:outputField value="{!thisCart.cart.Gross_Margin__c}" />
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection title="Accounting" id="cart-accounting" rendered="{!thisCart.isInternalUser}">	
+		<apex:outputField value="{!thisCart.cart.Total_Payable__c}"/>
+		<apex:outputField value="{!thisCart.cart.Total_Receivable__c}"/>
+		 		 
+		<apex:outputField value="{!thisCart.cart.Bank_Withdraw__c}"/>
+		<apex:outputField value="{!thisCart.cart.Bank_Deposit__c}"/>
+		
+		<apex:outputField value="{!thisCart.cart.Payable_Balance__c}"/>
+		<apex:outputField value="{!thisCart.cart.Receivable_Balance__c}"/>
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection title="Assign to Client" rendered="{!thisCart.canAssignClient}">
+	<apex:form >
+	<select id="select-client" size="1" itemId="{!thisCart.cart.Id}">
+		<option value="none">--</option>
+		<apex:repeat value="{!myClients}" var="c">
+			<option value="{!c.Id}">{!c.Name}</option>
+		</apex:repeat>	
+	</select>	
+	</apex:form>
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection id="client-detail" rendered="{!IF(!CONTAINS($Profile.Name,'Portal') ,true,false)}">
+	<apex:outputField value="{!thisCart.client.MailingStreet}"/>
+	<apex:outputField value="{!thisCart.client.MailingState}"/>
+	<apex:outputField value="{!thisCart.client.MailingCountry}"/>				
+	<apex:outputField value="{!thisCart.client.Email}"/>
+	<apex:outputField value="{!thisCart.client.Phone}"/>
+	<apex:outputField value="{!thisCart.client.HomePhone}"/>		
+	<apex:outputField value="{!thisCart.client.MobilePhone}"/>	
+	</apex:pageBlockSection>
+		
+	<apex:pageBlockSection title="Fill Order Detail" id="fill-detail" columns="1">
+	<apex:outputPanel rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}" >
+	<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
+	<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
+	</apex:outputPanel>
+	
+	<apex:pageBlockTable columns="4" value="{!thisCart.fills}" var="f" id="cart-detail">
+	<apex:column headerValue="Product" >
+		<a href="{!$Page.MyBuyOrderDetail}?id={!f.Buy_Order__c}">
+		<apex:image value="{!f.Buy_Order__r.Image__c}" style="height:50px;padding:10px;"/>
+		</a>
+	</apex:column>
+	
+	<apex:column headerValue="Fill Order Details">
+		<button class="button" item="remove-btn" itemId="{!f.Id}">Remove</button>
+		<div>
+			<a href="{!$Page.MyBuyFillOrderDetail}?id={!f.Id}">
+			{!f.Buy_Order__r.Name}
+			</a>
+		</div>
+	</apex:column>
+	
+	<apex:column headerValue="Price">
+		<div>
+		<input type="number" item="bid-price" itemId="{!f.Id}" value="{!f.Price__c}"/>
+		<span class="asking">{!f.Buy_Order__r.Standard_Price__c}</span>
+		</div>
+		
+		<apex:outputPanel layout="block" styleClass="arrow_box" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}" style="display:none;">
+		<label>Sell price: </label>
+		<input type="number" item="client-price" itemId="{!f.Id}" value="{!f.Client_Price__c}"/>	
+		</apex:outputPanel>		
+	</apex:column>
+	
+	<apex:column headerValue="Quantity">
+		<input type="number" item="bid-qty" itemId="{!f.Id}" value="{!f.Quantity__c}"/>
+		<span class="asking">{!f.Buy_Order__r.Quantity__c}</span>
+	</apex:column>
+	</apex:pageBlockTable>
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection title="Shipping Summary" columns="3" id="shipping-summary" rendered="{!thisCart.canCreateShipping}">
+		<apex:outputText label="Shpping Status" value="{!thisCart.cart.Shipping_Status__c}"/>		
+		<apex:outputText label="No. of Packages" value="{!thisCart.cart.Number_of_Package__c}"/>
+		<apex:outputText label="Total Shipping Costs" value="{!thisCart.cart.Shipping_Cost__c}"/>
+	</apex:pageBlockSection>
+		<apex:pageBlockTable value="{!thisCart.shipments}" var="s" rendered="{!thisCart.hasShipments}">
+			<apex:column value="{!s.Name}"/>
+			<apex:column value="{!s.CreatedDate}"/>
+			<apex:column value="{!s.Carrier__c}"/>
+			<apex:column value="{!s.Tracking_Number__c}"/>
+			<apex:column value="{!s.Number_of_Packages__c}"/>
+			<apex:column value="{!s.Shipping_Cost__c}"/>
+			<apex:column >
+				<apex:outputLink value="{!URLFOR($Action.Buy_Order_Shipping__c.View,s.Id)}">
+				Edit
+				</apex:outputLink>
+				|&nbsp;
+				<apex:outputLink value="{!URLFOR($Action.Buy_Order_Shipping__c.Delete,s.Id)}">
+				Del
+				</apex:outputLink>				
+			</apex:column>				
+		</apex:pageBlockTable>	
+		
+	<apex:pageBlockSection title="Payments" id="cart-payments">
+		<apex:outputField label="Bank Deposit" value="{!thisCart.cart.Bank_Deposit__c}" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}"/>		
+		<apex:outputField value="{!thisCart.cart.Bank_Withdraw__c}" rendered="{!IF(BEGINS($Profile.Name,'Nur Portal') || isInternalUser,true,false)}"/>
+					
+		<apex:pageBlockTable value="{!thisCart.deposits}" var="d" 
+		captionClass="table-caption" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}">
+			<apex:facet name="caption">Earn from Deal</apex:facet>
+			<apex:column value="{!d.CreatedDate}"/>
+			<apex:column value="{!d.Balance__c}"/>
+			<apex:column >
+				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.View,d.Id)}">
+				Edit
+				</apex:outputLink>
+				|&nbsp;
+				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.Delete,d.Id)}">
+				Del
+				</apex:outputLink>				
+			</apex:column>
+		</apex:pageBlockTable>
+
+		<apex:pageBlockTable value="{!thisCart.withdraws}" var="d" 
+		captionClass="table-caption" rendered="{!IF(BEGINS($Profile.Name,'Nur Portal') || isInternalUser,true,false)}">
+			<apex:facet name="caption">Pay for Deal</apex:facet>
+			<apex:column value="{!d.CreatedDate}"/>
+			<apex:column value="{!d.Balance__c}"/>
+			<apex:column >
+				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.View,d.Id)}">
+				Edit
+				</apex:outputLink>
+				|&nbsp;
+				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.Delete,d.Id)}">
+				Del
+				</apex:outputLink>				
+			</apex:column>			
+		</apex:pageBlockTable>
+	</apex:pageBlockSection>
+			
+	<apex:form >
+		<apex:actionFunction name="dummy" action="{!dummy}" rerender="cart-summary,cart-status,cart-profit,cart-accounting,cart-detail"/>
+		<apex:actionFunction name="dummy2" action="{!dummy}" rerender="cart-summary,cart-status,cart-profit,cart-accounting,command-button"/>
+		<apex:actionFunction name="dummy3" action="{!dummy}" rerender="cart-summary,client-detail"/>
+	</apex:form>     
+</apex:pageBlock>
+	#}
+{% endblock %}

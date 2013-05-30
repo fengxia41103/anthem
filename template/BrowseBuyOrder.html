@@ -227,7 +227,7 @@
 		</tbody>
 		</table>
 		
-		<a href=""><button>Review order</button></a>
+		<a href="{{ url_cart_review }}?cart={{ cart.key.id() }}"><button>Review order</button></a>
 		<label>Total</label><span class="border-top-red" id="this-cart-total">
 		{{ cart.payable }}
 		</span> 

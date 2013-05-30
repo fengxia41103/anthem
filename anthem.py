@@ -182,6 +182,8 @@ class BrowseBuyOrder(MyBaseHandler):
 		
 		# my open cart
 		open_cart=template_values['cart']=self.get_open_cart(me)
+		template_values['url_cart_review']=uri_for('cart-review')
+		
 		if len(open_cart.fills):
 			# cart has some fills already, we will enforce
 			# a filter to display only BuyOrders from the same owner
@@ -199,7 +201,7 @@ class BrowseBuyOrder(MyBaseHandler):
 			d['filled by me']=0
 			data.append(d)		
 		template_values['buyorders']=data		
-
+		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(template_values))
 		
@@ -245,3 +247,19 @@ class BrowseBuyOrder(MyBaseHandler):
 		my_cart.put()
 		
 		self.response.write(json.dumps(my_cart.to_dict(),cls=ComplexEncoder))
+
+class ReviewCart(MyBaseHandler):
+	def get(self):
+		template_values = {}
+
+		cart_id=int(self.request.GET['cart'])
+		
+		me=self.get_contact()
+		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
+		assert cart!=None		
+		
+		template_values['cart']=cart
+		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
+		self.response.write(template.render(template_values))
+
+		
