@@ -268,7 +268,8 @@ class ReviewCart(MyBaseHandler):
 		me=self.get_contact()
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
 		assert cart!=None		
-	
+		status='0'
+		
 		if self.request.POST.has_key('action'):
 			action=self.request.POST['action']
 			id=int(self.request.POST['id'])
@@ -302,7 +303,21 @@ class ReviewCart(MyBaseHandler):
 					for f in cart.fills:
 						if f.order!=matching_key: continue
 						f.qty=qty
-				
+			
+			# approval process
+			elif obj=='BuyOrderCart':
+				if action.lower()=='submit for approval':
+					cart.status='In Approval'
+				elif action.lower()=='approve' and cart.status=='In Approval':
+					cart.status='Ready for Processing'
+					
+					# TODO: send email to seller here
+				elif action.lower()=='reject' and cart.status=='In Approval':
+					cart.status='Rejected'
+					# TODO: send email to seller here
+				else:
+					# TODO: give an assert now
+					raise Exception('Unknown path')	
 			# update cart
 			cart.put()
-			self.response.write('0')
+			self.response.write(status)

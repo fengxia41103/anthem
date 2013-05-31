@@ -3,23 +3,12 @@
 {% block customJS %}
 <script type="text/javascript">
     j$(document).ready(function(){
-    	j$('input[type="number"]').prop('disabled', true);
-    	switch('{{cart.status}}'){
-    		case 'Open':
-    		case 'Rejected':
-    			j$('input[type="number"]').prop('disabled', false);
-    			break;
-    		default:
-    			j$('.command-link').remove();
-    			break;
-    	}
-    	
-    	switch ({{ me.can_be_doc()|lower }}){
-    		case true:
-    			j$('input[type="number"]').prop('disabled', false);
-    			break;    			
-    	}
-		    
+    	{% if cart.status=='Open' or cart.status=='Rejected' %}
+    		j$('input[type="number"]').prop('disabled', false);
+    	{% else %}
+    		j$('input[type="number"]').prop('disabled', true);
+		{% endif %}
+					    
 		// remove item from cart
 		j$(document).on('click','.command-link[item="buyorder-fill-remove"]',function(){
 			// call Server to remove this FillOrder from Cart
@@ -99,6 +88,18 @@
 				}
 			);			
 		});
+		
+		// approval process
+		j$(document).on('click','button[item="approval-process"]',function(){
+			var action=j$(this).html();
+			j$.post(
+				'{{ url }}?cart={{ cart.key.id() }}',
+				{'cart':{{cart.key.id()}},'action':action,'kind':'BuyOrderCart','id':'12345'}, // id is not used in this POST, so anything
+				function(result){
+					j$().toastmessage('showNoticeToast','Cart status has been updated');
+				}
+			);			
+		});
 				
 		// full screen switch
 		j$('#full-screen-switch-1').on('click',function(){
@@ -130,15 +131,15 @@
 {% block main %}
 	<div>
 	{% if cart.status=='Open' and me.can_be_nur() %}
-		<button class="my-button">Submit for Approval</button>
+		<button class="my-button" item="approval-process">Submit for Approval</button>
 	{% elif cart.status=='In Approval' and me.can_be_doc() %}
-		<button class="my-button">Approve</button>
-		<button class="my-button">Reject</button>
+		<button class="my-button" item="approval-process">Approve</button>
+		<button class="my-button" item="approval-process">Reject</button>
 	{% endif %}
 	</div>
 
-	<!-- Shipping inputs are available after approval -->
-	{% if cart.status=='Ready for Processing' %}
+	<!-- Shipping inputs are available after approval and for DOC -->
+	{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
 	<div class="top-header-pane" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
@@ -290,14 +291,22 @@
 					</blockquote>
 				</td>
 				<td>
-					<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
+					{% if cart.status=='Open' or cart.status=='Rejected' %}
+						<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
+					{% else %}
+						{{ f.price }}
+					{% endif %}
 					<div class="arrow_box" style="display:none;">
 						<label>Sell price: </label>
 						<input type="number" item="client-price" itemId="{{ f.order.id() }}" value="{{ f.client_price }}" step="any"/>	
 					</div>
 				</td>
 				<td>
-					<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
+					{% if cart.status=='Open' or cart.status=='Rejected' %}
+						<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
+					{% else %}
+						{{ f.qty }}
+					{% endif %}
 				</td>
 				<td><span class="command-link" itemId="{{ f.order.id() }}" item="buyorder-fill-remove">Remove</span></td>
 			</tr>
