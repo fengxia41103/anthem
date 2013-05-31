@@ -69,7 +69,7 @@ class MyBaseHandler(webapp2.RequestHandler):
 		# 
 		# RULE -- single OPEN cart per terminal_seller rule
 		# open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
-		open_cart=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status=='Open')
+		open_cart=BuyOrderCart(parent=me.key).query(BuyOrderCart.status=='Open')
 		assert open_cart.count()<2
 		if open_cart.count():
 			my_cart=open_cart.get() # if there is one
@@ -321,3 +321,27 @@ class ReviewCart(MyBaseHandler):
 			# update cart
 			cart.put()
 			self.response.write(status)
+
+class BankingCart(MyBaseHandler):
+	def get(self):
+		template_values = {}
+		me=self.get_contact()
+		template_values['me']=me		
+		template_values['url']=uri_for('cart-banking')
+		template_values['review_url']=uri_for('cart-review')		
+		
+		carts=BuyOrderCart(parent=me.key).query()
+		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
+		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0)
+		
+		if self.request.GET.has_key('seller'):
+			seller_id=int(self.request.GET['seller'])
+			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
+		if self.request.GET.has_key('client'):
+			client_id=int(self.request.GET['client'])
+			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))
+				
+		template_values['payable_carts']=payable_carts
+		template_values['receivable_carts']=receivable_carts
+		template = JINJA_ENVIRONMENT.get_template('/template/BankingCart.html')
+		self.response.write(template.render(template_values))
