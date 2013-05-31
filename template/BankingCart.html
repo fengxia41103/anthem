@@ -190,6 +190,11 @@
 				}
 			); 
     	});    	
+    	
+    	// user filters
+    	j$('select#seller_filter').change(function(){
+    		window.location = '{{url}}?seller='+j$(this).val();
+    	});
     });    
 </script>
 {% endblock %}

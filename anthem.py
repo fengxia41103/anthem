@@ -374,7 +374,6 @@ class BankingCart(MyBaseHandler):
 				cart.payout_slips.append(slip)
 				datastore_write_bundle.append(cart)
 		elif action=='receivable':
-			logging.info('kjaldfjlakjlajlakj')
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
 				assert cart!=None
