@@ -236,7 +236,8 @@ class BrowseBuyOrder(MyBaseHandler):
 				
 		if not existing:
 			# if not existing, create a new fill and add to cart
-			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=0)
+			# default client_price = price so you will break-even
+			f=BuyOrderFill(order=buyorder.key,price=price,qty=qty,client_price=price)
 			f.owner=me.key
 			f.last_modified_by=me.key
 			my_cart.fills.append(f)
@@ -331,17 +332,59 @@ class BankingCart(MyBaseHandler):
 		template_values['review_url']=uri_for('cart-review')		
 		
 		carts=BuyOrderCart(parent=me.key).query()
-		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
-		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0)
 		
+		# payable carts
+		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
 		if self.request.GET.has_key('seller'):
 			seller_id=int(self.request.GET['seller'])
 			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
+		template_values['payable_carts']=payable_carts
+		template_values['sellers']=set([c.terminal_seller for c in payable_carts])
+		
+		# receivable carts
+		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0)
 		if self.request.GET.has_key('client'):
 			client_id=int(self.request.GET['client'])
-			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))
-				
-		template_values['payable_carts']=payable_carts
+			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
 		template_values['receivable_carts']=receivable_carts
+		template_values['clients']=set([c.terminal_buyer for c in receivable_carts if c.terminal_buyer])
+		
+		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/BankingCart.html')
 		self.response.write(template.render(template_values))
+	
+	def post(self):
+		template_values = {}
+		me=self.get_contact()
+		status='0'
+		
+		action=self.request.POST['action']
+		data=json.loads(self.request.POST['data'])
+		datastore_write_bundle=[]
+		
+		if action=='payable':
+			for d in data:
+				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
+				assert cart!=None
+				slip=AccountingSlip()
+				slip.amount=float(d['amount'])
+				slip.party_a=me.key
+				slip.party_b=cart.terminal_seller
+				slip.money_flow='a-2-b'
+				cart.payout_slips.append(slip)
+				datastore_write_bundle.append(cart)
+		elif action=='receivable':
+			logging.info('kjaldfjlakjlajlakj')
+			for d in data:
+				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
+				assert cart!=None
+				slip=AccountingSlip()
+				slip.amount=float(d['amount'])
+				slip.party_a=me.key
+				slip.party_b=cart.terminal_buyer
+				slip.money_flow='b-2-a'
+				cart.payin_slips.append(slip)
+				datastore_write_bundle.append(cart)
+		
+		ndb.put_multi(datastore_write_bundle)
+		self.response.write(status)

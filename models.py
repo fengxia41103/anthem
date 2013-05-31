@@ -121,7 +121,7 @@ class AccountingSlip(ndb.Model):
 	
 	party_a=ndb.KeyProperty(kind='Contact')
 	party_b=ndb.KeyProperty(kind='Contact')
-	method=ndb.KeyProperty(kind='Billing') # transaction method
+	#method=ndb.KeyProperty(kind='Billing') # transaction method
 	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a']) # who gives the amount to whom
 	amount=ndb.FloatProperty()
 

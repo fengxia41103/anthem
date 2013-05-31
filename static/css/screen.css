@@ -1523,13 +1523,24 @@ input{
 	border-collapse:collapse;
 	border:none;
 }
-.table-row-border td{
+.table-row-border tbody td{
 	border-bottom:1px solid #beceee;
 	width:200px;
 	padding:0 20px;
 }
-.table-row-border tr:last-child td{
+.table-row-border thead td{
+	border-bottom:1px solid #cc8;
+	max-width:200px;
+	min-width:100px;
+	padding:0 20px;
+}
+.table-row-border tbody tr:last-child td{
 	border:none;
+}
+.table-row-border thead td{
+	font-weight:bold;
+	font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
+	text-align:center;	
 }
 
 .sf-table{
@@ -1555,4 +1566,10 @@ input{
 .command-link:hover{
 	cursor:pointer;
 	background:orange;
+}
+.green{
+	color:#4CBB17;
+}
+.red{
+	color:#CD5555;
 }
