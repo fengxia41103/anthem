@@ -3,11 +3,7 @@
 {% block customJS %}
 <script type="text/javascript">
     j$(document).ready(function(){
-    	// get rid of stock btn class
-    	j$('input').removeClass('btn');
-    
     	j$('input[type="number"]').prop('disabled', true);
-    	
     	switch('{{cart.status}}'){
     		case 'Open':
     		case 'Rejected':
@@ -18,8 +14,8 @@
     			break;
     	}
     	
-    	switch ("{!IF(thisCart.isInternalUser,true,false)}"){
-    		case 'true':
+    	switch ({{ me.can_be_doc()|lower }}){
+    		case true:
     			j$('input[type="number"]').prop('disabled', false);
     			break;    			
     	}
@@ -28,8 +24,8 @@
 		j$(document).on('click','.command-link[item="buyorder-fill-remove"]',function(){
 			// call Server to remove this FillOrder from Cart
 			var id=j$(this).attr('itemId');
-			var tr=j$(this).closest('tr');
-			
+			var tr=j$(this).closest('tr');			
+
 			j$.post(
 				'{{ url }}?cart={{ cart.key.id() }}',
 				{'cart':{{cart.key.id()}},'action':'remove','id':id,'kind':'BuyOrderFill'},
@@ -103,24 +99,7 @@
 				}
 			);			
 		});
-
 				
-		// assign client
-		j$("select#select-client").val('{!thisCart.cart.Client__c}');	
-		j$('select#select-client').on('change',function(){
-			var clientId=j$(this).val();
-			var cartId=j$(this).attr('itemId');
-			myBuyOrderExtension.assignClientToCart(cartId,clientId,function(result,success){
-				if (success){
-					// notification
-					j$().toastmessage('showNoticeToast', 'Client assignment has changed');
-					dummy3();
-				}else{
-					console.log('error');
-				}
-		    },{escape:true}); 				
-		});	
-		
 		// full screen switch
 		j$('#full-screen-switch-1').on('click',function(){
 			j$('.arrow_box').fadeIn(500);	
@@ -149,89 +128,17 @@
 {% endblock %}
 
 {% block main %}
-<style>
-input{
-	border:1px #EEEEE0 solid;
-    background-color:none;
-    padding: 5px;
-    max-width:70%;
-}
-.ariel-table select{
-    background-color:#ebebeb;
-    border:1px solid #00bec6; 
-    width: 385px;
-    height: 40px;
-    border-radius: 4px;
-    webkit-border-radius: 4px;
-    moz-border-radius:4px;
-    padding: 10px 0 10px 10px;
-    line-height:1;
-}
-
-.top-header-pane{
-    background: #FFEC8B; /* Old browsers */
-    position:fixed;
-    top:50px;
-    right:0;
-    border-radius: 0 0 10px 10px;
-    border: 1px white solid; 
-    padding: 10px;
-    z-index:999;
-}h
-
-.table-row-border{
-	border-collapse:collapse;
-	border:none;
-}
-.table-row-border td{
-	border-bottom:1px solid #beceee;
-	width:200px;
-	padding:0 20px;
-}
-.table-row-border tr:last-child td{
-	border:none;
-}
-
-.sf-table{
-	border-collapse: collapse;
-	border:none;
-	margin-left:auto;
-	margin-right:auto;
-}
-.sf-table tr:last-child td{
-	border:none;
-}
-.sf-table td:nth-child(2n) {
-	text-align:left;
-}
-.sf-table td:nth-child(2n+1) {
-    /*border-bottom: none;*/
-	font-weight:bold;
-	text-align:right;
-}
-.command-link{
-	text-decoration:underline;
-}
-.command-link:hover{
-	cursor:pointer;
-	background:orange;
-}
-</style>
-
 	<div>
-	<button class="my-button">Submit for Approval</button>
-	<button class="my-button">Approve</button>
-	<button class="my-button">Reject</button>
+	{% if cart.status=='Open' and me.can_be_nur() %}
+		<button class="my-button">Submit for Approval</button>
+	{% elif cart.status=='In Approval' and me.can_be_doc() %}
+		<button class="my-button">Approve</button>
+		<button class="my-button">Reject</button>
+	{% endif %}
 	</div>
-	
-	{#
-	<apex:form id="command-button">
-		<apex:commandButton value="Submit for Approval" action="{!submitCartApproval}" styleClass="my-button" rendered="{!thisCart.canSubmitApproval}"/>
-		<apex:commandButton value="Approve" action="{!approveCart}" styleClass="my-button" rendered="{!thisCart.canApproveReject}" />
-		<apex:commandButton value="Reject" action="{!rejectCart}" styleClass="my-button" rendered="{!thisCart.canApproveReject}" />
-	</apex:form>
-	#}
-	
+
+	<!-- Shipping inputs are available after approval -->
+	{% if cart.status=='Ready for Processing' %}
 	<div class="top-header-pane" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
@@ -276,6 +183,7 @@ input{
 		<button class="my-button">Create Shipment</button>
 	</div>   
 	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
+	{% endif %}
 	
 	<div class="quick-pane">
 	<h3>Fill Order Summary</h3>
@@ -313,57 +221,60 @@ input{
 	</table>
 	</div>
 	
-	<div class="quick-pane">
-	<h3>Profit</h3>
-	<table class="sf-table table-row-border">
-		<tr><td>Expected Profit</td>
-			<td>{{ cart.profit }}</td>
-			<td>Expected Gross Margin</td>
-			<td>{{ cart.gross_margin}}%</td>
-		</tr>
-		<tr><td>Realized Profit</td>
-			<td>{{ cart.realized_profit }}</td>
-			<td>Realized Gross Margin</td>
-			<td>{{ cart.realized_gross_margin }}</td>
-		</tr>
-	</table>
-	</div>
-
-	<div class="quick-pane">
-	<h3>Accounting</h3>
-	<table class="sf-table table-row-border">
-		<tr><td>Total Payable</td>
-			<td>{{ cart.payable }}</td>
-			<td>Total Receivable</td>
-			<td>{{ cart.receivable }}</td>
-		</tr>
-		<tr><td>Bank Withdraw</td>
-			<td>{{ cart.payout }}</td>
-			<td>Bank Deposit</td>
-			<td>{{ cart.payin }}</td>
-		</tr>
-		<tr>
-			<td>Payable Balance</td>
-			<td>{{ cart.payable_balance }}</td>
-			<td>Receivable</td>
-			<td>{{ cart.receivable_balance }}</td>
-		</tr>
-	</table>
-	</div>	
-
-	<div class="quick-pane">
-	<h3>Assign Client</h3>
-	{% if cart.terminal_buyer %}
-	<table class="sf-table table-row-border">
-		<tr><td>Shipping Address</td>
-			<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
-			<td>Email</td>
-			<td>{{ cart.terminal_buyer.get().email }}</td>
-		</tr>
-	</table>
+	<!-- DOC only views -->
+	{% if me.can_be_doc() %}
+		<div class="quick-pane">
+		<h3>Profit</h3>
+		<table class="sf-table table-row-border">
+			<tr><td>Expected Profit</td>
+				<td>{{ cart.profit }}</td>
+				<td>Expected Gross Margin</td>
+				<td>{{ cart.gross_margin}}%</td>
+			</tr>
+			<tr><td>Realized Profit</td>
+				<td>{{ cart.realized_profit }}</td>
+				<td>Realized Gross Margin</td>
+				<td>{{ cart.realized_gross_margin }}</td>
+			</tr>
+		</table>
+		</div>
+	
+		<div class="quick-pane">
+		<h3>Accounting</h3>
+		<table class="sf-table table-row-border">
+			<tr><td>Total Payable</td>
+				<td>{{ cart.payable }}</td>
+				<td>Total Receivable</td>
+				<td>{{ cart.receivable }}</td>
+			</tr>
+			<tr><td>Bank Withdraw</td>
+				<td>{{ cart.payout }}</td>
+				<td>Bank Deposit</td>
+				<td>{{ cart.payin }}</td>
+			</tr>
+			<tr>
+				<td>Payable Balance</td>
+				<td>{{ cart.payable_balance }}</td>
+				<td>Receivable</td>
+				<td>{{ cart.receivable_balance }}</td>
+			</tr>
+		</table>
+		</div>	
+	
+		<div class="quick-pane">
+		<h3>Assign Client</h3>
+		{% if cart.terminal_buyer %}
+		<table class="sf-table table-row-border">
+			<tr><td>Shipping Address</td>
+				<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
+				<td>Email</td>
+				<td>{{ cart.terminal_buyer.get().email }}</td>
+			</tr>
+		</table>
+		{% endif %}
+		</div>
 	{% endif %}
-	</div>
-
+	
 	<div class="quick-pane">
 	<h3>Fill Order Details</h3>
 	{% if cart.fills %}

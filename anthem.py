@@ -256,7 +256,7 @@ class ReviewCart(MyBaseHandler):
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
 		assert cart!=None		
 
-		template_values['contact']=me		
+		template_values['me']=me		
 		template_values['cart']=cart
 		template_values['url']=uri_for('cart-review')
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
