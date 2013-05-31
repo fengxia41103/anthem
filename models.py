@@ -169,7 +169,7 @@ class BuyOrderFill(MyBaseModel):
 	
 	# accounting
 	over_short=ndb.ComputedProperty(lambda self: self.receivable-self.payable)
-	gross_margin=ndb.ComputedProperty(lambda self: self.over_short/self.payable*100.0)
+	gross_margin=ndb.ComputedProperty(lambda self: self.over_short/self.payable*100.0 if self.payable else 0)
 
 class BuyOrderCart(MyBaseModel):	
 	terminal_seller=ndb.KeyProperty(kind='Contact')
@@ -197,7 +197,7 @@ class BuyOrderCart(MyBaseModel):
 	payable=ndb.ComputedProperty(lambda self: sum([f.payable for f in self.fills]))
 	receivable=ndb.ComputedProperty(lambda self:sum([f.receivable for f in self.fills]))
 	profit=ndb.ComputedProperty(lambda self: self.receivable-self.payable-self.shipping_cost)
-	gross_margin=ndb.FloatProperty() # since payable can be 0, division will fail, so set value manually
+	gross_margin=ndb.ComputedProperty(lambda self: self.profit/self.payable*100.0 if self.payable else 0)
 			
 	# a cart has multiple bank slips
 	# owner of BuyOrder is always "a"
@@ -212,9 +212,4 @@ class BuyOrderCart(MyBaseModel):
 	
 	# this is what we actually earned based on payin and payout
 	realized_profit=ndb.ComputedProperty(lambda self: self.payin-self.payout)
-	realized_gross_margin=ndb.FloatProperty()
-	
-	def compute_gross_margin(self):
-		if self.payable:
-			self.gross_margin=self.profit/self.payable*100.0
-			self.realized_gross_margin=self.profit/self.payable*100
+	realized_gross_margin=ndb.ComputedProperty(lambda self: self.realized_profit/self.payout*100.0 if self.payout else 0)	

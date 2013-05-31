@@ -8,13 +8,13 @@
     
     	j$('input[type="number"]').prop('disabled', true);
     	
-    	switch('{!thisCart.cart.Status__c}'){
+    	switch('{{cart.status}}'){
     		case 'Open':
     		case 'Rejected':
     			j$('input[type="number"]').prop('disabled', false);
     			break;
     		default:
-    			j$('button[item="remove-btn"]').remove();
+    			j$('.command-link').remove();
     			break;
     	}
     	
@@ -36,6 +36,7 @@
 				function(result){
 					switch(result){
 						case '0': // success
+							j$().toastmessage('showNoticeToast', "Item has been removed from your cart");
 							tr.fadeOut(500,function(){
 								j$(this).remove();
 							});
@@ -47,48 +48,62 @@
 			);			
 		});
 				
+		// change client price		
+		j$(document).on('change','input[item="client-price"]',function(){
+			var id=j$(this).attr('itemId');
+			var newVal=j$(this).val();
+			
+			j$.post(
+				'{{ url }}?cart={{ cart.key.id() }}',
+				{'cart':{{cart.key.id()}},'action':'update client price','id':id,'kind':'BuyOrderFill','price':newVal},
+				function(result){
+					switch(result){
+						case '0': // success
+							j$().toastmessage('showNoticeToast', "New price of "+newVal+' has been received');
+							break;
+						default:
+							break;
+					}
+				}
+			);			
+		});
+
 		// update qty and price
-		j$('input[item="bid-qty"]').on('change',function(){
-			var fillId=j$(this).attr('itemId');
+		j$(document).on('change','input[item="fill-qty"]',function(){
+			var id=j$(this).attr('itemId');
 			var newVal=j$(this).val();
-			myBuyOrderExtension.updateFillQty(fillId,newVal,function(result,success){
-				if (success){
-					// notification
-					j$().toastmessage('showNoticeToast', "New quantity of "+newVal+' has been received');
-					dummy2();
-				}else{
-					console.log('error');
+			j$.post(
+				'{{ url }}?cart={{ cart.key.id() }}',
+				{'cart':{{cart.key.id()}},'action':'update fill qty','id':id,'kind':'BuyOrderFill','qty':newVal},
+				function(result){
+					switch(result){
+						case '0': // success
+							j$().toastmessage('showNoticeToast', "New quantity of "+newVal+' has been received');
+							break;
+						default:
+							break;
+					}
 				}
-		    },{escape:true}); 				
+			);			
 		});
-		
-		j$('input[item="bid-price"]').on('change',function(){
-			var fillId=j$(this).attr('itemId');
+		j$(document).on('change','input[item="fill-price"]',function(){
+			var id=j$(this).attr('itemId');
 			var newVal=j$(this).val();
-			myBuyOrderExtension.updateFillPrice(fillId,newVal,function(result,success){
-				if (success){
-					// notification
-					j$().toastmessage('showNoticeToast', "New price of "+newVal+' has been received');
-					dummy2();
-				}else{
-					console.log('error');
+			j$.post(
+				'{{ url }}?cart={{ cart.key.id() }}',
+				{'cart':{{cart.key.id()}},'action':'update fill price','id':id,'kind':'BuyOrderFill','price':newVal},
+				function(result){
+					switch(result){
+						case '0': // success
+							j$().toastmessage('showNoticeToast', "New price of "+newVal+' has been received');
+							break;
+						default:
+							break;
+					}
 				}
-		    },{escape:true}); 				
+			);			
 		});
-		
-		j$('input[item="client-price"]').on('change',function(){
-			var fillId=j$(this).attr('itemId');
-			var newVal=j$(this).val();
-			myBuyOrderExtension.updateFillClientPrice(fillId,newVal,function(result,success){
-				if (success){
-					// notification
-					j$().toastmessage('showNoticeToast', "New client price of "+newVal+' has been received');
-					dummy2();
-				}else{
-					console.log('error');
-				}
-		    },{escape:true}); 				
-		});
+
 				
 		// assign client
 		j$("select#select-client").val('{!thisCart.cart.Client__c}');	
@@ -363,13 +378,16 @@ input{
 					{{ f.order.get().description }}
 					</blockquote>
 				</td>
-				<td>{{ f.price }}
+				<td>
+					<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
 					<div class="arrow_box" style="display:none;">
 						<label>Sell price: </label>
-						<input type="number" item="client-price" itemId="" value="" step="any"/>	
+						<input type="number" item="client-price" itemId="{{ f.order.id() }}" value="{{ f.client_price }}" step="any"/>	
 					</div>
 				</td>
-				<td>{{ f.qty }}</td>
+				<td>
+					<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
+				</td>
 				<td><span class="command-link" itemId="{{ f.order.id() }}" item="buyorder-fill-remove">Remove</span></td>
 			</tr>
 			{% endfor %}

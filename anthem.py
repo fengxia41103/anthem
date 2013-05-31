@@ -243,7 +243,6 @@ class BrowseBuyOrder(MyBaseHandler):
 			my_cart.broker=buyorder.owner
 			
 		# update cart
-		my_cart.compute_gross_margin()
 		my_cart.put()
 		
 		self.response.write(json.dumps(my_cart.to_dict(),cls=ComplexEncoder))
@@ -256,7 +255,8 @@ class ReviewCart(MyBaseHandler):
 		me=self.get_contact()
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
 		assert cart!=None		
-		
+
+		template_values['contact']=me		
 		template_values['cart']=cart
 		template_values['url']=uri_for('cart-review')
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
@@ -275,12 +275,33 @@ class ReviewCart(MyBaseHandler):
 			obj=self.request.POST['kind']
 			
 			if obj=='BuyOrderFill':
-				# we allow remove fill from cart
-				assert action=='remove'
-				
 				matching_key=ndb.Key('BuyOrder',id)
-				new_fills=[f for f in cart.fills if f.order!=matching_key]
-				cart.fills=new_fills
+				
+				# we allow remove fill from cart
+				if action=='remove':
+					new_fills=[f for f in cart.fills if f.order!=matching_key]
+					cart.fills=new_fills
+
+				# update client price
+				elif action=='update client price':
+					price=float(self.request.POST['price'])
+					for f in cart.fills:
+						if f.order!=matching_key: continue
+						f.client_price=price
+				
+				# update fill price
+				elif action=='update fill price':
+					price=float(self.request.POST['price'])
+					for f in cart.fills:
+						if f.order!=matching_key: continue
+						f.price=price
+
+				# update fill qty
+				elif action=='update fill qty':
+					qty=int(self.request.POST['qty'])
+					for f in cart.fills:
+						if f.order!=matching_key: continue
+						f.qty=qty
 				
 			# update cart
 			cart.put()
