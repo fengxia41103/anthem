@@ -251,7 +251,6 @@ class BrowseBuyOrder(MyBaseHandler):
 class ReviewCart(MyBaseHandler):
 	def get(self):
 		template_values = {}
-
 		cart_id=int(self.request.GET['cart'])
 		
 		me=self.get_contact()
@@ -259,7 +258,30 @@ class ReviewCart(MyBaseHandler):
 		assert cart!=None		
 		
 		template_values['cart']=cart
+		template_values['url']=uri_for('cart-review')
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
 		self.response.write(template.render(template_values))
-
-		
+	
+	def post(self):
+		template_values = {}
+		cart_id=int(self.request.POST['cart'])
+		me=self.get_contact()
+		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
+		assert cart!=None		
+	
+		if self.request.POST.has_key('action'):
+			action=self.request.POST['action']
+			id=int(self.request.POST['id'])
+			obj=self.request.POST['kind']
+			
+			if obj=='BuyOrderFill':
+				# we allow remove fill from cart
+				assert action=='remove'
+				
+				matching_key=ndb.Key('BuyOrder',id)
+				new_fills=[f for f in cart.fills if f.order!=matching_key]
+				cart.fills=new_fills
+				
+			# update cart
+			cart.put()
+			self.response.write('0')

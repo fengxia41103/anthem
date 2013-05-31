@@ -25,18 +25,26 @@
     	}
 		    
 		// remove item from cart
-		j$('button[item="remove-btn"]').on('click',function(){
+		j$(document).on('click','.command-link[item="buyorder-fill-remove"]',function(){
 			// call Server to remove this FillOrder from Cart
 			var id=j$(this).attr('itemId');
-		
-			myBuyOrderExtension.deleteOrderFill(id,function(result,success){
-				if (success){
-					j$().toastmessage('showNoticeToast', "Item has been removed from this order.");
-					dummy();
-				}else{
-					console.log('error');
+			var tr=j$(this).closest('tr');
+			
+			j$.post(
+				'{{ url }}?cart={{ cart.key.id() }}',
+				{'cart':{{cart.key.id()}},'action':'remove','id':id,'kind':'BuyOrderFill'},
+				function(result){
+					switch(result){
+						case '0': // success
+							tr.fadeOut(500,function(){
+								j$(this).remove();
+							});
+							break;
+						default:
+							break;
+					}
 				}
-		    },{escape:true}); 
+			);			
 		});
 				
 		// update qty and price
@@ -156,16 +164,27 @@ input{
     z-index:999;
 }h
 
+.table-row-border{
+	border-collapse:collapse;
+	border:none;
+}
+.table-row-border td{
+	border-bottom:1px solid #beceee;
+	width:200px;
+	padding:0 20px;
+}
+.table-row-border tr:last-child td{
+	border:none;
+}
+
 .sf-table{
 	border-collapse: collapse;
 	border:none;
 	margin-left:auto;
 	margin-right:auto;
 }
-.sf-table td{
-	border-bottom:1px solid #beceee;
-	width:200px;
-	padding:0 20px;
+.sf-table tr:last-child td{
+	border:none;
 }
 .sf-table td:nth-child(2n) {
 	text-align:left;
@@ -175,7 +194,13 @@ input{
 	font-weight:bold;
 	text-align:right;
 }
-
+.command-link{
+	text-decoration:underline;
+}
+.command-link:hover{
+	cursor:pointer;
+	background:orange;
+}
 </style>
 
 	<div>
@@ -239,7 +264,7 @@ input{
 	
 	<div class="quick-pane">
 	<h3>Fill Order Summary</h3>
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Cart Name</td>
 			<td>Cart# {{ cart.key.id() }}</td>
 			<td>Created Date</td>
@@ -259,7 +284,7 @@ input{
 	
 	<div class="quick-pane">
 	<h3>Status</h3>
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Status</td>
 			<td>{{ cart.status }}</td>
 			<td>Shipping Status</td>
@@ -275,7 +300,7 @@ input{
 	
 	<div class="quick-pane">
 	<h3>Profit</h3>
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Expected Profit</td>
 			<td>{{ cart.profit }}</td>
 			<td>Expected Gross Margin</td>
@@ -291,7 +316,7 @@ input{
 
 	<div class="quick-pane">
 	<h3>Accounting</h3>
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Total Payable</td>
 			<td>{{ cart.payable }}</td>
 			<td>Total Receivable</td>
@@ -314,7 +339,7 @@ input{
 	<div class="quick-pane">
 	<h3>Assign Client</h3>
 	{% if cart.terminal_buyer %}
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Shipping Address</td>
 			<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
 			<td>Email</td>
@@ -329,7 +354,7 @@ input{
 	{% if cart.fills %}
 		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
-		<table class="sf-table">
+		<table class="table-row-border">
 			{% for f in cart.fills %}
 			<tr><td><img src="{{ f.order.get().image }}" style="height:50px;padding:10px;" class="box-shadow"/></td>
 				<td>
@@ -345,6 +370,7 @@ input{
 					</div>
 				</td>
 				<td>{{ f.qty }}</td>
+				<td><span class="command-link" itemId="{{ f.order.id() }}" item="buyorder-fill-remove">Remove</span></td>
 			</tr>
 			{% endfor %}
 		</table>
@@ -353,7 +379,7 @@ input{
 
 	<div class="quick-pane">
 	<h3>Shipping Summary</h3>
-	<table class="sf-table">
+	<table class="sf-table table-row-border">
 		<tr><td>Created On</td>
 			<td>{{ cart.shipping_created_date }}</td>
 			<td>Carrier</td>
@@ -375,7 +401,7 @@ input{
 	<div class="quick-pane">
 	<h3>Payments</h3>
 	{% if cart.payout_slips %}
-		<table>
+		<table class="table-row-border">
 		<caption class="table-caption">Pay For This Deal</caption>
 		<thead>
 			<tr><td>Transaction Created On</td>
@@ -394,7 +420,7 @@ input{
 		</table>
 	{% endif %}
 	{% if cart.payin_slips %}
-		<table>
+		<table class="table-row-border">
 		<caption class="table-caption">Earn From This Deal</caption>
 		<thead>
 			<tr><td>Transaction Created On</td>
