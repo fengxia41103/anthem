@@ -119,7 +119,7 @@
 	    });
 	    j$('#shopping-cart-visible-switch').on('click',function(){
 	    	j$(this).hide();
-	    	j$(this).parents('div.top-header-pane').slideToggle(600);
+	    	j$(this).siblings('div.top-header-pane').slideToggle(600);
 	    });				
     });
 </script>
@@ -154,34 +154,35 @@ input{
     border: 1px white solid; 
     padding: 10px;
     z-index:999;
-}
+}h
 
-.sf-table td:nth-child(2n+1){
-	font-weight:bold;
-	width:25%;
-}
 .sf-table{
 	border-collapse: collapse;
+	border:none;
+	margin-left:auto;
+	margin-right:auto;
 }
-.sf-table tr{
-	border: solid;
-  	border-width: 1px 0;
+.sf-table td{
+	border-bottom:1px solid #beceee;
+	width:200px;
+	padding:0 20px;
 }
-.sf-table tr:first-child {
-  border-top: none;
+.sf-table td:nth-child(2n) {
+	text-align:left;
 }
-.sf-table tr:last-child {
-    border-bottom: none;
+.sf-table td:nth-child(2n+1) {
+    /*border-bottom: none;*/
+	font-weight:bold;
+	text-align:right;
 }
 
-.sf-table td{
-}
 </style>
 
-<apex:pageBlock >
+	<div>
 	<button class="my-button">Submit for Approval</button>
 	<button class="my-button">Approve</button>
 	<button class="my-button">Reject</button>
+	</div>
 	
 	{#
 	<apex:form id="command-button">
@@ -191,7 +192,7 @@ input{
 	</apex:form>
 	#}
 	
-	<div class="top-header-pane">
+	<div class="top-header-pane" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
 		</span>		
@@ -233,22 +234,21 @@ input{
 		Please verify the shipment information and click the "Create Shipment" button below.
 		Shiping label file will be emailed to all buyers and sellers.
 		<button class="my-button">Create Shipment</button>
-	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;
-	</div>
 	</div>   
+	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
 	
-	<div>
+	<div class="quick-pane">
 	<h3>Fill Order Summary</h3>
-	<table class="sf-table ariel-table">
+	<table class="sf-table">
 		<tr><td>Cart Name</td>
-			<td>Cart# {{ cart.id }}</td>
+			<td>Cart# {{ cart.key.id() }}</td>
 			<td>Created Date</td>
 			<td>{{ cart.created_time }}</td>
 		</tr><tr>
 			<td>Buyer Name</td>
 			<td>
-				{% if cart.terminal_buyer %}
-					{{ cart.terminal_buyer.get().nickname }}
+				{% if cart.broker %}
+					{{ cart.broker.get().nickname }}
 				{% endif %}
 			</td>
 			<td>Seller Name</td>
@@ -256,167 +256,161 @@ input{
 		</tr>
 	</table>
 	</div>					
-	{#
-	<apex:pageBlockSection title="Fill Order Summary" columns="2" id="cart-summary">
-		<apex:outputText value="{!thisCart.cart.Name}"/>
-		<apex:outputField value="{!thisCart.cart.CreatedDate}" />
-		
-		<apex:outputField value="{!thisCart.cart.Buyer__c}"/>
-		<apex:outputField label="Seller" value="{!thisCart.cart.Owner.Name}"/>
-		<apex:outputField value="{!thisCart.cart.Client__c}" rendered="{!thisCart.isInternalUser}"/>		
-	</apex:pageBlockSection>
 	
-	<apex:pageBlockSection title="Status" id="cart-status">
-		<apex:outputField value="{!thisCart.cart.Status__c}"/>
-		<apex:outputText value="{!thisCart.cart.Shipping_Status__c}"/>	
-		<apex:outputField value="{!thisCart.cart.Seller_Satisfied__c}"/>
-		<apex:outputField value="{!thisCart.cart.Client_Satisfied__c}"/>			
-	</apex:pageBlockSection>
+	<div class="quick-pane">
+	<h3>Status</h3>
+	<table class="sf-table">
+		<tr><td>Status</td>
+			<td>{{ cart.status }}</td>
+			<td>Shipping Status</td>
+			<td>{{ cart.shipping_status }}</td>
+		</tr><tr>
+			<td>Buyer Reconciled</td>
+			<td>{{ cart.buyer_reconciled }}</td>
+			<td>Seller Reconciled</td>
+			<td>{{ cart.seller_reconciled }}</td>
+		</tr>
+	</table>
+	</div>
 	
-	<apex:pageBlockSection title="Profit" id="cart-profit" rendered="{!thisCart.isInternalUser}">
-		<!-- apex:outputText label="Buyer" value="{!IF(v==v2,'',thisCart.fills[0].Buy_Order__r.Owner.Name)}"/-->
-		<apex:outputField value="{!thisCart.cart.Over_Short__c}" />
-		<apex:outputField value="{!thisCart.cart.Gross_Margin__c}" />
-	</apex:pageBlockSection>
-	
-	<apex:pageBlockSection title="Accounting" id="cart-accounting" rendered="{!thisCart.isInternalUser}">	
-		<apex:outputField value="{!thisCart.cart.Total_Payable__c}"/>
-		<apex:outputField value="{!thisCart.cart.Total_Receivable__c}"/>
-		 		 
-		<apex:outputField value="{!thisCart.cart.Bank_Withdraw__c}"/>
-		<apex:outputField value="{!thisCart.cart.Bank_Deposit__c}"/>
-		
-		<apex:outputField value="{!thisCart.cart.Payable_Balance__c}"/>
-		<apex:outputField value="{!thisCart.cart.Receivable_Balance__c}"/>
-	</apex:pageBlockSection>
-	
-	<apex:pageBlockSection title="Assign to Client" rendered="{!thisCart.canAssignClient}">
-	<apex:form >
-	<select id="select-client" size="1" itemId="{!thisCart.cart.Id}">
-		<option value="none">--</option>
-		<apex:repeat value="{!myClients}" var="c">
-			<option value="{!c.Id}">{!c.Name}</option>
-		</apex:repeat>	
-	</select>	
-	</apex:form>
-	</apex:pageBlockSection>
-	
-	<apex:pageBlockSection id="client-detail" rendered="{!IF(!CONTAINS($Profile.Name,'Portal') ,true,false)}">
-	<apex:outputField value="{!thisCart.client.MailingStreet}"/>
-	<apex:outputField value="{!thisCart.client.MailingState}"/>
-	<apex:outputField value="{!thisCart.client.MailingCountry}"/>				
-	<apex:outputField value="{!thisCart.client.Email}"/>
-	<apex:outputField value="{!thisCart.client.Phone}"/>
-	<apex:outputField value="{!thisCart.client.HomePhone}"/>		
-	<apex:outputField value="{!thisCart.client.MobilePhone}"/>	
-	</apex:pageBlockSection>
-		
-	<apex:pageBlockSection title="Fill Order Detail" id="fill-detail" columns="1">
-	<apex:outputPanel rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}" >
-	<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
-	<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
-	</apex:outputPanel>
-	
-	<apex:pageBlockTable columns="4" value="{!thisCart.fills}" var="f" id="cart-detail">
-	<apex:column headerValue="Product" >
-		<a href="{!$Page.MyBuyOrderDetail}?id={!f.Buy_Order__c}">
-		<apex:image value="{!f.Buy_Order__r.Image__c}" style="height:50px;padding:10px;"/>
-		</a>
-	</apex:column>
-	
-	<apex:column headerValue="Fill Order Details">
-		<button class="button" item="remove-btn" itemId="{!f.Id}">Remove</button>
-		<div>
-			<a href="{!$Page.MyBuyFillOrderDetail}?id={!f.Id}">
-			{!f.Buy_Order__r.Name}
-			</a>
-		</div>
-	</apex:column>
-	
-	<apex:column headerValue="Price">
-		<div>
-		<input type="number" item="bid-price" itemId="{!f.Id}" value="{!f.Price__c}"/>
-		<span class="asking">{!f.Buy_Order__r.Standard_Price__c}</span>
-		</div>
-		
-		<apex:outputPanel layout="block" styleClass="arrow_box" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}" style="display:none;">
-		<label>Sell price: </label>
-		<input type="number" item="client-price" itemId="{!f.Id}" value="{!f.Client_Price__c}"/>	
-		</apex:outputPanel>		
-	</apex:column>
-	
-	<apex:column headerValue="Quantity">
-		<input type="number" item="bid-qty" itemId="{!f.Id}" value="{!f.Quantity__c}"/>
-		<span class="asking">{!f.Buy_Order__r.Quantity__c}</span>
-	</apex:column>
-	</apex:pageBlockTable>
-	</apex:pageBlockSection>
-	
-	<apex:pageBlockSection title="Shipping Summary" columns="3" id="shipping-summary" rendered="{!thisCart.canCreateShipping}">
-		<apex:outputText label="Shpping Status" value="{!thisCart.cart.Shipping_Status__c}"/>		
-		<apex:outputText label="No. of Packages" value="{!thisCart.cart.Number_of_Package__c}"/>
-		<apex:outputText label="Total Shipping Costs" value="{!thisCart.cart.Shipping_Cost__c}"/>
-	</apex:pageBlockSection>
-		<apex:pageBlockTable value="{!thisCart.shipments}" var="s" rendered="{!thisCart.hasShipments}">
-			<apex:column value="{!s.Name}"/>
-			<apex:column value="{!s.CreatedDate}"/>
-			<apex:column value="{!s.Carrier__c}"/>
-			<apex:column value="{!s.Tracking_Number__c}"/>
-			<apex:column value="{!s.Number_of_Packages__c}"/>
-			<apex:column value="{!s.Shipping_Cost__c}"/>
-			<apex:column >
-				<apex:outputLink value="{!URLFOR($Action.Buy_Order_Shipping__c.View,s.Id)}">
-				Edit
-				</apex:outputLink>
-				|&nbsp;
-				<apex:outputLink value="{!URLFOR($Action.Buy_Order_Shipping__c.Delete,s.Id)}">
-				Del
-				</apex:outputLink>				
-			</apex:column>				
-		</apex:pageBlockTable>	
-		
-	<apex:pageBlockSection title="Payments" id="cart-payments">
-		<apex:outputField label="Bank Deposit" value="{!thisCart.cart.Bank_Deposit__c}" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}"/>		
-		<apex:outputField value="{!thisCart.cart.Bank_Withdraw__c}" rendered="{!IF(BEGINS($Profile.Name,'Nur Portal') || isInternalUser,true,false)}"/>
-					
-		<apex:pageBlockTable value="{!thisCart.deposits}" var="d" 
-		captionClass="table-caption" rendered="{!IF(BEGINS($Profile.Name,'Doc Portal') || isInternalUser,true,false)}">
-			<apex:facet name="caption">Earn from Deal</apex:facet>
-			<apex:column value="{!d.CreatedDate}"/>
-			<apex:column value="{!d.Balance__c}"/>
-			<apex:column >
-				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.View,d.Id)}">
-				Edit
-				</apex:outputLink>
-				|&nbsp;
-				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.Delete,d.Id)}">
-				Del
-				</apex:outputLink>				
-			</apex:column>
-		</apex:pageBlockTable>
+	<div class="quick-pane">
+	<h3>Profit</h3>
+	<table class="sf-table">
+		<tr><td>Expected Profit</td>
+			<td>{{ cart.profit }}</td>
+			<td>Expected Gross Margin</td>
+			<td>{{ cart.gross_margin}}%</td>
+		</tr>
+		<tr><td>Realized Profit</td>
+			<td>{{ cart.realized_profit }}</td>
+			<td>Realized Gross Margin</td>
+			<td>{{ cart.realized_gross_margin }}</td>
+		</tr>
+	</table>
+	</div>
 
-		<apex:pageBlockTable value="{!thisCart.withdraws}" var="d" 
-		captionClass="table-caption" rendered="{!IF(BEGINS($Profile.Name,'Nur Portal') || isInternalUser,true,false)}">
-			<apex:facet name="caption">Pay for Deal</apex:facet>
-			<apex:column value="{!d.CreatedDate}"/>
-			<apex:column value="{!d.Balance__c}"/>
-			<apex:column >
-				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.View,d.Id)}">
-				Edit
-				</apex:outputLink>
-				|&nbsp;
-				<apex:outputLink value="{!URLFOR($Action.Bank_Slip__c.Delete,d.Id)}">
-				Del
-				</apex:outputLink>				
-			</apex:column>			
-		</apex:pageBlockTable>
-	</apex:pageBlockSection>
-			
-	<apex:form >
-		<apex:actionFunction name="dummy" action="{!dummy}" rerender="cart-summary,cart-status,cart-profit,cart-accounting,cart-detail"/>
-		<apex:actionFunction name="dummy2" action="{!dummy}" rerender="cart-summary,cart-status,cart-profit,cart-accounting,command-button"/>
-		<apex:actionFunction name="dummy3" action="{!dummy}" rerender="cart-summary,client-detail"/>
-	</apex:form>     
-</apex:pageBlock>
-	#}
+	<div class="quick-pane">
+	<h3>Accounting</h3>
+	<table class="sf-table">
+		<tr><td>Total Payable</td>
+			<td>{{ cart.payable }}</td>
+			<td>Total Receivable</td>
+			<td>{{ cart.receivable }}</td>
+		</tr>
+		<tr><td>Bank Withdraw</td>
+			<td>{{ cart.payout }}</td>
+			<td>Bank Deposit</td>
+			<td>{{ cart.payin }}</td>
+		</tr>
+		<tr>
+			<td>Payable Balance</td>
+			<td>{{ cart.payable_balance }}</td>
+			<td>Receivable</td>
+			<td>{{ cart.receivable_balance }}</td>
+		</tr>
+	</table>
+	</div>	
+
+	<div class="quick-pane">
+	<h3>Assign Client</h3>
+	{% if cart.terminal_buyer %}
+	<table class="sf-table">
+		<tr><td>Shipping Address</td>
+			<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
+			<td>Email</td>
+			<td>{{ cart.terminal_buyer.get().email }}</td>
+		</tr>
+	</table>
+	{% endif %}
+	</div>
+
+	<div class="quick-pane">
+	<h3>Fill Order Details</h3>
+	{% if cart.fills %}
+		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
+		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
+		<table class="sf-table">
+			{% for f in cart.fills %}
+			<tr><td><img src="{{ f.order.get().image }}" style="height:50px;padding:10px;" class="box-shadow"/></td>
+				<td>
+					{{ f.order.get().name }}
+					<blockquote>
+					{{ f.order.get().description }}
+					</blockquote>
+				</td>
+				<td>{{ f.price }}
+					<div class="arrow_box" style="display:none;">
+						<label>Sell price: </label>
+						<input type="number" item="client-price" itemId="" value="" step="any"/>	
+					</div>
+				</td>
+				<td>{{ f.qty }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
+	</div>
+
+	<div class="quick-pane">
+	<h3>Shipping Summary</h3>
+	<table class="sf-table">
+		<tr><td>Created On</td>
+			<td>{{ cart.shipping_created_date }}</td>
+			<td>Carrier</td>
+			<td>{{ cart.shipping_carrier }}</td>
+		</tr>
+		<tr><td>Tracking Number</td>
+			<td>{{ cart.shipping_tracking_number }}</td>
+			<td>No. of Packages</td>
+			<td>{{ cart.shipping_num_of_package }}</td>
+		</tr>
+		<tr><td>Shipping Status</td>
+			<td>{{ cart.shipping_status }}</td>
+			<td>Shipping Cost</td>
+			<td>{{ cart.shipping_cost }}</td>
+		</tr>
+	</table>
+	</div>	
+
+	<div class="quick-pane">
+	<h3>Payments</h3>
+	{% if cart.payout_slips %}
+		<table>
+		<caption class="table-caption">Pay For This Deal</caption>
+		<thead>
+			<tr><td>Transaction Created On</td>
+				<td>Amount</td>
+				<td>Payment Method</td>
+			</tr>
+		</thead>
+		<tbody>		
+		{% for s in cart.payout_slips %}
+			<tr><td>{{ s.created_time }}</td>
+				<td>{{ s.amount }}</td>
+				<td>{{ s.billing }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+		</table>
+	{% endif %}
+	{% if cart.payin_slips %}
+		<table>
+		<caption class="table-caption">Earn From This Deal</caption>
+		<thead>
+			<tr><td>Transaction Created On</td>
+				<td>Amount</td>
+				<td>Payment Method</td>
+			</tr>
+		</thead>
+		<tbody>		
+		{% for s in cart.payin_slips %}
+			<tr><td>{{ s.created_time }}</td>
+				<td>{{ s.amount }}</td>
+				<td>{{ s.billing }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+		</table>
+	{% endif %}
+	</div>
 {% endblock %}

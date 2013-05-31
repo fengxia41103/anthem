@@ -209,22 +209,7 @@
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
 		</span>	
-		<table id="this-cart">
-		<thead>
-		<tr>
-			<td>Buy Order</td><td>Quantity</td><td>Price</td>
-		</tr>
-		</thead>
-		
-		<tbody>
-		{% for f in cart.fills %}
-		<tr>
-			<td>{{ f.order.get().name }}</td>
-			<td>{{ f.qty }}</td>
-			<td>{{ f.price }}</td>
-		</tr>
-		{% endfor %}
-		</tbody>
+		<table id="this-cart" class="ariel-table">
 		</table>
 		
 		<a href="{{ url_cart_review }}?cart={{ cart.key.id() }}"><button>Review order</button></a>

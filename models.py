@@ -115,6 +115,10 @@ class Contact(ndb.Model):
 #
 #######################################
 class AccountingSlip(ndb.Model):
+	# StructuredProperty within a Contact
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
+	last_modified_time=ndb.DateTimeProperty(auto_now=True)
+	
 	party_a=ndb.KeyProperty(kind='Contact')
 	party_b=ndb.KeyProperty(kind='Contact')
 	method=ndb.KeyProperty(kind='Billing') # transaction method
@@ -170,13 +174,22 @@ class BuyOrderFill(MyBaseModel):
 class BuyOrderCart(MyBaseModel):	
 	terminal_seller=ndb.KeyProperty(kind='Contact')
 	terminal_buyer=ndb.KeyProperty(kind='Contact')
+	broker=ndb.KeyProperty(kind='Contact')
+
+	# these flags should be MANUALLY set by each party of this transaction as an acknowledgement!
+	buyer_reconciled=ndb.BooleanProperty(default=False)
+	seller_reconciled=ndb.BooleanProperty(default=False)
 	
 	# shipping related
 	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'],default='Open')
 	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
 	shipping_carrier=ndb.StringProperty()
 	shipping_cost=ndb.FloatProperty()
-	
+	shipping_carrier=ndb.StringProperty(choices=['USPS','FedEx','DHL','UPS','Other'])
+	shipping_num_of_package=ndb.IntegerProperty()
+	shipping_tracking_number=ndb.StringProperty()
+	shipping_created_date=ndb.DateProperty()
+		
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
 	
@@ -187,7 +200,21 @@ class BuyOrderCart(MyBaseModel):
 	gross_margin=ndb.FloatProperty() # since payable can be 0, division will fail, so set value manually
 			
 	# a cart has multiple bank slips
-	account_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
-
-
+	# owner of BuyOrder is always "a"
+	# payout: terminal seller is "b", slip is a-2-b, thus a cost to the broker
+	# payin: termian client is "b", slip is b-2-a, thus an income to the broker
+	payout_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
+	payin_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
+	payout=ndb.ComputedProperty(lambda self: sum([p.amount for p in self.payout_slips]))
+	payin=ndb.ComputedProperty(lambda self: sum([p.amount for p in self.payin_slips]))
+	payable_balance=ndb.ComputedProperty(lambda self: self.payable-self.payout)
+	receivable_balance=ndb.ComputedProperty(lambda self: self.receivable-self.payin)
 	
+	# this is what we actually earned based on payin and payout
+	realized_profit=ndb.ComputedProperty(lambda self: self.payin-self.payout)
+	realized_gross_margin=ndb.FloatProperty()
+	
+	def compute_gross_margin(self):
+		if self.payable:
+			self.gross_margin=self.profit/self.payable*100.0
+			self.realized_gross_margin=self.profit/self.payable*100

@@ -240,10 +240,10 @@ class BrowseBuyOrder(MyBaseHandler):
 			f.owner=me.key
 			f.last_modified_by=me.key
 			my_cart.fills.append(f)
+			my_cart.broker=buyorder.owner
 			
 		# update cart
-		if my_cart.payable:
-			my_cart.gross_margin=my_cart.profit/my_cart.payable*100.0
+		my_cart.compute_gross_margin()
 		my_cart.put()
 		
 		self.response.write(json.dumps(my_cart.to_dict(),cls=ComplexEncoder))
