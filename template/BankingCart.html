@@ -1,0 +1,322 @@
+{% extends "/template/base.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+    function updatePayableFundBalance(){
+    	var total=0;
+    	j$.each(j$('input[item="payable-payment"]'),function(index,payment){
+    		total+=parseFloat(j$(payment).val());
+    	});
+    		
+    	var fund=parseFloat(j$('#input-total-payable-fund').val());
+    	j$('#payable-fund-balance').html(fund-total);
+    	
+    	if ((fund-total)>=0){
+    		j$('#payable-fund-balance').addClass('green');
+    		j$('#payable-fund-balance').removeClass('red');
+    	}else{
+    		j$('#payable-fund-balance').addClass('red');
+    		j$('#payable-fund-balance').removeClass('green');
+    	}
+    }
+    
+    function distributePayableFund(){
+    	var payments=j$('input[item="payable-payment"]');
+    	var balance=j$('#input-total-payable-fund').val();
+    	var i=0;
+    	while(i<payments.length){
+    		var id=j$(payments[i]).attr('itemId');
+    		var next=j$('span[itemId="'+id+'"][item="payable-max"]');
+    		var need=parseFloat(j$(next).html());
+    		var actual=need;
+    		if (balance<need){
+    			// not enough
+    			actual=balance;
+    		}
+    		j$(payments[i]).val(actual);
+    		
+    		// update remaining payable balance
+    		j$('span[itemId="'+id+'"][item="payable-balance"]').html(need-actual);
+    		
+    		// iterator    			
+    		balance -= actual;
+    		i++;
+    	}
+    	updatePayableFundBalance();
+    }
+    
+    // Receivables    
+    function updateReceivableFundBalance(){
+    	var total=0;
+    	j$.each(j$('input[item="receivable-payment"]'),function(index,payment){
+    		total+=parseFloat(j$(payment).val());
+    	});
+    		
+    	var fund=parseFloat(j$('#input-total-receivable-fund').val());
+    	j$('#receivable-fund-balance').html(fund-total);
+    	
+    	if ((fund-total)>=0){
+    		j$('#receivable-fund-balance').addClass('green');
+    		j$('#receivable-fund-balance').removeClass('red');
+    	}else{
+    		j$('#receivable-fund-balance').addClass('red');
+    		j$('#receivable-fund-balance').removeClass('green');
+    	}
+    }
+    
+    function distributeReceivableFund(){
+    	var payments=j$('input[item="receivable-payment"]');
+    	var balance=j$('#input-total-receivable-fund').val();
+    	var i=0;
+    	while(i<payments.length){
+    		var id=j$(payments[i]).attr('itemId');
+    		var next=j$('span[itemId="'+id+'"][item="receivable-max"]');
+    		var need=parseFloat(j$(next).html());
+    		var actual=need;
+    		if (balance<need){
+    			// not enough
+    			actual=balance;
+    		}
+    		j$(payments[i]).val(actual);
+    		
+    		// update remaining receivable balance
+    		j$('span[itemId="'+id+'"][item="receivable-balance"]').html(need-actual);
+    		
+    		// iterator    			
+    		balance -= actual;
+    		i++;
+    	}
+    	updateReceivableFundBalance();
+    }
+        
+    j$(document).ready(function(){
+		j$('#tabs').tabs();
+		    	
+    	// if changing total payable fund
+    	j$('#input-total-payable-fund').on('change',function(){
+			distributePayableFund();
+    	});
+    	
+    	// if changing payable distribution
+    	j$(document).on('change','input[item="payable-payment"]',function(){
+    		// max amount to be the balance so you cannt overpay!
+    		var me=parseFloat(j$(this).val());
+    		var id=j$(this).attr('itemId');
+    		var balance=parseFloat(j$('span[itemId="'+id+'"][item="payable-max"]').html());
+
+    		if (me>balance){
+    			j$(this).val(balance);
+    			j$().toastmessage('showWarningToast', 'Amount can not exceed payable balance');
+    			me=balance;
+    		}
+    		// update remaining balance
+    		j$('span[itemId="'+id+'"][item="payable-balance"]').html(balance-me);
+    		
+			// update fund balance
+			updatePayableFundBalance();    		
+    	});
+    	
+    	j$(document).on('click','span[item="remove-tr-from-payable-table"]',function(){
+    		// first TR up the tree removed from DOM
+    		j$(this).parents('tr:first').remove();
+    		
+			// update fund balance
+			updatePayableFundBalance();        		
+    	});
+    	
+    	j$('#btn-create-payable-slips').on('click',function(){
+    		var payments=j$('input[item="payable-payment"]');
+    		var data=[];
+    		for (var i=0;i<payments.length;i++){
+    			var id=j$(payments[i]).attr('itemId');
+    			data.push({'id':id,'amount':parseFloat(j$(payments[i]).val())});
+    		}
+			j$.post(
+				'/cart/banking',
+				{'action':'payable','data':JSON.stringify(data)},
+				function(result){
+					j$().toastmessage('showNoticeToast', 'Payments have been received');									
+				}
+			); 
+    	});
+    	
+    	// Receivables
+ 
+    	// if changing total receivable fund
+    	j$(document).on('change','#input-total-receivable-fund',function(){
+			distributeReceivableFund();
+    	});
+    	
+    	// if changing receivable distribution
+    	j$(document).on('change','input[item="receivable-payment"]',function(){
+    		// max amount to be the balance so you cannt overpay!
+    		var me=parseFloat(j$(this).val());
+    		var id=j$(this).attr('itemId');
+    		var balance=parseFloat(j$('span[itemId="'+id+'"][item="receivable-max"]').html());
+
+    		if (me>balance){
+    			j$(this).val(balance);
+    			j$().toastmessage('showWarningToast', 'Amount can not exceed receivable balance');
+    			me=balance;
+    		}
+    		// update remaining balance
+    		j$('span[itemId="'+id+'"][item="receivable-balance"]').html(balance-me);
+    		
+			// update fund balance
+			updateReceivableFundBalance();    		
+    	});
+    	
+    	j$(document).on('click','span[item="remove-tr-from-receivable-table"]',function(){
+    		// first TR up the tree removed from DOM
+    		j$(this).parents('tr:first').remove();
+    		
+			// update fund balance
+			updateReceivableFundBalance();        		
+    	});
+    	
+    	j$('#btn-create-receivable-slips').on('click',function(){
+    		var payments=j$('input[item="receivable-payment"]');
+    		var data=[];
+    		for (var i=0;i<payments.length;i++){
+    			var id=j$(payments[i]).attr('itemId');
+    			data.push({'id':id,'amount':parseFloat(j$(payments[i]).val())});
+    		}
+				
+			j$.post(
+				'/cart/banking',
+				{'action':'receivable','data':JSON.stringify(data)},
+				function(result){
+					j$().toastmessage('showNoticeToast', 'Payments have been received');									
+				}
+			); 
+    	});    	
+    });    
+</script>
+{% endblock %}
+
+{% block main %}
+
+<div id="tabs">
+	<ul>
+    	<li><a href="#tabs-1">Register Payment to Sellers</a></li>
+        <li><a href="#tabs-2">Register Earnings</a></li>
+	</ul>
+	<div id="tabs-1">
+    Paying a seller will withdraw funds from Buyer's bank account and transfer them to the Seller's account.
+		<div class="quick-pane">
+			<h3>Step 1: Enter total amount</h3>
+			<div class="searchbox">
+				<input type="text" placeholder="Total amount to withdraw" id="input-total-payable-fund" title=""/>
+	    	</div>
+		</div>
+		
+		<div class="quick-pane">
+			<h3>Step 2: Filter carts by seller</h3>
+			
+			<select id="seller_filter">
+				<option value="all">All</option>
+				{% for c in sellers %}
+					<option value="{{ c.id() }}">{{ c.get().nickname }}</option>
+				{% endfor %}
+			</select>
+		</div>	
+		
+		<div class="quick-pane">
+			<h3>Step 3: Allocate payments</h3>
+			<table class="table-row-border">
+				<thead>
+					<tr><td>Cart Number</td>
+						<td>Pay To</td>
+						<td>Payable Balance</td>
+						<td>Amount to Pay</td>
+						<td>Remaining Balance After This Payment</td>
+						<td></td>
+					</tr>
+				</thead>
+				<tbody>
+				{% for c in payable_carts %}
+				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}">Cart# {{ c.key.id() }}</a></td>
+					<td>{{ c.terminal_seller.get().nickname }}</td>
+					<td><span itemId="{{ c.key.id() }}" item="payable-max">{{ c.payable_balance }}</span></td>
+					<td>
+						<input type="number" itemId="{{ c.key.id() }}" item="payable-payment" value="{{ c.payable_balance }}" step="any" min="0" 
+						max="{{ c.payable_balance }}"/>
+					</td>
+					<td><span itemId="{{ c.key.id() }}" item="payable-balance">0</span></td>
+					<td>
+						<span item="remove-tr-from-payable-table" style="text-decoration:underline;">Pay this later</span>
+					</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			
+			<div class="border-top-red" style="margin-top:20px;margin-left:auto;margin-right:0;width:200px;">
+				<label style="font-weight:bold;margin-right:20px;">Fund over/short:</label>
+				<span id="payable-fund-balance" style="border-bottom: 3px double red;"></span>
+				<button id="btn-create-payable-slips" class="my-button" style="margin-top:30px;">Pay All</button>			
+			</div>
+		</div>
+	</div>
+
+	<div id="tabs-2">
+    Distruting earning will withdraw funds from Client's bank account and transfer them to the Buyer's account.
+		<div class="quick-pane">
+			<h3>Step 1: Enter total amount</h3>
+			<div class="searchbox">
+				<input type="text" placeholder="Total amount to distribute" id="input-total-receivable-fund" title=""/>
+	    	</div>
+		</div>
+		
+		<div class="quick-pane">
+			<h3>Step 2: Filter carts by client</h3>
+			
+			<select id="client_filter">
+				<option value="all">All</option>
+				{% for c in clients %}
+					<option value="{{ c.id() }}">{{ c.get().nickname }}</option>
+				{% endfor %}
+			</select>
+		</div>	
+		
+		<div class="quick-pane">
+			<h3>Step 3: Allocate payments</h3>
+			<table class="table-row-border">
+				<thead>
+					<tr><td>Cart Number</td>
+						<td>Pay To</td>
+						<td>Receivable Balance</td>
+						<td>Amount to Pay</td>
+						<td>Remaining Balance After This Payment</td>
+						<td></td>
+					</tr>
+				</thead>
+				<tbody>
+				{% for c in receivable_carts %}
+				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}">Cart# {{ c.key.id() }}</a></td>
+					<td>{{ c.terminal_seller.get().nickname }}</td>
+					<td><span itemId="{{ c.key.id() }}" item="receivable-max">{{ c.payable_balance }}</span></td>
+					<td>
+						<input type="number" itemId="{{ c.key.id() }}" item="receivable-payment" value="{{ c.receivable_balance }}" step="any" 
+						min="0" 
+						max="{{ c.receivable_balance }}"/>
+					</td>
+					<td><span itemId="{{ c.key.id() }}" item="receivable-balance">0</span></td>
+					<td>
+						<span item="remove-tr-from-receivable-table" style="text-decoration:underline;">Pay this later</span>
+					</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+			
+			<div class="border-top-red" style="margin-top:20px;margin-left:auto;margin-right:0;width:200px;">
+				<label style="font-weight:bold;margin-right:20px;">Fund over/short:</label>
+				<span id="receivable-fund-balance" style="border-bottom: 3px double red;"></span>
+				<button id="btn-create-receivable-slips" class="my-button" style="margin-top:30px;">Pay All</button>			
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
