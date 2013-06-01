@@ -387,3 +387,17 @@ class BankingCart(MyBaseHandler):
 		
 		ndb.put_multi(datastore_write_bundle)
 		self.response.write(status)
+
+class ManageUserProfile(MyBaseHandler):
+	def get(self):
+		template_values = {}
+		template_values['me']=me=self.get_contact()
+		template_values['membership_options']=MONTHLY_MEMBERSHIP_FEE
+			
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserProfile.html')
+		self.response.write(template.render(template_values))
+	
+	def post(self):
+		me=self.get_contact()
+		

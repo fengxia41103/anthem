@@ -189,7 +189,8 @@ class BuyOrderCart(MyBaseModel):
 	shipping_num_of_package=ndb.IntegerProperty()
 	shipping_tracking_number=ndb.StringProperty()
 	shipping_created_date=ndb.DateProperty()
-		
+	shipping_label=ndb.BlobProperty() # allowing one label file
+			
 	# a cart has multiple fills
 	fills=ndb.StructuredProperty(BuyOrderFill,repeated=True)
 	

@@ -33,7 +33,7 @@ routes = [
 	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),  
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
-	
+	Route('/user/profile',handler='anthem.ManageUserProfile',name='user-profie'),	
 ]
 
 app = WSGIApplication(routes, config=app_config, debug=True)

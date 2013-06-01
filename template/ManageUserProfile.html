@@ -1,0 +1,102 @@
+{% extends "/template/base.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		j$('#btn-add-membership').click(function(){
+			var table=j$(this).siblings('table.table-row-border');
+			var html='<tr>';
+			html+='<td><select>';
+			{% for role,fee in membership_options.iteritems() %}
+				html+='<option value="{{ role }}">{{ role }}</option>';
+			{% endfor %}
+			html+='</select></td>';
+			html+='<td>New</td>';
+			html+='<td></td><td></td><td></td><td></td>';
+			html+='<td><span class="command-link">Start</span> | <span class="command-link">Delete</span></td></tr>';
+			
+    		j$(table).find('tbody').append(html);
+		});
+	
+	});
+</script>
+{% endblock %}
+
+{% block main %}
+
+<div class="quick-pane">
+<h3>Contact Information</h3>
+	<table class="sf-table">
+		<tr><td>Email</td>
+			<td>
+				<span class="command-link" style="float:right;">Edit</span>
+ New 				{{ me.email }}
+				<p><input type="email" name="email" value="{{me.email}}"/></p>				
+			</td>
+			<td>Phone</td>
+			<td>
+				<span class="command-link" style="float:right;">Edit</span>
+				{% for i, p in me.phone.iteritems() %}
+					<div>
+					<label class="cart-summary-label">{{i}}</label>
+					{{ p }}508-801-1794
+					</div>
+				{% endfor %}
+			</td>
+		</tr>
+		<tr><td>Shipping Address</td>
+			<td>
+				<span class="command-link" style="float:right;">Edit</span>
+				{{ me.shipping_address }}
+			</td>
+		</tr>
+	</table>
+</div>
+
+<div class="quick-pane">
+<h3>Memberships</h3>
+	<table class="table-row-border">
+	<thead>	<tr><td>Role</td>
+				<td>Status</td>
+				<td>Monthly Payment ($)</td>
+				<td>Last Payment Received</td>
+				<td>Last Payment Amount</td>
+				<td>Exipration Date</td>
+				<td></td>
+			</tr>
+	</thead>
+	<tbody>
+		{% for m in me.memberships %}
+			<tr><td>{{ m.role }}</td>
+				<td>
+					{% if m.is_active %}
+						Active
+					{% else %}
+						Expirated
+					{% endif %}
+				</td>
+				<td>{{ m.monthly_payment }}</td>
+				<td>{{ m.last_payment_received_date }}</td>
+				<td>{{ m.last_payment_amount }}</td>
+				<td>{{ m.expiration_date }}</td>
+				<td>
+					{% if m.is_active %}
+						<span class="command-link">Cancel</span> | 
+						<span class="command-link">Extend</span>
+					{% else %}
+						<span class="command-link">Renew</span>
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>	
+	</table>
+	<button id="btn-add-membership" class="my-button">Add</button>
+</div>
+
+<div class="quick-pane">
+	<h3>Billing Method</h3>
+	<button id="btn-add-billing" class="my-button">Add</button>
+ 	
+</div>
+{% endblock %}
