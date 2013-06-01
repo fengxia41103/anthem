@@ -18,6 +18,16 @@
     		j$(table).find('tbody').append(html);
 		});
 	
+		j$('#show-new-billing-div').click(function(){
+			j$(this).fadeOut(500,function(){
+				j$('div#div-new-billing-method-form').show();
+			});
+		});
+		j$('#btn-cancel-new-billing').click(function(){
+			j$('div#div-new-billing-method-form').fadeOut(500,function(){
+				j$('#show-new-billing-div').show();
+			});
+		});
 	});
 </script>
 {% endblock %}
@@ -30,7 +40,7 @@
 		<tr><td>Email</td>
 			<td>
 				<span class="command-link" style="float:right;">Edit</span>
- New 				{{ me.email }}
+				 {{ me.email }}
 				<p><input type="email" name="email" value="{{me.email}}"/></p>				
 			</td>
 			<td>Phone</td>
@@ -91,12 +101,45 @@
 		{% endfor %}
 	</tbody>	
 	</table>
-	<button id="btn-add-membership" class="my-button">Add</button>
+	<button id="btn-add-membership" class="my-button">Add a New Membership</button>
 </div>
 
 <div class="quick-pane">
 	<h3>Billing Method</h3>
-	<button id="btn-add-billing" class="my-button">Add</button>
- 	
+	{% for b in me.billing_methods %}
+		<div class="ariel-pinterest-item">
+			<h4>}{{ b.media }}</h4>
+			{{ b.name_on_account }}<br />
+			{{ b.address }}<br />
+			{{ b.account_number }}<br />
+			{{ b.expiration_date }}<br />
+		</div>
+	{% endfor %}
+
+	<span class="collapse-switch" id="show-new-billing-div">Add a New Billing Method</span>
+	<div id="div-new-billing-method-form" style="display:none;">
+	<table class="ariel-table">
+		<tr><td>Method</td>
+			<td><select>
+				<option value="Manual" selected="selected">Manual</option>
+				<option value="paypal">PayPal</option>
+				<option value="master">MasterCard</option>
+				<option value="visa">Visa</option>
+				</select>
+			</td>
+		</tr>
+		<tr><td>Account Number</td>
+			<td><input type="text" value="" placeholder="" /></td>
+		</tr>
+		<tr><td>Expiration Date</td>
+			<td><input type="date" value="" /></td>
+		</tr>
+		<tr><td>Billing Address</td>
+			<td><input type="text" value="" /></td>
+		</tr>
+	</table>
+	<button id="btn-add-new-billing" class="my-button">Add</button>
+	<button id="btn-cancel-new-billing" class="my-button">Cancel</button>
+ 	</div>
 </div>
 {% endblock %}
