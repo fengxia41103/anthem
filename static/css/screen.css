@@ -1525,15 +1525,13 @@ input{
 }
 .table-row-border tbody td{
 	border-bottom:1px solid #beceee;
-	max-width:200px;
-	min-width:100px;
 	padding:5px 20px;
 	vertical-align:top;
+	max-width:200px;
+	min-width:25%;
 }
 .table-row-border thead td{
 	border-bottom:1px solid #cc8;
-	max-width:200px;
-	min-width:100px;
 	padding:0 20px;
 }
 .table-row-border tbody tr:last-child td{
@@ -1554,8 +1552,6 @@ input{
 }
 .sf-table td{
 	vertical-align:top;
-	min-width:100px;
-	max-width:200px;
 }
 
 .sf-table tr:last-child td{
@@ -1606,4 +1602,9 @@ input{
 }
 .toc li:hover{
 	background-color:white;
+}
+.main{
+	width:60%;
+	margin-right:auto;
+	margin-left:auto;
 }
