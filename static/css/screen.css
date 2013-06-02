@@ -1,6 +1,7 @@
 body{
-    font-family: Verdana, Geneva, sans-serif; 
-	font-size:9pt;
+    /*font-family: Verdana, Geneva, sans-serif; */
+    font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
+	font-size:10pt;
 }
 
 h1,h2,h3,h4,h5{
@@ -1584,24 +1585,18 @@ input{
     font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
 	color:#CD9B1D;
 	border-radius:5px;
-	margin:auto;
+	width:200px;
 }
 .toc a{
 	text-decoration:none;
 }
 .toc li{
 	list-style-type:none;
-	width:120px;
-	background-color: #beccee;
-	border-radius:5px;
-	color:white;
-	display:inline-block;
-	padding: 5px 10px;
-	text-align:center;
 	overflow:hidden;
+	padding: 0 10px;
 }
 .toc li:hover{
-	background-color:white;
+	background-color:#cc9;
 }
 .main{
 	width:60%;
