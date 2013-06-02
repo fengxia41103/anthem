@@ -28,36 +28,80 @@
 				j$('#show-new-billing-div').show();
 			});
 		});
+		
+		j$('#edit-phone').click(function(){
+			j$(this).closest('td').find('input').show();
+		});
+		
+		j$('.command-link').click(function(){
+			j$(this).hide();
+			j$(this).closest('td').find('textarea').show();
+			j$(this).closest('td').find('input').show();
+			j$(this).closest('td').find('button').show();
+		});
+		
+		j$('button[item="cancel"]').click(function(){
+			j$(this).closest('td').find('textarea').hide();
+			j$(this).closest('td').find('input').hide();
+			j$(this).closest('td').find('button').hide();			
+			j$(this).closest('td').find('.command-link').show();
+		});
+		j$('button#btn-save-shipping-address').click(function(){
+			var address=j$('textarea#shipping-address').html();		
+		});
+		j$('button#btn-save-phone').click(function(){
+			var home=j$('#phone-home').val();		
+			var office=j$('#phone-office').val();		
+			var mobile=j$('#phone-mobile').val();
+			
+			console.log(mobile);
+			console.log(home);
+			console.log(office);		
+		});
 	});
 </script>
 {% endblock %}
 
 {% block main %}
 
+
 <div class="quick-pane">
 <h3>Contact Information</h3>
 	<table class="sf-table">
 		<tr><td>Email</td>
 			<td>
-				<span class="command-link" style="float:right;">Edit</span>
 				 {{ me.email }}
-				<p><input type="email" name="email" value="{{me.email}}"/></p>				
 			</td>
-			<td>Phone</td>
-			<td>
-				<span class="command-link" style="float:right;">Edit</span>
-				{% for i, p in me.phone.iteritems() %}
-					<div>
-					<label class="cart-summary-label">{{i}}</label>
-					{{ p }}508-801-1794
-					</div>
-				{% endfor %}
-			</td>
-		</tr>
-		<tr><td>Shipping Address</td>
+			<td>Shipping Address</td>
 			<td>
 				<span class="command-link" style="float:right;">Edit</span>
 				{{ me.shipping_address }}
+				<br />
+				<textarea id="shipping-address" style="display:none;"></textarea>
+				<br />
+				
+				<button class="ariel-button" id="btn-save-shipping-address" style="display:none;">Save</button> 
+				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
+			</td>
+		</tr>
+		<tr><td>Phone</td>
+			<td>
+				<span class="command-link" style="float:right;" id="edit-phone">Edit</span>
+				<table>
+				{% for i, p in me.phone.iteritems() %}
+					<tr>
+					<td><label class="cart-summary-label">{{i}}</label></tr>
+					<td>
+					{{ p }}
+					<input id="phone-{{ i }}" type="phone" placeholder="eg. 801-891-8888" value="" style="display:none;"/>
+					</td>
+					</tr>
+				{% endfor %}
+				</table>
+				<br />
+				
+				<button class="ariel-button" id="btn-save-phone" style="display:none;">Save</button> 
+				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
 			</td>
 		</tr>
 	</table>
@@ -65,6 +109,7 @@
 
 <div class="quick-pane">
 <h3>Memberships</h3>
+	<span class="collapse-switch" id="btn-add-membership">Add a New Membership</span>
 	<table class="table-row-border">
 	<thead>	<tr><td>Role</td>
 				<td>Status</td>
@@ -101,7 +146,6 @@
 		{% endfor %}
 	</tbody>	
 	</table>
-	<button id="btn-add-membership" class="my-button">Add a New Membership</button>
 </div>
 
 <div class="quick-pane">
@@ -138,8 +182,8 @@
 			<td><input type="text" value="" /></td>
 		</tr>
 	</table>
-	<button id="btn-add-new-billing" class="my-button">Add</button>
-	<button id="btn-cancel-new-billing" class="my-button">Cancel</button>
+	<button id="btn-add-new-billing" class="ariel-button">Add</button>
+	<button id="btn-cancel-new-billing" class="ariel-button">Cancel</button>
  	</div>
 </div>
 {% endblock %}

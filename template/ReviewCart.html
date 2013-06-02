@@ -129,6 +129,20 @@
 {% endblock %}
 
 {% block main %}
+	<!-- TOC -->
+	<div class="toc">
+	Table of Content
+	<ul>
+		<li><a href="">Fill Order Summary</a</li>
+		<li><a href="">Status</a></li>
+		<li><a href="">Profit</a></li>
+		<li><a href="">Accounting</a></li>
+		<li><a href="">Fill Order Details</a></li>
+		<li><a href="">Shipping Summary</a></li>
+		<li><a href="">Payments</a></li>
+	</ul>
+	</div>
+	
 	<div>
 	{% if cart.status=='Open' and me.can_be_nur() %}
 		<button class="my-button" item="approval-process">Submit for Approval</button>

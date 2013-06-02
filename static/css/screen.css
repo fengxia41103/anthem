@@ -1525,8 +1525,9 @@ input{
 }
 .table-row-border tbody td{
 	border-bottom:1px solid #beceee;
-	width:200px;
-	padding:0 20px;
+	max-width:200px;
+	min-width:100px;
+	padding:5px 20px;
 	vertical-align:top;
 }
 .table-row-border thead td{
@@ -1556,6 +1557,7 @@ input{
 	min-width:100px;
 	max-width:200px;
 }
+
 .sf-table tr:last-child td{
 	border:none;
 }
@@ -1580,4 +1582,28 @@ input{
 }
 .red{
 	color:#CD5555;
+}
+
+.toc{
+    font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
+	color:#CD9B1D;
+	border-radius:5px;
+	margin:auto;
+}
+.toc a{
+	text-decoration:none;
+}
+.toc li{
+	list-style-type:none;
+	width:120px;
+	background-color: #beccee;
+	border-radius:5px;
+	color:white;
+	display:inline-block;
+	padding: 5px 10px;
+	text-align:center;
+	overflow:hidden;
+}
+.toc li:hover{
+	background-color:white;
 }
