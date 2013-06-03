@@ -31,6 +31,7 @@ routes = [
 	# Anthem
 	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),  	
 	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),  
+	Route('/buyorder/manage', handler='anthem.ManageBuyOrder',name='buyorder-manage'),  
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
 	Route('/user/profile',handler='anthem.ManageUserProfile',name='user-profie'),	

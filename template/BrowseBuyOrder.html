@@ -2,8 +2,6 @@
 
 {% block customJS %}
 <script type="text/javascript">
-    var j$ = jQuery.noConflict();
-    
     // get unfilled order list
     function getBuyOrderList(filterString){
 		j$.post('/buyorder/list',

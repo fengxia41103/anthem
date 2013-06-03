@@ -3,6 +3,7 @@ from google.appengine.api.users import User
 import datetime
 from dateutil.relativedelta import relativedelta
 from secrets import *
+from myUtil import *
 
 #######################################
 #
@@ -149,8 +150,15 @@ class BuyOrder(MyBaseModel):
 	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)
 
 	# tags is a string list tokenized self.name and self.description by white space
-	# TODO: use NLTK package
+	# tags are all lower case!
+	# TODO: use NLTK package to be intelligent
 	tags=ndb.ComputedProperty(lambda self: list(set([f for f in self.name.lower().replace(',',' ').split(' ')]+[f for f in self.description.lower().replace(',',' ').split(' ')])), repeated=True)
+	
+	# category keywords
+	# we are to be smart about this property so user doesn't need to input
+	# instead, we will parse the tags and look for keywords that internally will map to a particular category
+	# category keywords will function as tags when searching
+	queues=ndb.ComputedProperty(lambda self: categorization(self.tags))
 	
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference

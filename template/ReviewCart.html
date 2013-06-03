@@ -133,13 +133,13 @@
 	<div class="toc">
 	Table of Content
 	<ul>
-		<li><a href="">Fill Order Summary</a</li>
-		<li><a href="">Status</a></li>
-		<li><a href="">Profit</a></li>
-		<li><a href="">Accounting</a></li>
-		<li><a href="">Fill Order Details</a></li>
-		<li><a href="">Shipping Summary</a></li>
-		<li><a href="">Payments</a></li>
+		<li><a href="#sec-summary">Fill Order Summary</a</li>
+		<li><a href="#sec-status">Status</a></li>
+		<li><a href="#sec-profit">Profit</a></li>
+		<li><a href="#sec-accounting">Accounting</a></li>
+		<li><a href="#sec-fill-list">Fill Order Details</a></li>
+		<li><a href="#sec-shipping-summary">Shipping Summary</a></li>
+		<li><a href="#sec-payment">Payments</a></li>
 	</ul>
 	</div>
 	
@@ -200,7 +200,7 @@
 	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
 	{% endif %}
 	
-	<div class="quick-pane">
+	<div class="quick-pane" id="sec-summary">
 	<h3>Fill Order Summary</h3>
 	<table class="sf-table table-row-border">
 		<tr><td>Cart Name</td>
@@ -220,7 +220,7 @@
 	</table>
 	</div>					
 	
-	<div class="quick-pane">
+	<div class="quick-pane" id="sec-status">
 	<h3>Status</h3>
 	<table class="sf-table table-row-border">
 		<tr><td>Status</td>
@@ -238,7 +238,7 @@
 	
 	<!-- DOC only views -->
 	{% if me.can_be_doc() %}
-		<div class="quick-pane">
+		<div class="quick-pane" id="sec-profit">
 		<h3>Profit</h3>
 		<table class="sf-table table-row-border">
 			<tr><td>Expected Profit</td>
@@ -254,7 +254,7 @@
 		</table>
 		</div>
 	
-		<div class="quick-pane">
+		<div class="quick-pane" sec="sec-accounting">
 		<h3>Accounting</h3>
 		<table class="sf-table table-row-border">
 			<tr><td>Total Payable</td>
@@ -290,7 +290,7 @@
 		</div>
 	{% endif %}
 	
-	<div class="quick-pane">
+	<div class="quick-pane" id="sec-fill-list">
 	<h3>Fill Order Details</h3>
 	{% if cart.fills %}
 		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
@@ -329,7 +329,7 @@
 	{% endif %}
 	</div>
 
-	<div class="quick-pane">
+	<div class="quick-pane" id="sec-shipping-summary">
 	<h3>Shipping Summary</h3>
 	<table class="sf-table table-row-border">
 		<tr><td>Created On</td>
@@ -350,10 +350,10 @@
 	</table>
 	</div>	
 
-	<div class="quick-pane">
+	<div class="quick-pane" id="sec-payment">
 	<h3>Payments</h3>
 	{% if cart.payout_slips %}
-		<table class="table-row-border">
+		<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
 		<caption class="table-caption">Pay For This Deal</caption>
 		<thead>
 			<tr><td>Transaction Created On</td>
@@ -372,7 +372,7 @@
 		</table>
 	{% endif %}
 	{% if cart.payin_slips %}
-		<table class="table-row-border">
+		<table class="table-row-border" style="width:49%;">
 		<caption class="table-caption">Earn From This Deal</caption>
 		<thead>
 			<tr><td>Transaction Created On</td>

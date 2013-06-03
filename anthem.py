@@ -401,3 +401,28 @@ class ManageUserProfile(MyBaseHandler):
 	def post(self):
 		me=self.get_contact()
 		
+
+class ManageBuyOrder(MyBaseHandler):
+	def get(self):
+		template_values = {}
+		template_values['me']=me=self.get_contact()
+		
+		# get all carts that belong to this user
+		template_values['carts']=carts=BuyOrderCart.query(ancestor=me.key)
+		template_values['review_url']=uri_for('cart-review')		
+		template_values['browse_url']=uri_for('buyorder-browse')		
+		
+		# get new BuyOrders that are available to me		
+		if me.can_be_nur():
+			orders=BuyOrder.query().fetch(100)
+		if me.can_be_doc():
+			orders+=BuyOrder.query(BuyOrder.owner==me.key)
+		template_values['orders']=orders
+		
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrder.html')
+		self.response.write(template.render(template_values))
+	
+	def post(self):
+		me=self.get_contact()
+		
