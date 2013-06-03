@@ -45,9 +45,44 @@
 
 {% endblock %}
 
-<div class="main">
-{% block main %}{% endblock %}
-</div>
+<style>
+
+</style>
+
+<table id="site-layout">
+<tr><td class="level-1-navigation" width="100px">
+		<ul>		
+			<li>
+				<a href="/user/profile">
+				<img src="http://cdn2.iconfinder.com/data/icons/blue-bits-basic-and-bonus/128/022.png" title="setting"/>
+				</a>
+			</li>
+			<li>
+				<a href="">
+				<img src="http://cdn5.iconfinder.com/data/icons/customicondesign-office6-shadow/128/custom-reports.png" title="reporting"/>
+				</a>
+			</li>
+			<li>
+				<a href="/buyorder/browse">
+				<img src="http://cdn2.iconfinder.com/data/icons/woothemes/PNG/shopppingcart.png" title="browse and shop"/>
+				</a>
+			</li>
+			<li>
+				<a href="/cart/banking">
+				<img src="http://cdn4.iconfinder.com/data/icons/is_beta_accounting/png/128/money.png" title="accounting"/>
+				</a>
+			</li>			
+		</ul>
+		<h3 class="rotate" style="display:block;">
+			Anthem Market Place
+		</h3>
+	</td>
+	<td>
+		<div class="main">
+		{% block main %}{% endblock %}
+		</div>
+	</td>
+</tr></table>
  
 {% block footer %}{% endblock %}
 </body>

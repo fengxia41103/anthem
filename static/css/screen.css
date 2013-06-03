@@ -2,6 +2,7 @@ body{
     /*font-family: Verdana, Geneva, sans-serif; */
     font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
 	font-size:10pt;
+	margin:0;
 }
 
 h1,h2,h3,h4,h5{
@@ -385,38 +386,6 @@ ul#pinterest-filters li:hover{
 a.login-button:hover{
 	text-decoration:none;
 	background-color:orange;
-}
-
-/* SF hack */
-.bPageFooter,
-#sidebarCell{
-	display:none;
-}
-
-.tabsNewBar{	/* default tab header */
-	display:none;
-}
-
-.bodyDiv{
-	border:none;
-	background-image:none;
-	background-color:white;
-	width:100%;
-}
-
-.bPageBlock, 
-.bDetailBlock, 
-.apexDefaultPageBlock,
-.individualPalette {
-	border:none;
-}
-
-div.controls{
-	/*display:none;*/
-}
-
-.bPageTitle{
-	background-color: #0a243d;
 }
 
 
@@ -1605,9 +1574,11 @@ input{
 	background-color:#cc9;
 }
 .main{
-	width:60%;
+	/*width:60%;*/
+	width:80%;
 	margin-right:auto;
 	margin-left:auto;
+	padding: 20px;
 }
 .overlay{
 	background:rgba(204,204,204,0.5);
@@ -1645,3 +1616,73 @@ div.pin-in-focus img{
 	margin-top:20px;
 }
 
+.level-1-navigation{
+	opacity:80%;
+	width:100px;
+	background-color:#292421;
+	color:white;
+}
+
+.level-1-navigation img{
+	width:50px;
+	height:50px;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	margin-bottom:80px;
+	margin-top:80px;
+	padding:20px;
+}
+.level-1-navigation img:hover{
+	border:2px #ce8 solid;
+	border-radius:20px;
+	-moz-border-radius:20px;
+	-webkit-border-radius:20px;
+}
+
+.level-1-navigation ul{
+	margin-left:0;
+	padding-left:0;
+}
+.level-1-navigation li{
+	list-style-type:none;
+	margin-left:0;
+	padding-left:0;
+}
+
+table#site-layout{
+	width:100%;
+	border:none;
+	border-collapse:collapse;
+}
+table#site-layout td{
+	vertical-align:top;
+}
+
+
+#tabs-min { 
+	background: transparent; 
+	border: none; 
+} 
+#tabs-min .ui-widget-header { 
+	background: transparent; 
+	border: none; 
+	border-bottom: 1px solid #c0c0c0; 
+	-moz-border-radius: 0px; 
+	-webkit-border-radius: 0px; 
+	border-radius: 0px; 
+} 
+#tabs-min .ui-tabs-nav .ui-state-default { 
+	background: transparent; 
+	border: none; 
+} 
+#tabs-min .ui-tabs-nav .ui-state-active { 
+	background: transparent url(img/uiTabsArrow.png) no-repeat bottom center; 
+	border: none; 
+} 
+#tabs-min .ui-tabs-nav .ui-state-default a { 
+	color: #c0c0c0; 
+} 
+#tabs-min .ui-tabs-nav .ui-state-active a { 
+	color: #459e00; 
+}
