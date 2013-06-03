@@ -2,79 +2,16 @@
 
 {% block customJS %}
 <script type="text/javascript">
-    // get unfilled order list
-    function getBuyOrderList(filterString){
-		j$.post('/buyorder/list',
-			{'filter':filterString},
-			function(resp){
-				var result=j$.parseJSON(resp);
-				var html='';
-				for (var i=0;i<result.length;i++){
-					var order=result[i];
-					var id=order['id'];
-				
-					// compose the action div
-					html+='<div class="pin shadow">';
-					
-					// add a command center
-					html+='<div class="pin-command-center" style="display:none;">';
-  					html+='<input item="qty" type="number" value="1" /> x $';
-  					html+='<input item="price" type="number" value="'+order['price']+'" />';
-  					
-					html+='<button item="button-new-buyorder-fill" item-id="'+id+'">Fill</button>';
-					html+='</div>';+' &hearts;'
-					html+='<a href="">';			
-					html+='<img src="'+order['image']+'"/>';
-					html+='</a>';
-					html+='<p>'+order['name']+'</p>';
-					html+='<p><span class="product-stat">'+order['qty']+'</span><span class="product-stat-label">qty</span>';
-					html+='<span class="product-stat">'+order['price']+'</span><span class="product-stat-label">$</span>';
-					html+='<a href="">';															
-					if (order['filled by me']!= undefined){				
-						html +='<span class="product-stat-by-me redheart shadow">';	
-					}else{
-						html +='<span class="product-stat-by-me redheart shadow" style="display:none;">';	
-					}
-					html+=order['filled by me']+' &hearts;';
-					html+='</span>';
-					html+='</a>';					
-					html+='</p>';
-					
-					html+='<p class="product-list-item-footer-user">'+order['owner']['name']+'</p>';
-					html+='</div>';
-				}
-				j$('#unfilledOrderPinterest').html(html);
-				
-				// update filter tags
-				if (filterString!=undefined && filterString.length>0){
-					// check if the keywork already on the list
-					var found=false;
-					var current=j$('ul#pinterest-filters li');
-					for (var c=0; c<current.length;c++){
-						if (j$(current[c]).text()==filterString){
-							found=true;
-							break;
-						}
-					}
-					if (found==false){
-						j$('ul#pinterest-filters').prepend('<li>'+filterString+'</li>').children('li:last').remove();
-					}
-				}			
-			}		
-		);	
-	}
-
     j$(document).ready(function(){
-    	    	
-		j$(document).on('mouseenter','.pin',function(){
-			j$(this).children('.pin-command-center').fadeIn({duration:800});
-		}).on('mouseleave','.pin',function(){
-			j$(this).children('.pin-command-center').fadeOut({duration:1000});
+		j$(document).on('mouseenter','.pin-in-focus .image-house',function(){
+			j$(this).find('.pin-command-center').fadeIn({duration:400});
+		}).on('mouseleave','.pin-in-focus .image-house',function(){
+			j$(this).find('.pin-command-center').fadeOut({duration:400});
 		});
 		
 	    // fill order shortcut    
-    	j$(document).on('click','button[item="button-new-buyorder-fill"]',function(){
-	    	var id=j$(this).attr('itemID');
+    	j$(document).on('click','button[item="btn-new-buyorder-fill"]',function(){
+	    	var id=j$(this).attr('itemId');
 	    	var price=j$(this).prev('input').val();
 	    	var qty=j$(this).prev('input').prev('input').val();
 	    	j$.post(
@@ -168,19 +105,52 @@
 			"bPaginate":false,
 			"bInfo":false,
 			"bDeferRender": true
-		});	    	
+		});
+		
+		// overlay
+		j$('div.overlay').click(function(e){
+			var pos=j$('div.pin-in-focus').offset();
+			var width=j$('div.pin-in-focus').outerWidth();
+			var height=j$('div.pin-in-focus').outerHeight();
+			var out=false;
+			if ((e.pageX<pos.left) || (e.pageX>(pos.left+width))){
+				out=true;
+			}
+			if ((e.pageY<pos.top) || (e.pageY>(pos.top+height))){
+				out=true;
+			}
+			if (out==true){
+				j$(this).fadeOut(200);
+			}
+		});
+		
+		j$(document).on('click','.pin img',function(){
+			var id=j$(this).parents('div.pin').attr('itemId');
+			console.log(id);
+			
+			var title=j$(this).siblings('h3[item="title"]').html();
+			var subtitle=j$(this).siblings('p[item="subtitle"]').html();
+			var img=j$(this).attr('src');			
+			var qty=j$(this).parents('div.pin').find('span[item="qty"]').html();
+			var price=j$(this).parents('div.pin').find('span[item="price"]').html();
+			var owner=j$(this).parents('div.pin').find('.product-list-item-footer-user').attr('name');
+			
+			j$('#infocus-title').html(owner);
+			j$('#infocus-subtitle').html(subtitle);
+			j$('#infocus-image').attr('src',img);
+			j$('#infocus-qty').val(qty);
+			j$('#infocus-price').val(price);
+			j$('#infocus-product-name').html(title);
+			j$('#infocus-product-description').html(subtitle);
+			j$('div.overlay').fadeIn(300);
+			j$('button[item="btn-new-buyorder-fill"]').attr('itemId',id);
+			
+		});
     });    	
 </script>
 {% endblock %}
 
 {% block header %}
-	{% if user %}
-		<div id="cssmenu">
-			<ul>
-			
-			</ul>
-		</div>
-	{% endif %}
 {% endblock %}
 
 {% block main %}
@@ -223,21 +193,17 @@
 	
     <div id="unfilledOrderPinterest" class="css3-columns">
     {% for b in buyorders %}
-		<div class="pin shadow">
+		<div class="pin shadow" itemId="{{ b.order.key.id() }}">
 		
-		<div class="pin-command-center" style="display:none;">
-  		<input item="qty" type="number" value="1" /> x $
-  		<input item="price" type="number" value="{{ b.order.price }}" />
-		<button item="button-new-buyorder-fill" itemID="{{ b.order.key.id() }}">Fill</button>
-		</div>
 		<img src="{{ b.order.image }}" />
-		<h3>{{ b.order.name|title }}</h3>			
-		<p>{{ b.order.description }}</p>			
+
+		<h3 item="title">{{ b.order.name|title }}</h3>			
+		<p item="subtitle">{{ b.order.description }}</p>			
 		<p>
-			<span class="product-stat">{{ b.order.qty }}</span>
+			<span class="product-stat" item="qty">{{ b.order.qty }}</span>
 			<span class="product-stat-label">qty</span>
 			
-			<span class="product-stat">{{ b.order.price }}</span>
+			<span class="product-stat" item="price">{{ b.order.price }}</span>
 			<span class="product-stat-label">$</span>
 			
 			<span class="product-stat-by-me redheart shadow">
@@ -249,5 +215,27 @@
 		</a>
 		</div>
     {% endfor %}
+    </div>
+    
+    <div class="overlay" style="display:none;">
+    	<div class="pin-in-focus box-shadow">
+    		<div class="border-bottom">
+    			<h1 id="infocus-title">ah.banana.slug@gmail.com</h1>
+    			<h4 id="infocus-subtitle">Posted on 8/9/2013<h4>
+    		</div>
+    		<div class="image-house">
+				<div class="pin-command-center" style="display:none;">
+  				<input item="qty" type="number" id="infocus-qty" value="" /> x $
+  				<input item="price" type="number" id="infocus-price" value="" />
+				<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Fill</button>
+				</div> 
+				
+    			<a id="infocus-image-link" href="">
+    			<img id="infocus-image" src="" />
+    			</a>
+    		</div>
+    		<h4 id="infocus-product-name">iPad</h4>
+    		<blockquote id="infocus-product-description">sljdfldsj</blockquote>
+    	</div>
     </div>
 {% endblock %}

@@ -152,13 +152,13 @@ h1,h2,h3,h4,h5{
 }
   
 .css3-columns{
-	-moz-column-count: 5;
+	-moz-column-count: 3;
   	-moz-column-gap: 10px;
   	-moz-column-fill: auto;
-  	-webkit-column-count: 5;
+  	-webkit-column-count: 3;
   	-webkit-column-gap: 10px;
   	-webkit-column-fill: auto;
-  	column-count: 5;
+  	column-count: 32;
   	column-gap: 10px;
   	column-fill: auto;
 }
@@ -182,6 +182,11 @@ h1,h2,h3,h4,h5{
 	padding-bottom: 5px;
 	border-bottom: 1px silver solid;
 }
+.pin img:hover{
+	cursor:-webkit-zoom-in;
+	cursor:-moz-zoom-in;
+}
+
 .pin p{
 	margin-bottom: 5px;
 }
@@ -208,17 +213,19 @@ h1,h2,h3,h4,h5{
 }
 
 .pin-command-center{
-	z-index:99;
-	width:95%;
-	background-color: #238E68;
-	-webkit-border-radius: 0 0 25px;
-	-moz-border-radius: 0 0 25px;
-	border-radius: 0 0 25px;
+	margin-right:auto;
+	margin-left:auto;
+	width: 50%;
+	background-color: #00bec6;
+	-webkit-border-radius: 0 0 0 25px;
+	-moz-border-radius: 0 0 0 25px;
+	border-radius: 0 0 0 25px;
 	display:block;
 	padding: 5px;
 	position:absolute;
-	left:0;
-	top:0;
+	top:200px;
+	z-index:2000;
+	text-align:right;
 }
 .pin-command-center input{
 	max-width: 20%;
@@ -238,6 +245,7 @@ h1,h2,h3,h4,h5{
 	color: white;
 /*	font-family: Impact, Charcoal, sans-serif;       	*/	font-family: ‘Arial Narrow’, sans-serif;
 }
+
 .pin-command-center button{
 	padding: 7px;
 	color: white;
@@ -1368,7 +1376,7 @@ button[item="submit-for-approval-btn"]:hover{
 	webkit-border-radius:5px;
 	moz-border-radius:5px;
 	padding: 20px 10px;
-	width:80%;
+	width:100%;
 	margin-right:auto;
 	margin-left:auto;
 	margin-bottom:15px;
@@ -1399,7 +1407,7 @@ button[item="submit-for-approval-btn"]:hover{
 	border-radius: 5px;
 	webkit-border-radius:5px;
 	moz-border-radius:5px;
-	width: 200px;
+	/*width: ;*/
 	height:280px;
     
     moz-column-break-inside: avoid; 
@@ -1448,10 +1456,8 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .ariel-pinterest-item p{
-	font-family: Verdana, Geneva, sans-serif;	
 	color:white;
 	padding: 5px 10px;
-	font-size:1.2em;
 }
 .ariel-button{
 	background-color: #00bec6;
@@ -1603,3 +1609,39 @@ input{
 	margin-right:auto;
 	margin-left:auto;
 }
+.overlay{
+	background:rgba(204,204,204,0.5);
+	/*background-color:#eee;*/
+	position:fixed;
+	width:100%;
+	height:100%;
+	top:0px;
+	left:0px;
+	z-index:1000;
+	overflow-y: scroll;
+}
+div.pin-in-focus{
+	width:50%;
+	background-image: url('/static/img/white-background.png');
+	margin-right:auto;
+	margin-left:auto;
+	margin-top:50px;
+	padding: 50px;
+	border-radius:10px;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+}
+div.pin-in-focus img{
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	width: 80%;
+}
+
+.border-bottom{
+	border-bottom:1px #cc8 solid;
+}
+.image-house{
+	margin-top:20px;
+}
+
