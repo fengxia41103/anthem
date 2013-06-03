@@ -125,8 +125,6 @@
 				<td>Posting Buyer</td>
 				<td>Status</td>
 				<td>Shipping</td>
-				<td>Total Payable</td>
-				<td>Total Receivable</td>
 			</tr>
 	</thead>
 	<tbody>
@@ -143,11 +141,13 @@
 					{% endif %}
 				</td>
 				<td>{{ c.terminal_seller.get().nickname }}</td>
-				<td>{{ c.broker.get().nickname }}</td>
+				<td>
+					{% if c.broker %}
+						{{ c.broker.get().nickname }}
+					{% endif %}
+				</td>
 				<td>{{ c.status }}</td>
 				<td>{{ c.shipping_status }}</td>
-				<td>{{ c.payable }}</td>
-				<td>{{ c.receivable }}</td>
 			</tr>
 		{% endfor %}
 	</tbody>

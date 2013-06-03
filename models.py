@@ -24,7 +24,7 @@ class Membership(ndb.Model):
 	payment_to_date=ndb.FloatProperty(default=0) # accumulative
 	
 	# membership service role
-	role=ndb.StringProperty(default='Nur',choices=['Nur','Doc','Client','Super'])
+	role=ndb.StringProperty(default='Nur',choices=['Nur','Doc','Client','Super','Trial'])
 	
 	# as of writing, ComputedProperty does not support Date, 5/30/2013	
 	expiration_date=ndb.DateProperty()
@@ -100,15 +100,15 @@ class Contact(ndb.Model):
 	
 	def can_be_doc(self):
 		# if a Doc membership is Active
-		return (self.is_active and any([m.role=='Doc' or m.role=='Super' for m in self.memberships]))
+		return (self.is_active and any([m.role in ['Doc','Super','Trial'] for m in self.memberships]))
 
 	def can_be_nur(self):
 		# if a Nur membership is Active
-		return (self.is_active and any([m.role=='Nur' or m.role=='Super' for m in self.memberships]))
+		return (self.is_active and any([m.role in ['Nur','Super','Trial'] for m in self.memberships]))
 
 	def can_be_client(self):
 		# if a Client membership is Active
-		return (self.is_active and any([m.role=='Client' or m.role=='Super' for m in self.memberships]))
+		return (self.is_active and any([m.role in ['Client','Super','Trial'] for m in self.memberships]))
 	
 #######################################
 #

@@ -54,4 +54,4 @@ AUTH_CONFIG = {
 }
 
 # Membership
-MONTHLY_MEMBERSHIP_FEE={'Nur':20,'Doc':10,'Client':10,'Super':100}
+MONTHLY_MEMBERSHIP_FEE={'Nur':20,'Doc':10,'Client':10,'Super':100,'Trial':0}

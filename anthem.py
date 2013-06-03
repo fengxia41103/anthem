@@ -56,20 +56,22 @@ class MyBaseHandler(webapp2.RequestHandler):
 		# initiate membership
 		# TODO: this needs to be replaced by a Membership signup page
 		if not me.memberships:
-			m=Membership(role='Super')
-			m.member_pay(1)
+			m=Membership(role='Trial')
+			m.member_pay(1) # always 1-month free trial
 			me.memberships.append(m)
 			me.put()
 		return me
 
-	def get_open_cart(self,me):
+	def get_open_cart(self):
 		# get open cart where terminal_seller == current login user
 		# if BuyOrder was creatd with a particular termianl_buyer specified
 		# we need to locate the cart that has the matching (terminal_buyer,terminal_seller) pair
 		# 
 		# RULE -- single OPEN cart per terminal_seller rule
 		# open_cart=BuyOrderCart.query(BuyOrderCart.terminal_seller==me.key,BuyOrderCart.status=='Open')
-		open_cart=BuyOrderCart(parent=me.key).query(BuyOrderCart.status=='Open')
+		me=self.get_contact()
+
+		open_cart=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status=='Open')
 		assert open_cart.count()<2
 		if open_cart.count():
 			my_cart=open_cart.get() # if there is one
@@ -181,7 +183,7 @@ class BrowseBuyOrder(MyBaseHandler):
 			queries=BuyOrder.query()
 		
 		# my open cart
-		open_cart=template_values['cart']=self.get_open_cart(me)
+		open_cart=template_values['cart']=self.get_open_cart()
 		template_values['url_cart_review']=uri_for('cart-review')
 		
 		if len(open_cart.fills):
@@ -220,7 +222,7 @@ class BrowseBuyOrder(MyBaseHandler):
 		assert buyorder!=None
 		
 		# there is one and only one open cart		
-		my_cart=self.get_open_cart(me)
+		my_cart=self.get_open_cart()
 		assert my_cart!=None
 			
 		# we have established an OPEN cart
