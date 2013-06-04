@@ -18,6 +18,13 @@ indexes:
 
 - kind: BuyOrder
   properties:
+  - name: owner
+  - name: queues
+  - name: created_time
+    direction: desc
+
+- kind: BuyOrder
+  properties:
   - name: tags
   - name: created_time
     direction: desc

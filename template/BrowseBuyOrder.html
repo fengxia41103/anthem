@@ -126,8 +126,7 @@
 		
 		j$(document).on('click','.pin img',function(){
 			var id=j$(this).parents('div.pin').attr('itemId');
-			console.log(id);
-			
+			var owner_id=j$(this).parents('div.pin').attr('ownerId');
 			var title=j$(this).siblings('h3[item="title"]').html();
 			var subtitle=j$(this).siblings('p[item="subtitle"]').html();
 			var img=j$(this).attr('src');			
@@ -145,6 +144,22 @@
 			j$('div.overlay').fadeIn(300);
 			j$('button[item="btn-new-buyorder-fill"]').attr('itemId',id);
 			
+			// get buyorders posted by this author
+			j$.post(
+				'/buyorder/owner/'+owner_id+'/',
+				'',
+				function(result){
+					var data=j$.parseJSON(result);
+					
+					var html='<ul>';
+					for (var i=0; i<data.length;i++){
+						var tt=j$.parseJSON(data[i]);
+						html+='<li><img src="'+tt['image']+'" /></li>';
+					}
+					html+='</ul>';
+					j$('#my-list-of-buyorder').html(html);
+				}
+			);
 		});
     });    	
 </script>
@@ -193,7 +208,7 @@
 	
     <div id="unfilledOrderPinterest" class="css3-columns">
     {% for b in buyorders %}
-		<div class="pin shadow" itemId="{{ b.order.key.id() }}">
+		<div class="pin shadow" itemId="{{ b.order.key.id() }}" ownerId="{{ b.order.owner.id() }}" >
 		
 		<img src="{{ b.order.image }}" />
 
@@ -206,13 +221,12 @@
 			<span class="product-stat" item="price">{{ b.order.price }}</span>
 			<span class="product-stat-label">$</span>
 			
-			<span class="product-stat-by-me redheart shadow">
-			&hearts;
+			<span class="product-stat-by-me shadow">
+				<a href="/buyorder/owner/{{b.order.owner.id()}}/">
+					<p class="product-list-item-footer-user" name="{{b.order.owner.get().nickname}}">{{ b.order.owner.get().nickname }}</p>
+				</a>
 			</span>
 		</p>
-		<a href="{{url}}?owner={{b.order.owner.id()}}">
-		<p class="product-list-item-footer-user" name="{{b.order.owner.get().nickname}}">{{ b.order.owner.get().nickname }}</p>
-		</a>
 		</div>
     {% endfor %}
     </div>
@@ -227,15 +241,21 @@
 				<div class="pin-command-center" style="display:none;">
   				<input item="qty" type="number" id="infocus-qty" value="" /> x $
   				<input item="price" type="number" id="infocus-price" value="" />
-				<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Fill</button>
+				<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Add to cart</button>
 				</div> 
 				
     			<a id="infocus-image-link" href="">
     			<img id="infocus-image" src="" />
     			</a>
     		</div>
-    		<h4 id="infocus-product-name">iPad</h4>
-    		<blockquote id="infocus-product-description">sljdfldsj</blockquote>
+    		<div class="border-bottom">
+    			<h4 id="infocus-product-name">iPad</h4>
+    			<blockquote id="infocus-product-description">sljdfldsj</blockquote>
+    		</div>
+    		<div class="list-of-photo">
+    			<h4>Similar Posts</h4>
+    			<div id="my-list-of-buyorder"></div>
+    		</div>
     	</div>
     </div>
 {% endblock %}

@@ -10,6 +10,7 @@ import datetime
 
 import jinja2
 from models import *
+from myUtil import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -145,6 +146,73 @@ class PublishNewBuyOrder(MyBaseHandler):
 		order.put()
 		self.response.write('0')
 
+class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
+	def get(self,owner_id,cat):
+		me=self.get_contact()
+	
+		# load buyorder browse page
+		template_values = {}
+		template_values['url']=uri_for('buyorder-browse')		
+		template_values['user']=me
+		template_values['url_login']=users.create_login_url(self.request.url)
+		template_values['url_logout']=users.create_logout_url('/')
+
+		# filter buyorder by owner
+		# and filter by category
+		queries=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.queues==cat))
+		
+		# my open cart
+		open_cart=template_values['cart']=self.get_open_cart()
+		template_values['url_cart_review']=uri_for('cart-review')
+		
+		if len(open_cart.fills):
+			# cart has some fills already, we will enforce
+			# a filter to display only BuyOrders from the same owner
+			# RULE -- unique (intermediate-buyer,terminal-seller) OPEN cart rule
+			owner_key = open_cart.fills[0].order.get().owner
+			queries=queries.filter(BuyOrder.owner==owner_key)
+				
+		# compose data structure for template
+		data=[]
+		for q in queries.order(-BuyOrder.created_time).fetch(100):
+			d={}
+			d['order']=q
+
+			# place holder
+			d['filled by me']=0
+			data.append(d)		
+		template_values['buyorders']=data		
+		
+		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
+		self.response.write(template.render(template_values))
+
+class BrowseBuyOrderByOwner(MyBaseHandler):
+	def get(self,owner_id):
+		me=self.get_contact()
+		template_values = {}
+		orders=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
+				
+		# group them by "queues"
+		queue={}
+		for o in orders:
+			template_values['owner']=o.owner
+			for q in o.queues:
+				if queue.has_key(q): queue[q].append(o)
+				else: queue[q]=[o]
+		
+		template_values['cats']=sorted(queue.keys())
+		template_values['orders']=queue
+		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrderByOwner.html')
+		self.response.write(template.render(template_values))
+		
+	def post(self,owner_id):
+		# return similar posts from the same owner
+		me=self.get_contact()
+		template_values = {}
+		queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
+		
+		self.response.write(json.dumps([json.dumps(o.to_dict(),cls=ComplexEncoder) for o in queries]))
+
 class BrowseBuyOrder(MyBaseHandler):
 	def get(self):
 		me=self.get_contact()
@@ -167,6 +235,8 @@ class BrowseBuyOrder(MyBaseHandler):
 			owner_id=self.request.GET['owner']
 		except:
 			owner_id=None
+		template_values['owner_id']=owner_id
+			
 		# filter by Name or Description string match
 		try:
 			nd=self.request.GET['nd']

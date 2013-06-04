@@ -1,0 +1,46 @@
+{% extends "/template/base.html" %}
+
+{% block customJS %}
+	<script type="text/javascript">
+		j$(document).ready(function(){
+			// show level 2 navigation pane
+			j$('.level-2-navigation').show();
+		});
+	</script>
+{% endblock %}
+
+{% block level_2_navigation %}
+	<h4>Categories</h4>
+	
+	<ul>
+		{% for k in cats %}
+			<li><a href="#tab-{{ loop.index }}">{{ k|title }}</a></li>			
+		{% endfor %}
+	<ul>
+{% endblock %}
+
+{% block main %}
+	{% if owner %}
+	<div class="border-bottom">
+		<h1>{{ owner.get().nickname }}</h1>	
+	</div>
+	
+	<div id="list-of-category-section">
+		{% for item in orders|dictsort %}
+			<a href="/buyorder/owner/{{ owner.id() }}/{{ item[0] }}/">
+			<div id="tab-{{ loop.index }}">
+				<h3>{{ item[0]|title }}</h3>
+				{% for v in item[1] %}
+					<img src="{{ v['image'] }}" width="100px" height="100px"/>
+				{% endfor %}
+			</div>
+			</a>
+		{% endfor %}
+	
+	{% else %}
+		<!-- placeholder: import a NO-FOUND page -->
+		Sorry I found noting.
+	{% endif %}
+	</div>
+	
+{% endblock %}

@@ -46,7 +46,7 @@
 {% endblock %}
 
 <table id="site-layout">
-<tr><td class="level-1-navigation" width="100px">
+<tr><td class="level-1-navigation">
 		<ul>		
 			<li>
 				<a href="/user/profile">
@@ -72,6 +72,12 @@
 		<h3 class="rotate" style="display:block;">
 			Anthem Market Place
 		</h3>
+	</td>
+	
+	<td class="level-2-navigation" style="display:none;">
+		{% block level_2_navigation %}
+		
+		{% endblock %}
 	</td>
 	<td>
 		<div class="main">

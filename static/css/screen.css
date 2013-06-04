@@ -1653,6 +1653,32 @@ table#site-layout td{
 	color: #459e00; 
 }
 
+div.list-of-photo{
+	margin-top:10px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+.list-of-photo ul{
+	list-style-type:none;
+	margin:0;
+	padding:0;
+}
+.list-of-photo li img{
+	width:50px;
+	height:50px;
+	margin:0;
+	padding:0;
+	float:left;
+}
+
+.list-of-category-section{
+
+}
+.list-of-category-section a{
+	text-decoration:none;
+}
+
 /* Main layout */
 .level-1-navigation{
 	opacity:80%;
@@ -1687,4 +1713,32 @@ table#site-layout td{
 	list-style-type:none;
 	margin-left:0;
 	padding-left:0;
+}
+
+.level-2-navigation{
+	width:150px;
+	background-color: #888;
+}
+
+.level-2-navigation ul{
+	padding-left:0;
+	margin-right;auto;
+	margin-left:auto;
+	display:block;
+}
+.level-2-navigation li{
+	list-style-type:none;
+	margin-left:0;
+	padding-left:0;
+	display:inline-block;
+	margin-top:5px;
+	padding:0 5px;
+	background-color:white;
+	border-radius:5px;
+}
+.level-2-navigation li:hover{
+	background-color: orange;
+}
+.level-2-navigation li a{
+	text-decoration:none;
 }
