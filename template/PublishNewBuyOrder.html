@@ -235,7 +235,10 @@
     	  	return e.which !== 13;
     	}).ajaxForm(options,function() { 
     		alert("Thank you for your comment!"); 
-    	}); 
+    	});
+    	
+    	// initialize tabs
+    	j$('#tabs-min').tabs(); 
     });	
 </script>
 {% endblock %}
@@ -250,135 +253,153 @@ the right category so buyers can find your item easily. We'll also look for simi
 items to give you a starting point for your listing.
 </p>
 
-<h2 class="ariel-h2">1. What are you looking for?</h2>
-<p class="ariel-p">Tell us about your offer.</p>
-<table class="ariel-table">
-<tr><td>
-Choose only one client
-</td><td>
-<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
-</td></tr>
+<div id="tabs-min">
+	<ul>
+		<li><a href="#step-1">1. Describe Your Product</a></li>
+		<li><a href="#step-2">2. Select a Picture</a></li>
+		<li><a href="#step-3">3. Review and Publish</a></li>
+	</ul>
 
-<tr><td>
-Product name
-</td><td>
-<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
-</td></tr>
-
-<tr><td>
-Write about the product
-</td><td>
-<input name="description" type="text" id="input-product-description" placeholder="eg. Serial number starts with NO233xxx"/>
-</td></tr>
-
-<tr><td>
-Name the price
-</td><td>
-<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
-</td></tr>
-
-<tr><td>
-Enter quantity
-</td><td>
-<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
-</td></tr>
-</table>
-
-<h2 class="ariel-h2">2. Does the photo match your product?</h2>
-<p class="ariel-p">
-We help you automatically find pictures for your product. This helps user with a visual reference and improves matching quality.
-</p>
-
-<div class="image-select-pane" >
-<div class="css3-columns-4">
-</div>
-
-<div class="show-more">
-Show more
-</div>
-
-<p class="ariel-p">
-None of these matches yours? Find your own picture and copy and paste url of your product below.
-</p>
-
-<table class="ariel-table">
-<tr><td>
-Picture link
-</td><td>
-<input type="url" class="url" placeholder="http://..."/>
-<input type="url" name="url" style="display:none;"/>
-
-<span class="ariel-button" id="btn-apply-user-input-image">Use</span>
-</td></tr>
-</table>
-<div class="ariel-pinterest-item" style="margin-right:auto;margin-left:auto;display:block;">
-	<img id="user-input-image" src="" />
-	<p>
-		<span class="ariel-checkbox">&nbsp;</span>
-		Yes, use this one
-	</p>
-</div>
-</div>
-
-<h2 class="ariel-h2">3. Review your order and publish</h2>
-<p></p>
-
-<div class="image-select-pane">
-	<table id="review-new-buy-order-table">
-	<tr><td class="box-shadow">
-	<img id="review-product-image" src="" style=""/>
-	</td><td>
-	
-	<table class="ariel-table">
+	<div id="step-1">
+		<h2 class="ariel-h2">1. What are you looking for?</h2>
+		<p class="ariel-p">Tell us about your offer.</p>
+		<table class="ariel-table">
+		<tr><td>
+		Choose only one client
+		</td><td>
+		<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+		</td></tr>
+		
 		<tr><td>
 		Product name
 		</td><td>
-		<span id="review-product-name"></span>
+		<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
 		</td></tr>
 		
 		<tr><td>
-		Product details
+		Write about the product
 		</td><td>
-		<span id="review-product-description"></span>
+		<input name="description" type="text" id="input-product-description" placeholder="eg. Serial number starts with NO233xxx"/>
 		</td></tr>
 		
 		<tr><td>
-		For client
+		Name the price
 		</td><td>
-		<span id="review-client-name"></span>
+		<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
 		</td></tr>
 		
 		<tr><td>
-		Unit price
+		Enter quantity
 		</td><td>
-		<span id="review-price"></span>
+		<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
 		</td></tr>
+		</table>
+	</div>		
+	
+	
+	<div id="step-2">
+	
+		<h2 class="ariel-h2">2. Does the photo match your product?</h2>
+		<p class="ariel-p">
+		We help you automatically find pictures for your product. This helps user with a visual reference and improves matching quality.
+		</p>
 		
+		<div class="image-select-pane" >
+		<div class="css3-columns-4">
+		</div>
+		
+		<div class="show-more">
+		Show more
+		</div>
+		
+		<p class="ariel-p">
+		None of these matches yours? Find your own picture and copy and paste url of your product below.
+		</p>
+		
+		<table class="ariel-table">
 		<tr><td>
-		Quantity
+		Picture link
 		</td><td>
-		<span id="review-qty"></span>
-		</td></tr>
+		<input type="url" class="url" placeholder="http://..."/>
+		<input type="url" name="url" style="display:none;"/>
 		
-		<tr><td>
-		Total amount
-		</td><td class="ariel-blue">
-			<apex:outputPanel styleClass="border-top-red">
-			<span id="review-order-total" style="border-bottom: 3px double red;"></span>		
-			</apex:outputPanel>				
+		<span class="ariel-button" id="btn-apply-user-input-image">Use</span>
 		</td></tr>
-	</table>
-	</td></tr></table>
+		</table>
+		<div class="ariel-pinterest-item" style="margin-right:auto;margin-left:auto;display:block;">
+			<img id="user-input-image" src="" />
+			<p>
+				<span class="ariel-checkbox">&nbsp;</span>
+				Yes, use this one
+			</p>
+		</div>
+		</div>
+	</div>
+
+	<div id="step-3">
+		<h2 class="ariel-h2">3. Review your order and publish</h2>
+		<p></p>
+		
+		<div class="image-select-pane">
+			<table id="review-new-buy-order-table">
+			<tr><td class="box-shadow">
+			<img id="review-product-image" src="" style=""/>
+			</td><td>
+			
+			<table class="ariel-table">
+				<tr><td>
+				Product name
+				</td><td>
+				<span id="review-product-name"></span>
+				</td></tr>
+				
+				<tr><td>
+				Product details
+				</td><td>
+				<span id="review-product-description"></span>
+				</td></tr>
+				
+				<tr><td>
+				For client
+				</td><td>
+				<span id="review-client-name"></span>
+				</td></tr>
+				
+				<tr><td>
+				Unit price
+				</td><td>
+				<span id="review-price"></span>
+				</td></tr>
+				
+				<tr><td>
+				Quantity
+				</td><td>
+				<span id="review-qty"></span>
+				</td></tr>
+				
+				<tr><td>
+				Total amount
+				</td><td class="ariel-blue">
+					<apex:outputPanel styleClass="border-top-red">
+					<span id="review-order-total" style="border-bottom: 3px double red;"></span>		
+					</apex:outputPanel>				
+				</td></tr>
+			</table>
+			</td></tr></table>
+		</div>
+		
+		<div class="image-select-pane" style="border:none;">
+		<div style="float:right;">
+		<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of Service</a>
+		<div class="ariel-button" style="margin-top:15px;">
+			<input style="border:none;background:transparent;" type="submit" value="Publish" />
+		</div>
+		</div>
+		</div>		
+	</div>
 </div>
 
-	<div class="image-select-pane" style="border:none;">
-	<div style="float:right;">
-	<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of Service</a>
-	<div class="ariel-button" style="margin-top:15px;">
-		<input style="border:none;background:transparent;" type="submit" value="Publish" />
-	</div>
-	</div>
-	</div>
+
 
 </form>
 

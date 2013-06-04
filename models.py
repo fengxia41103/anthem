@@ -158,7 +158,7 @@ class BuyOrder(MyBaseModel):
 	# we are to be smart about this property so user doesn't need to input
 	# instead, we will parse the tags and look for keywords that internally will map to a particular category
 	# category keywords will function as tags when searching
-	queues=ndb.ComputedProperty(lambda self: categorization(self.tags))
+	queues=ndb.ComputedProperty(lambda self: categorization(self.tags), repeated=True,indexed=False)
 	
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference
