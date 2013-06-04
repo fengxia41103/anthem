@@ -140,6 +140,13 @@
     	});
     	
     	j$('#input-product-name').on('change',function(){
+    		if (j$(this).val().length>=500){
+				j$().toastmessage('showWarningToast', 'Name is too long. Max is 500 characters.');    		
+    		}else{
+				j$('#review-product-name').html(j$(this).val());    		
+    		}
+			console.log('search');
+			
     		googleSearchStart=1;
     		
     		var term=j$.trim(j$(this).val());
@@ -190,13 +197,6 @@
     	j$('#input-client-name').on('change',function(){
     		j$('#review-client-name').html(j$(this).val());
     	});
-    	j$('#input-product-name').on('change',function(){
-    		if (j$(this).val().length>=500){
-				j$().toastmessage('showWarningToast', 'Name is too long. Max is 500 characters.');    		
-    		}else{
-				j$('#review-product-name').html(j$(this).val());    		
-    		}
-    	});    	
     	j$('#input-product-description').on('change',function(){
     		if (j$(this).val().length>=500){
 				j$().toastmessage('showWarningToast', 'Description is too long. Max is 500 characters.');    		
