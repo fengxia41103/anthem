@@ -1675,6 +1675,7 @@ div.list-of-photo{
 .list-of-category-section{
 
 }
+
 .list-of-category-section a{
 	text-decoration:none;
 }
@@ -1718,6 +1719,9 @@ div.list-of-photo{
 .level-2-navigation{
 	width:150px;
 	background-color: #888;
+}
+.level-2-navigation h3{
+	color:white;
 }
 
 .level-2-navigation ul{

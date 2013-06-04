@@ -133,9 +133,10 @@
 			var qty=j$(this).parents('div.pin').find('span[item="qty"]').html();
 			var price=j$(this).parents('div.pin').find('span[item="price"]').html();
 			var owner=j$(this).parents('div.pin').find('.product-list-item-footer-user').attr('name');
+			var postTime=j$(this).parents('div.pin').attr('postTime');
 			
 			j$('#infocus-title').html(owner);
-			j$('#infocus-subtitle').html(subtitle);
+			j$('#infocus-subtitle').html(postTime);
 			j$('#infocus-image').attr('src',img);
 			j$('#infocus-qty').val(qty);
 			j$('#infocus-price').val(price);
@@ -208,7 +209,7 @@
 	
     <div id="unfilledOrderPinterest" class="css3-columns">
     {% for b in buyorders %}
-		<div class="pin shadow" itemId="{{ b.order.key.id() }}" ownerId="{{ b.order.owner.id() }}" >
+		<div class="pin shadow" itemId="{{ b.order.key.id() }}" ownerId="{{ b.order.owner.id() }}" postTime="{{ b.order.created_time }}">
 		
 		<img src="{{ b.order.image }}" />
 
@@ -235,7 +236,7 @@
     	<div class="pin-in-focus box-shadow">
     		<div class="border-bottom">
     			<h1 id="infocus-title">ah.banana.slug@gmail.com</h1>
-    			<h4 id="infocus-subtitle">Posted on 8/9/2013<h4>
+    			<h4>Posted On <span id="infocus-subtitle"></span><h4>
     		</div>
     		<div class="image-house">
 				<div class="pin-command-center" style="display:none;">

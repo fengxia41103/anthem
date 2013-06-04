@@ -27,14 +27,14 @@
 	
 	<div id="list-of-category-section">
 		{% for item in orders|dictsort %}
-			<a href="/buyorder/owner/{{ owner.id() }}/{{ item[0] }}/">
 			<div id="tab-{{ loop.index }}">
 				<h3>{{ item[0]|title }}</h3>
+				<a href="/buyorder/owner/{{ owner.id() }}/{{ item[0] }}/">
 				{% for v in item[1] %}
 					<img src="{{ v['image'] }}" width="100px" height="100px"/>
 				{% endfor %}
+				</a>
 			</div>
-			</a>
 		{% endfor %}
 	
 	{% else %}
