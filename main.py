@@ -35,6 +35,7 @@ routes = [
 	Route('/buyorder/owner/<owner_id:\d+>/', handler='anthem.BrowseBuyOrderByOwner',name='buyorder-browse-owner'),  
 	Route('/buyorder/manage', handler='anthem.ManageBuyOrder',name='buyorder-manage'),  
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
+	Route('/cart/manage', handler='anthem.ManageBuyOrderCart',name='cart-manage'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
 	Route('/user/profile',handler='anthem.ManageUserProfile',name='user-profie'),	
 ]

@@ -20,16 +20,6 @@
 				</span>
 			</a>
 		</li>		
-
-		<li id="nav-buyorder-owner">
-			<a href="/buyorder/owner/{{ me.key.id() }}/" title="View my posted orders by category">
-				<span class="ss-label">
-				<img src="http://cdn5.iconfinder.com/data/icons/high-resolution-app-tab-bar-icons/60/Category.png" />
-				Categories
-				</span>
-			</a>
-		</li>
-
 		{% endif %}
 		
 		{% if me.can_be_doc() %}
@@ -42,7 +32,26 @@
 			</a>
 		</li>
 		{% endif %}
+
+		<li id="nav-cart-manage">
+			<a href="/cart/manage" title="Manage shopping orders">
+				<span class="ss-label">
+				<img src="http://cdn4.iconfinder.com/data/icons/vectory-personnel-2/40/user_approve-128.png" />
+				Approval
+				</span>
+			</a>
+		</li>
 		
+		{% if me.can_be_doc() %}
+		<li id="nav-buyorder-owner">
+			<a href="/buyorder/owner/{{ me.key.id() }}/" title="View my posted orders by category">
+				<span class="ss-label">
+				<img src="http://cdn5.iconfinder.com/data/icons/high-resolution-app-tab-bar-icons/60/Category.png" />
+				Categories
+				</span>
+			</a>
+		</li>
+		{% endif %}
 
 	</ul>
 {% endblock %}

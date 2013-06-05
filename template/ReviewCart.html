@@ -5,9 +5,14 @@
     j$(document).ready(function(){
     	{% if cart.status=='Open' or cart.status=='Rejected' %}
     		j$('input[type="number"]').prop('disabled', false);
+    	{% elif cart.status=='Ready for Processing' %}
+    		j$('input[type="number"]').prop('disabled', true);
+    		j$('input[name^="shipping"]').prop('disabled', false);
+
     	{% else %}
     		j$('input[type="number"]').prop('disabled', true);
 		{% endif %}
+		
 					    
 		// remove item from cart
 		j$(document).on('click','.command-link[item="buyorder-fill-remove"]',function(){
@@ -97,7 +102,7 @@
 		j$(document).on('click','button[item="approval-process"]',function(){
 			var action=j$(this).html();
 			j$.post(
-				'{{ url }}?cart={{ cart.key.id() }}',
+				'/cart/review?cart={{ cart.key.id() }}',
 				{'cart':{{cart.key.id()}},'action':action,'kind':'BuyOrderCart','id':'12345'}, // id is not used in this POST, so anything
 				function(result){
 					j$().toastmessage('showNoticeToast','Cart status has been updated');
@@ -119,14 +124,14 @@
 	    
 	    // shopping cart animation
 	    j$('#shopping-cart-collapse-switch').on('click',function(){
-	    	j$(this).parents('div.top-header-pane').slideToggle(600,function(){
+	    	j$(this).parents('div.shopping-cart-pane').slideToggle(600,function(){
 	    		j$('#shopping-cart-visible-switch').fadeIn(400);
 	    	});
 	    	
 	    });
 	    j$('#shopping-cart-visible-switch').on('click',function(){
 	    	j$(this).hide();
-	    	j$(this).siblings('div.top-header-pane').slideToggle(600);
+	    	j$(this).siblings('div.shopping-cart-pane').slideToggle(600);
 	    });
 	    
 	    // level 2 navigation
@@ -147,6 +152,10 @@
 	<div>
 	{% if cart.status=='Open' and me.can_be_nur() %}
 		<button class="my-button" item="approval-process">Submit for Approval</button>
+	{% elif cart.status=='Rejected' and me.can_be_nur() %}
+		<button class="my-button" item="approval-process">Submit for Approval</button>
+	{% elif cart.status=='Rejected' and me.can_be_doc() %}
+		<button class="my-button" item="approval-process">Approve</button>
 	{% elif cart.status=='In Approval' and me.can_be_doc() %}
 		<button class="my-button" item="approval-process">Approve</button>
 		<button class="my-button" item="approval-process">Reject</button>
@@ -156,12 +165,77 @@
 		<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
 	{% endif %}
 
+	<style>
+	.shopping-cart-pane{
+		background: #888; /* Old browsers */
+		position:fixed;
+		top:50px;
+		right:0;
+		border-radius: 0 0 10px 10px;
+		border: 1px #888 solid; 
+		padding: 20px;
+		z-index:999;
+		width:540px;
+	}
+	.ss-select, .ss-select option{
+		background-color:#888;
+		color:white;
+		border:none;
+		width:500px; 
+		height: 40px;
+		border-radius: 5px;
+		webkit-border-radius: 5px;
+		moz-border-radius:5px;
+		padding: 5px 0 10px 10px;
+		font-size:1.4em;
+	}	
+	</style>
 	<!-- Shipping inputs are available after approval and for DOC -->
 	{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
-	<div class="top-header-pane" style="display:none;">
+	<div class="shopping-cart-pane" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
-		</span>		
+		</span>
+
+		<h1 class="ariel-blue" style="color:white;">Enter Shipping Information</h1>		
+		<div>
+		<label class="ss-label">Select a shipping method</label>
+		<br />
+		<select class="ss-select" name="shipping-carrier">
+			{% for s in shipping_methods %}
+				<option value="{{ s }}">{{ s }}</option>
+			{% endfor %}
+		</select>
+		</div>
+		<br />
+				
+		<div>
+		<label class="ss-label">Tracking Number</label>
+		<br />
+		<input class="ss-input" type="text" name="shipping-tracking" id="input-tracking-number" placeholder="eg. 013840222514114"/>
+		</div>
+
+		<table class="two-col-table">
+			<tr>
+				<td>
+					<label>Number of Packages</label>
+					<br />
+					<input type="number" name="shipping-number-of-package" id="input-number-of-package" placeholder="1"/>					
+				</td>
+				<td>
+					<label>Cost</label>
+					<br />
+					<input type="number" name="shipping-cost" step="any" placeholder="0.0"/>
+				</td>
+			</tr>
+		</table>		
+		
+		<div>
+		<label class="ss-label">Upload Shipping Label File</label>
+		<br />
+		<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
+		</div>
+		{#		
 		<table class="ariel-table">
 		<tr><td>
 			Select a carrier
@@ -176,7 +250,7 @@
 		<tr><td>
 			Enter tracking number
 		</td><td>
-			<input type="text" id="input-tracking-number" placeholder="eg. a random number"/>
+			<input type="text" id="input-tracking-number" placeholder="eg. 013840222514114"/>
 		</td></tr>
 		
 		<tr><td>
@@ -197,8 +271,12 @@
 			<input type="number" step="any" placeholder=""/>
 		</td></tr>
 		</table>
+		#}
+		
+		<p class="ariel-blue" style="color:white;">
 		Please verify the shipment information and click the "Create Shipment" button below.
 		Shiping label file will be emailed to all buyers and sellers.
+		</p>
 		<button class="my-button">Create Shipment</button>
 	</div>   
 	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>

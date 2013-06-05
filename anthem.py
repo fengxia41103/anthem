@@ -332,6 +332,7 @@ class ReviewCart(MyBaseHandler):
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
 		assert cart!=None		
 
+		template_values['shipping_methods']=SHIPPING_METHOD
 		template_values['me']=me		
 		template_values['cart']=cart
 		template_values['url']=uri_for('cart-review')
@@ -476,6 +477,22 @@ class ManageUserProfile(MyBaseHandler):
 	def post(self):
 		me=self.get_contact()
 		
+class ManageBuyOrderCart(MyBaseHandler):
+	def get(self):
+		template_values = {}
+		template_values['me']=me=self.get_contact()
+		template_values['review_url']=uri_for('cart-review')		
+		open_cart=template_values['cart']=self.get_open_cart()
+		
+		# get all carts that belong to this user
+		template_values['my_carts']=carts=BuyOrderCart.query(ancestor=me.key)
+
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrderCart.html')
+		self.response.write(template.render(template_values))
+	
+	def post(self):
+		me=self.get_contact()
 
 class ManageBuyOrder(MyBaseHandler):
 	def get(self):

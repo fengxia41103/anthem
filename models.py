@@ -193,7 +193,7 @@ class BuyOrderCart(MyBaseModel):
 	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
 	shipping_carrier=ndb.StringProperty()
 	shipping_cost=ndb.FloatProperty()
-	shipping_carrier=ndb.StringProperty(choices=['USPS','FedEx','DHL','UPS','Other'])
+	shipping_carrier=ndb.StringProperty(choices=SHIPPING_METHOD)
 	shipping_num_of_package=ndb.IntegerProperty()
 	shipping_tracking_number=ndb.StringProperty()
 	shipping_created_date=ndb.DateProperty()
