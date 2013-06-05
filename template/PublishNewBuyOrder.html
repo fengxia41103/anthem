@@ -1,4 +1,4 @@
-{% extends "/template/base.html" %}
+{% extends "/template/OrderBase.html" %}
 
 {% block customJS %}
 <script type="text/javascript">
@@ -256,6 +256,10 @@
 			// this is the actual INPUT field that will be submitted in form
 			j$('#input-product-description').html(content);
      	});
+     	
+     	// level 2 navigation on
+     	j$('.level-2-navigation').show();
+     	j$('#nav-buyorder-post').addClass('level-2-navigation-selected');
     });	
 </script>
 {% endblock %}

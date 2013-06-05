@@ -14,11 +14,27 @@ CAT={
 }
 
 def categorization(words):
+	# match words to CAT to create a CAT list
 	c=[]
 	for w in words:
 		if w.lower() in CAT: c+=CAT[w.lower()]
 	if len(c)==0: c=['uncategoried']
 	return list(set(c))
+
+def tokenize(phrase):
+	# break phrase to list of token
+	
+	# 1. we save any token delimited by ','
+	# eg. "interior decoration, snap,whatever this is"
+	by_comma=[p.strip() for p in phrase.split(',')]
+	
+	# 2. we further breaking down comma delimitered token by white space
+	by_whitespace=[]
+	for bb in by_comma:
+		by_whitespace+=[b.strip() for b in bb.split(' ')]
+	
+	# we are to merge all lists into one!
+	return list(set(by_comma+by_whitespace))
 
 def format_datetime(value, format='medium'):
 	if format == 'full':

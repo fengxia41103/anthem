@@ -152,8 +152,7 @@ class BuyOrder(MyBaseModel):
 	# tags is a string list tokenized self.name and self.description by white space
 	# tags are all lower case!
 	# TODO: use NLTK package to be intelligent
-	#tags=ndb.ComputedProperty(lambda self: list(set([f for f in self.name.lower().replace(',',' ').split(' ')]+[f for f in self.description.lower().replace(',',' ').split(' ')])), repeated=True)
-	tags=ndb.ComputedProperty(lambda self: [f for f in self.name.lower().replace(',',' ').split(' ')], repeated=True)
+	tags=ndb.ComputedProperty(lambda self: tokenize(self.name), repeated=True)
 	
 	# category keywords
 	# we are to be smart about this property so user doesn't need to input

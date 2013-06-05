@@ -1,4 +1,4 @@
-{% extends "/template/base.html" %}
+{% extends "/template/OrderBase.html" %}
 
 {% block customJS %}
 <script type="text/javascript">
@@ -162,17 +162,18 @@
 				}
 			);
 		});
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-buyorder-browse').addClass('level-2-navigation-selected');
     });    	
 </script>
 {% endblock %}
 
-{% block header %}
-{% endblock %}
-
 {% block main %}
 	<h1>
-	{% if user %}
-		Welcome, {{ user.nickname }}! (<a href="{{url_logout}}">Logout</a>)
+	{% if me %}
+		Welcome, {{ me.nickname }}! (<a href="{{url_logout}}">Logout</a>)
 	{% else %}
 		<a href="{{url_login}}">Sign in or register</a>
 	{% endif %}

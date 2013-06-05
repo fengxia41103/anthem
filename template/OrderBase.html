@@ -1,0 +1,32 @@
+{% extends "/template/base.html" %}
+
+{% block level_2_navigation %}
+	<ul>
+		<li id="nav-buyorder-browse">
+			<a href="/buyorder/browse" title="Browse and shop">
+				<span class="ss-label">
+				<img src="http://cdn4.iconfinder.com/data/icons/devine_icons/128/PNG/Folder%20and%20Places/Stack.png" />
+				Shopping
+				</span>
+			</a>
+		</li>
+		
+		<li id="nav-buyorder-post">
+			<a href="/buyorder/new" title="Post a new order">
+				<span class="ss-label">
+				<img src="http://cdn2.iconfinder.com/data/icons/picons-essentials/57/compose-128.png" />
+				Post new
+				</span>
+			</a>
+		</li>
+		
+		<li id="nav-buyorder-owner">
+			<a href="/buyorder/owner/{{ me.key.id() }}/" title="Manage my orders">
+				<span class="ss-label">
+				<img src="http://cdn2.iconfinder.com/data/icons/picons-essentials/71/view_list-128.png" />
+				Inventory
+				</span>
+			</a>
+		</li>
+	</ul>
+{% endblock %}

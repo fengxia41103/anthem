@@ -99,7 +99,7 @@ class PublishNewBuyOrder(MyBaseHandler):
 
 		# load publish buyorder page
 		template_values = {}
-	
+		template_values['me']=me
 		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
 		self.response.write(template.render(template_values))
 
@@ -153,7 +153,7 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 		# load buyorder browse page
 		template_values = {}
 		template_values['url']=uri_for('buyorder-browse')		
-		template_values['user']=me
+		template_values['me']=me
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 
@@ -225,7 +225,7 @@ class BrowseBuyOrder(MyBaseHandler):
 		# load buyorder browse page
 		template_values = {}
 		template_values['url']=uri_for('buyorder-browse')		
-		template_values['user']=me
+		template_values['me']=me
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 

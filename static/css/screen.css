@@ -73,16 +73,32 @@ h1,h2,h3,h4,h5{
 	margin-top:5px;
 	padding:0 5px;
 	border-radius:5px;
-	background-color: white;
+	/*background-color: #888;*/
+}
+.level-2-navigation-selected{
+	background-color:white;
 }
 .level-2-navigation li:hover{
-	background-color:#00bec6;
+	background-color:#4AC948;
 }
+.level-2-navigation li:hover a{
+	color:white;
+}
+
 .level-2-navigation li a{
 	text-decoration:none;
 	color: #333; 
 }
-.level-2-navigation li a:hover{
+
+.level-2-navigation img{
+	width:40px;
+	height:40px;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	margin-bottom:5px;
+	margin-top:5px;
+	padding:20px;
 }
 
 .map-td-left{
