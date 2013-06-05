@@ -114,6 +114,9 @@ ul.tags li{
 	background-color: #888;
 	color:white;
 }
+ul.tags li:hover{
+	background-color:#4AC948;	
+}
 ul.tags li a{
 	text-decoration:none;
 	color:white;

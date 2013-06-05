@@ -1,4 +1,4 @@
-{% extends "/template/base.html" %}
+{% extends "/template/OrderBase.html" %}
 
 {% block customJS %}
 <script type="text/javascript">
@@ -127,26 +127,16 @@
 	    j$('#shopping-cart-visible-switch').on('click',function(){
 	    	j$(this).hide();
 	    	j$(this).siblings('div.top-header-pane').slideToggle(600);
-	    });				
+	    });
+	    
+	    // level 2 navigation
+	    j$('.level-2-navigation').show();
+	    j$('#nav-cart-review').addClass('level-2-navigation-selected');
     });
 </script>
 {% endblock %}
 
 {% block main %}
-	<!-- TOC -->
-	<div class="toc">
-	Table of Content
-	<ul>
-		<li><a href="#sec-summary">Fill Order Summary</a</li>
-		<li><a href="#sec-status">Status</a></li>
-		<li><a href="#sec-profit">Profit</a></li>
-		<li><a href="#sec-accounting">Accounting</a></li>
-		<li><a href="#sec-fill-list">Fill Order Details</a></li>
-		<li><a href="#sec-shipping-summary">Shipping Summary</a></li>
-		<li><a href="#sec-payment">Payments</a></li>
-	</ul>
-	</div>
-	
 	{% if cart.fills|length > 0 %}
 	<div>
 	{% if cart.status=='Open' and me.can_be_nur() %}
@@ -156,6 +146,8 @@
 		<button class="my-button" item="approval-process">Reject</button>
 	{% endif %}
 	</div>
+	{% else %}
+		<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
 	{% endif %}
 
 	<!-- Shipping inputs are available after approval and for DOC -->

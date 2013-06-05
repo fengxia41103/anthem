@@ -100,6 +100,7 @@ class PublishNewBuyOrder(MyBaseHandler):
 		# load publish buyorder page
 		template_values = {}
 		template_values['me']=me
+		open_cart=template_values['cart']=self.get_open_cart()
 		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
 		self.response.write(template.render(template_values))
 
@@ -154,6 +155,7 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 		template_values = {}
 		template_values['url']=uri_for('buyorder-browse')		
 		template_values['me']=me
+		open_cart=template_values['cart']=self.get_open_cart()
 		template_values['url_login']=users.create_login_url(self.request.url)
 		template_values['url_logout']=users.create_logout_url('/')
 
@@ -190,6 +192,7 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 	def get(self,owner_id):
 		template_values = {}
 		template_values['me']=me=self.get_contact()
+		open_cart=template_values['cart']=self.get_open_cart()
 		orders=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
 				
 		# group them by "queues"
