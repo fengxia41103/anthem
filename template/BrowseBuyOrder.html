@@ -25,7 +25,7 @@
 					var total_payable=0;
 					for (var i=0; i<fills.length; i++){
 						var f=fills[i];
-						data.push([f['order']['name'],f['order']['description'],f['qty'],f['price']]);
+						data.push([f['order']['name'],f['qty'],f['price']]);
 						total_payable+=parseInt(f['qty'])*parseFloat(f['price']);
 					}
 					// redraw cart table
@@ -45,7 +45,7 @@
 					// this is to enforce the buyer-seller pair rule
 					buyer=fills[0].order.owner.name;
 					var match=[];
-					j$('.product-list-item-footer-user').each(function(index,item){
+					j$('.product-list-item-footer-user a').each(function(index,item){
 						if (j$(item).html()!=buyer) match.push(item);
 					});
 					
@@ -89,13 +89,12 @@
 		// cart table
 		var data=[];
 		{% for f in cart.fills %}
-			data.push(["{{f.order.get().name|title}}","{{f.order.get().description|truncate(30,True)}}",{{f.qty}},{{f.price}}]);
+			data.push(["{{f.order.get().name|title}}",{{f.qty}},{{f.price}}]);
 		{% endfor %}
 		j$('#this-cart').dataTable({
 			"aaData":data,
 		    "aoColumns":[
 		    	{ "sTitle": "Product"},
-		    	{ "sTitle": "Description"},
 		    	{ "sTitle": "Quantity"},
 		    	{ "sTitle": "Price"}
 		    	],
@@ -197,11 +196,18 @@
 		<table id="this-cart" class="ariel-table">
 		</table>
 		
-		<a href="{{ url_cart_review }}?cart={{ cart.key.id() }}"><button>Review order</button></a>
-		<label>Total</label><span class="border-top-red" id="this-cart-total">
-		{{ cart.payable }}
-		</span> 
-
+		<div style="float:right;">
+			<label class="ss-label">Total</label>
+			<span class="border-top-red" id="this-cart-total">
+				{{ cart.payable }}
+			</span>
+			
+			<br />
+			<a href="{{ url_cart_review }}?cart={{ cart.key.id() }}">
+				<span class="my-button" style="background-color:#000;">Review order</spa>
+			</a>
+		</div>
+		 
 	</div>
 	<div id="shopping-cart-visible-switch">Cart Items &nbsp;
 	<span id="cart-item-count">{{ cart.fills|length }}</span>

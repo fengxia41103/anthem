@@ -479,7 +479,7 @@ a.login-button:hover{
 }
 
 #shopping-cart{
-	background: #FFEC8B; /* Old browsers */
+	background: #888; /* Old browsers */
 	position:fixed;
 	top:50px;
 	right:0;
@@ -487,6 +487,10 @@ a.login-button:hover{
 	border: 1px white solid; 
 	padding: 10px;
 	z-index:999;
+	color:white;
+}
+#shopping-cart a{
+	text-decoration:none;
 }
 
 #shopping-cart tbody tr:nth-child(2n+1){
@@ -515,12 +519,6 @@ a.login-button:hover{
 	margin-bottom: 5px;	
 }
 
-#shopping-cart button{
-	border: 1px white solid;
-	background-color: silver;
-	color: white;	
-}
-
 #shopping-cart-total{
 	font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
 	float:right;
@@ -528,7 +526,8 @@ a.login-button:hover{
 }
 
 #shopping-cart-visible-switch{
-	background-color: #FFEC8B;
+	background-color: #888;
+	color:white;
 	position:fixed;
 	/*top:0;
 	left:66%;
