@@ -21,7 +21,11 @@ def categorization(words):
 	if len(c)==0: c=['uncategoried']
 	return list(set(c))
 
-def tokenize(phrase):
+def tokenize(something):
+	# always lower case
+	# this will make future search case insensitive!
+	phrase=something.lower()
+	
 	# break phrase to list of token
 	
 	# 1. we save any token delimited by ','

@@ -171,6 +171,7 @@
 {% endblock %}
 
 {% block main %}
+	{#
 	<h1>
 	{% if me %}
 		Welcome, {{ me.nickname }}! (<a href="{{url_logout}}">Logout</a>)
@@ -178,9 +179,16 @@
 		<a href="{{url_login}}">Sign in or register</a>
 	{% endif %}
 	</h1>
+	#}
+	
+	<h1 class="ariel-blue">Browse and Shop</h1>
+	<p class="ariel-blue ariel-p">
+	Browse or use the search box to find products people are looking to buy, and add product to your shopping cart if you want sell to the buyer.
+	</p>
+
 
 	<div class="searchbox">
-	<input type="text" placeholder="Enter keywords here or Click a tag below" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>
+	<input type="text" placeholder="Enter a keyword" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>
 	<a id="link-pinterest-filter" href="" class="ariel-button">Search</a>
     <ul id="pinterest-filters">
     	{% for item in hotTags %}
