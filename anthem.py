@@ -251,7 +251,7 @@ class BrowseBuyOrder(MyBaseHandler):
 			queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
 		elif nd:
 			# this will be OR tag test, meaning that any tag is in the ND list will be True
-			queries=BuyOrder.query(BuyOrder.tags.IN(nd.lower().replace(',',' ').split(' ')))
+			queries=BuyOrder.query(BuyOrder.tags.IN(tokenize(nd)))
 		else:
 			queries=BuyOrder.query()
 		

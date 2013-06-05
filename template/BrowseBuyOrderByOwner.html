@@ -13,7 +13,11 @@
 {% block main %}
 	{% if owner %}
 	<div class="border-bottom">
-		<h3>Categories</h3>
+    	<h1 class="ariel-blue">Categories</h1>
+        <p class="ariel-blue ariel-p">
+        Browse orders grouped by categories and click on a category tag below as navigation shortcut.
+        </p>
+
 		<ul class="tags">
 		{% for k in cats %}
 			<li><a href="#tab-{{ loop.index }}">{{ k|title }}</a></li>			

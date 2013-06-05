@@ -137,6 +137,12 @@
 {% endblock %}
 
 {% block main %}
+    <h1 class="ariel-blue">Review Your Shopping Cart and Place Order</h1>
+    <p class="ariel-blue ariel-p">
+    	Review items in your shopping cart and submit. You can monitor the status of your orders
+    	at any time.
+    </p>
+        
 	{% if cart.fills|length > 0 %}
 	<div>
 	{% if cart.status=='Open' and me.can_be_nur() %}
@@ -199,7 +205,7 @@
 	{% endif %}
 	
 	<div class="quick-pane" id="sec-summary">
-	<h3>Fill Order Summary</h3>
+	<h3>Cart Summary</h3>
 	<table class="sf-table table-row-border">
 		<tr><td>Cart Name</td>
 			<td>Cart# {{ cart.key.id() }}</td>
@@ -289,7 +295,7 @@
 	{% endif %}
 	
 	<div class="quick-pane" id="sec-fill-list">
-	<h3>Fill Order Details</h3>
+	<h3>Item Details</h3>
 	{% if cart.fills|count >0 %}
 		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
