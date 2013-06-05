@@ -25,6 +25,10 @@
 							tr.fadeOut(500,function(){
 								j$(this).remove();
 							});
+							
+							// if this is the last row, we now have an empty cart
+							// redirect to browse page
+							window.location.href = "/buyorder/browse";
 							break;
 						default:
 							break;
@@ -294,7 +298,7 @@
 	
 	<div class="quick-pane" id="sec-fill-list">
 	<h3>Fill Order Details</h3>
-	{% if cart.fills %}
+	{% if cart.fills|count >0 %}
 		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
 		<table class="table-row-border">
