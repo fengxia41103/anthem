@@ -145,8 +145,6 @@
     		}else{
 				j$('#review-product-name').html(j$(this).val());    		
     		}
-			console.log('search');
-			
     		googleSearchStart=1;
     		
     		var term=j$.trim(j$(this).val());
@@ -198,11 +196,6 @@
     		j$('#review-client-name').html(j$(this).val());
     	});
     	j$('#input-product-description').on('change',function(){
-    		if (j$(this).val().length>=500){
-				j$().toastmessage('showWarningToast', 'Description is too long. Max is 500 characters.');    		
-    		}else{
-				j$('#review-product-description').html(j$(this).val());    		
-    		}
     	});    	
     	j$('#input-price').on('change',function(){
     		j$('#review-price').html(j$(this).val());
@@ -260,7 +253,16 @@
    			{title: 'Table styles'},
    			{title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
    			]    		
-     	});    	 
+     	});
+     	
+     	j$('#view-review').click(function(){
+     		var content=tinyMCE.activeEditor.getContent({format : 'raw'});
+    		if (content.length>=500){
+				j$().toastmessage('showWarningToast', 'Description is too long. Max is 500 characters.');    		
+    		}else{
+				j$('#review-product-description').html(content);    		
+    		}
+     	});
     });	
 </script>
 {% endblock %}
@@ -279,7 +281,7 @@ items to give you a starting point for your listing.
 	<ul>
 		<li><a href="#step-1">1. Describe Your Product</a></li>
 		<li><a href="#step-2">2. Select a Picture</a></li>
-		<li><a href="#step-3">3. Review and Publish</a></li>
+		<li><a href="#step-3" id="view-review">3. Review and Publish</a></li>
 	</ul>
 
 	<div id="step-1">
@@ -302,6 +304,11 @@ items to give you a starting point for your listing.
 			<label class="ss-label">Brief Description</label>
 			<br />
 			<textarea class="ss-textarea" name="description" id="input-product-description"></textarea>
+			
+			<label class="ss-label">For Client (optional)</label>
+			<br />
+			<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+			
 		</div>
 	</div>
 	{#
@@ -388,7 +395,7 @@ items to give you a starting point for your listing.
 			<img id="review-product-image" src="" style=""/>
 			</td><td>
 			
-			<table class="ariel-table">
+			<table class="ariel-table table-row-border">
 				<tr><td>
 				Product name
 				</td><td>
@@ -398,7 +405,7 @@ items to give you a starting point for your listing.
 				<tr><td>
 				Product details
 				</td><td>
-				<span id="review-product-description"></span>
+				<div id="review-product-description" class=""></div>
 				</td></tr>
 				
 				<tr><td>
