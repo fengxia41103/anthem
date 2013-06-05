@@ -188,8 +188,8 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 
 class BrowseBuyOrderByOwner(MyBaseHandler):
 	def get(self,owner_id):
-		me=self.get_contact()
 		template_values = {}
+		template_values['me']=me=self.get_contact()
 		orders=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
 				
 		# group them by "queues"

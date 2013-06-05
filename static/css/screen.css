@@ -100,6 +100,24 @@ h1,h2,h3,h4,h5{
 	margin-top:5px;
 	padding:20px;
 }
+ul.tags{
+	padding-left:0;
+}
+ul.tags li{
+	list-style-type:none;
+	margin-left:0;
+	padding-left:0;
+	display:inline-block;
+	margin-top:5px;
+	padding:5px 10px;
+	border-radius:5px;
+	background-color: #888;
+	color:white;
+}
+ul.tags li a{
+	text-decoration:none;
+	color:white;
+}
 
 .map-td-left{
 	text-align:right;
