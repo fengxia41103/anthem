@@ -238,7 +238,29 @@
     	});
     	
     	// initialize tabs
-    	j$('#tabs-min').tabs(); 
+    	j$('#tabs-min').tabs();
+    	
+    	// initialize textarea
+		tinymce.init({
+    		selector: "textarea",
+    		width: 510,
+    		height: 300,
+			plugins: [
+ 			"advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+  			"searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+   			"save table contextmenu directionality emoticons template paste textcolor"
+  			],
+			toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons", 
+   			style_formats: [
+   			{title: 'Bold text', inline: 'b'},
+   			{title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+   			{title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+   			{title: 'Example 1', inline: 'span', classes: 'example1'},
+   			{title: 'Example 2', inline: 'span', classes: 'example2'},
+   			{title: 'Table styles'},
+   			{title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
+   			]    		
+     	});    	 
     });	
 </script>
 {% endblock %}
@@ -263,6 +285,26 @@ items to give you a starting point for your listing.
 	<div id="step-1">
 		<h2 class="ariel-h2">1. What are you looking for?</h2>
 		<p class="ariel-p">Tell us about your offer.</p>
+		
+		<div class="ss">
+			<input class="ss-input" name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+			<table class="two-col-table">
+				<tr><td>
+						<label>Price</label><br />
+						<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
+					</td><td>
+						<label>Qty</label><br />
+						<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
+					</td>
+				</tr>
+			</table>
+			
+			<label class="ss-label">Brief Description</label>
+			<br />
+			<textarea class="ss-textarea" name="description" id="input-product-description"></textarea>
+		</div>
+	</div>
+	{#
 		<table class="ariel-table">
 		<tr><td>
 		Choose only one client
@@ -295,7 +337,7 @@ items to give you a starting point for your listing.
 		</td></tr>
 		</table>
 	</div>		
-	
+	#}
 	
 	<div id="step-2">
 	

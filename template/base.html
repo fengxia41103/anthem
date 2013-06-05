@@ -27,13 +27,20 @@
 	<!-- easing -->
 	<!-- http://gsgd.co.uk/sandbox/jquery/easing/ -->
 	<script type="text/javascript" src="/static/easing/jquery.easing.min.js"></script>
-	
+
+	<!-- tinyMCE -->
+	<script type="text/javascript" src="/static/tinymce/js/tinymce/jquery.tinymce.min.js"></script>	
+	<script type="text/javascript" src="/static/tinymce/js/tinymce/tinymce.min.js"></script>	
 		
-	<LINK REL=StyleSheet HREF="/static/css/navigation.css" TYPE="text/css" MEDIA=screen>
+	<LINK REL=StyleShyeet HREF="/static/css/navigation.css" TYPE="text/css" MEDIA=screen>
 	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
 		
 	<script type="text/javascript">
 	var j$=jQuery.noConflict();
+	
+	// some global initialization
+	j$(document).ready(function(){
+	});
 	</script>	
 	
 	{% block customJS %}{% endblock %}

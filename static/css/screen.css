@@ -1,12 +1,88 @@
 body{
     /*font-family: Verdana, Geneva, sans-serif; */
-    font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
+    /*font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;*/
+	font-family: Verdana, Geneva, sans-serif;
 	font-size:10pt;
 	margin:0;
 }
 
 h1,h2,h3,h4,h5{
 	font-family: Lato, "Times New Roman", Times, sans-serif;
+}
+
+/* Main layout */
+.level-1-navigation{
+	opacity:80%;
+	width:100px;
+	background-color:#292421;
+	color:white;
+}
+
+.level-1-navigation img{
+	width:50px;
+	height:50px;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	margin-bottom:50px;
+	margin-top:50px;
+	padding:20px;
+	border:2px #292421 solid;
+}
+.level-1-navigation img:hover{
+	border:2px #ce8 solid;
+	border-radius:20px;
+	-moz-border-radius:20px;
+	-webkit-border-radius:20px;
+}
+
+.level-1-navigation ul{
+	margin-left:0;
+	padding-left:0;
+}
+.level-1-navigation li{
+	list-style-type:none;
+	margin-left:0;
+	padding-left:0;
+}
+
+.level-2-navigation{
+	width:150px;
+	background-color: #888;
+	text-align:center;
+}
+.level-2-navigation h3{
+	color:white;
+	border-bottom: 4px white solid;
+	padding-bottom:20px;
+}
+
+.level-2-navigation div{
+	margin-right;auto;
+	margin-left:auto;
+	display:block;
+}
+.level-2-navigation ul{
+	padding-left:0;
+}
+.level-2-navigation li{
+	list-style-type:none;
+	margin-left:0;
+	padding-left:0;
+	display:inline-block;
+	margin-top:5px;
+	padding:0 5px;
+	border-radius:5px;
+	background-color: white;
+}
+.level-2-navigation li:hover{
+	background-color:#00bec6;
+}
+.level-2-navigation li a{
+	text-decoration:none;
+	color: #333; 
+}
+.level-2-navigation li a:hover{
 }
 
 .map-td-left{
@@ -1466,12 +1542,6 @@ button[item="submit-for-approval-btn"]:hover{
 	margin-right:auto;
 }
 
-input{
-	border:1px #EEEEE0 solid;
-    background-color:none;
-    padding: 5px;
-    max-width:70%;
-}
 .ariel-table select{
     background-color:#ebebeb;
     border:1px solid #00bec6; 
@@ -1493,7 +1563,7 @@ input{
     border: 1px white solid; 
     padding: 10px;
     z-index:999;
-}h
+}
 
 .table-row-border{
 	border-collapse:collapse;
@@ -1672,77 +1742,60 @@ div.list-of-photo{
 	float:left;
 }
 
-.list-of-category-section{
-
-}
-
 .list-of-category-section a{
 	text-decoration:none;
 }
 
-/* Main layout */
-.level-1-navigation{
-	opacity:80%;
-	width:100px;
-	background-color:#292421;
-	color:white;
-}
-
-.level-1-navigation img{
-	width:50px;
-	height:50px;
-	margin-left:auto;
+/* ss style input sections */
+div.ss{
 	margin-right:auto;
-	display:block;
-	margin-bottom:50px;
-	margin-top:50px;
-	padding:20px;
-	border:2px #292421 solid;
-}
-.level-1-navigation img:hover{
-	border:2px #ce8 solid;
-	border-radius:20px;
-	-moz-border-radius:20px;
-	-webkit-border-radius:20px;
-}
-
-.level-1-navigation ul{
-	margin-left:0;
-	padding-left:0;
-}
-.level-1-navigation li{
-	list-style-type:none;
-	margin-left:0;
-	padding-left:0;
-}
-
-.level-2-navigation{
-	width:150px;
-	background-color: #888;
-}
-.level-2-navigation h3{
-	color:white;
-}
-
-.level-2-navigation ul{
-	padding-left:0;
-	margin-right;auto;
 	margin-left:auto;
 	display:block;
 }
-.level-2-navigation li{
-	list-style-type:none;
-	margin-left:0;
-	padding-left:0;
-	display:inline-block;
-	margin-top:5px;
-	padding:0 5px;
-	background-color:white;
-	border-radius:5px;
+
+table.two-col-table{
+	border-collapse:collapse;
+  	border-spacing: 0;
+  	border:none;
+	margin-top:10px;
+	margin-bottom:10px;
+	width:500px;
 }
-.level-2-navigation li:hover{
-	background-color: orange;
+
+table.two-col-table td:nth-child(2n+1){
+	width:50%;
+	padding-right:20px;
 }
-.level-2-navigation li a{
-	text-decoration:none;
+table.two-col-table label{
+	font-size:0.9em;
+	font-weight:bold;
+}
+table.two-col-table input{
+	/*color:#ebebeb;*/
+	color:white;
+	background-color:#888;
+	border:none; 
+	width: 100%;
+	border-radius: 5px;
+	webkit-border-radius: 5px;
+	moz-border-radius:5px;
+	padding: 10px 0 10px 10px;
+	font-size:0.9em;
+}
+
+.ss-input{
+	background-color:#888;
+	color:white;
+	border:none;
+	width:500px; 
+	height: 40px;
+	border-radius: 5px;
+	webkit-border-radius: 5px;
+	moz-border-radius:5px;
+	padding: 5px 0 10px 10px;
+	font-size:1.4em;
+}
+.ss-label{
+	font-size:0.9em;
+	font-weight:bold;
 }

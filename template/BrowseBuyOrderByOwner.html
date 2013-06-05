@@ -10,13 +10,14 @@
 {% endblock %}
 
 {% block level_2_navigation %}
-	<h4>Categories</h4>
-	
-	<ul>
+	<h3>Categories</h3>
+	<div>	
+		<ul>
 		{% for k in cats %}
 			<li><a href="#tab-{{ loop.index }}">{{ k|title }}</a></li>			
 		{% endfor %}
-	<ul>
+		<ul>
+	</div>
 {% endblock %}
 
 {% block main %}
@@ -25,10 +26,10 @@
 		<h1>{{ owner.get().nickname }}</h1>	
 	</div>
 	
-	<div id="list-of-category-section">
+	<div class="list-of-category-section">
 		{% for item in orders|dictsort %}
+			<h3>{{ item[0]|title }}</h3>
 			<div id="tab-{{ loop.index }}">
-				<h3>{{ item[0]|title }}</h3>
 				<a href="/buyorder/owner/{{ owner.id() }}/{{ item[0] }}/">
 				{% for v in item[1] %}
 					<img src="{{ v['image'] }}" width="100px" height="100px"/>
