@@ -192,23 +192,6 @@
     	});
     	
     	// link inputs to review sections
-    	j$('#input-client-name').on('change',function(){
-    		j$('#review-client-name').html(j$(this).val());
-    	});
-    	j$('#input-product-description').on('change',function(){
-    	});    	
-    	j$('#input-price').on('change',function(){
-    		j$('#review-price').html(j$(this).val());
-    		
-    		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$(this).val());
-    		j$('#review-order-total').html(total);
-    	});
-    	j$('#input-qty').on('change',function(){
-    		j$('#review-qty').html(j$(this).val());
-
-    		var total=parseFloat(j$('#input-price').val())*parseFloat(j$(this).val());
-    		j$('#review-order-total').html(total);    		
-    	});
     	
     	j$('#btn-apply-user-input-image').on('click',function(){
     		j$('#user-input-image').attr('src',j$(this).siblings('input').val());
@@ -235,7 +218,7 @@
     	
     	// initialize textarea
 		tinymce.init({
-    		selector: "textarea",
+    		selector: "textarea.ss-textarea",
     		width: 510,
     		height: 300,
 			plugins: [
@@ -256,12 +239,22 @@
      	});
      	
      	j$('#view-review').click(function(){
-     		var content=tinyMCE.activeEditor.getContent({format : 'raw'});
-    		if (content.length>=500){
-				j$().toastmessage('showWarningToast', 'Description is too long. Max is 500 characters.');    		
-    		}else{
-				j$('#review-product-description').html(content);    		
-    		}
+     		// populate review info upon user viewing this tab
+     		// the review data will be later submitted to create an instance
+    		j$('#review-client-name').html(j$('#input-client-name').val());
+    		
+    		j$('#review-price').html(j$('#input-price').val());
+    		j$('#review-qty').html(j$('#input-qty').val());
+    		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$('#input-price').val());
+    		j$('#review-order-total').html(total);
+			
+			// tinyMCE editor content
+     		//var content=tinyMCE.activeEditor.getContent({format : 'raw'});
+     		var content=tinyMCE.activeEditor.getContent();
+			j$('#review-product-description').html(content);
+			
+			// this is the actual INPUT field that will be submitted in form
+			j$('#input-product-description').html(content);
      	});
     });	
 </script>
@@ -285,10 +278,9 @@ items to give you a starting point for your listing.
 	</ul>
 
 	<div id="step-1">
-		<h2 class="ariel-h2">1. What are you looking for?</h2>
-		<p class="ariel-p">Tell us about your offer.</p>
-		
 		<div class="ss">
+			<label class="ss-label">Product</label>
+			<br />
 			<input class="ss-input" name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
 			<table class="two-col-table">
 				<tr><td>
@@ -303,8 +295,9 @@ items to give you a starting point for your listing.
 			
 			<label class="ss-label">Brief Description</label>
 			<br />
-			<textarea class="ss-textarea" name="description" id="input-product-description"></textarea>
-			
+			<textarea class="ss-textarea"></textarea>
+			<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
+			<br />
 			<label class="ss-label">For Client (optional)</label>
 			<br />
 			<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
@@ -347,8 +340,6 @@ items to give you a starting point for your listing.
 	#}
 	
 	<div id="step-2">
-	
-		<h2 class="ariel-h2">2. Does the photo match your product?</h2>
 		<p class="ariel-p">
 		We help you automatically find pictures for your product. This helps user with a visual reference and improves matching quality.
 		</p>
@@ -375,7 +366,7 @@ items to give you a starting point for your listing.
 		<span class="ariel-button" id="btn-apply-user-input-image">Use</span>
 		</td></tr>
 		</table>
-		<div class="ariel-pinterest-item" style="margin-right:auto;margin-left:auto;display:block;">
+		<div class="ariel-pinterest-item" style="width:25%;margin-right:auto;margin-left:auto;display:block;">
 			<img id="user-input-image" src="" />
 			<p>
 				<span class="ariel-checkbox">&nbsp;</span>
@@ -386,12 +377,9 @@ items to give you a starting point for your listing.
 	</div>
 
 	<div id="step-3">
-		<h2 class="ariel-h2">3. Review your order and publish</h2>
-		<p></p>
-		
 		<div class="image-select-pane">
 			<table id="review-new-buy-order-table">
-			<tr><td class="box-shadow">
+			<tr><td class="box-shadow" valign="middle">
 			<img id="review-product-image" src="" style=""/>
 			</td><td>
 			
@@ -438,12 +426,13 @@ items to give you a starting point for your listing.
 		</div>
 		
 		<div class="image-select-pane" style="border:none;">
-		<div style="float:right;">
-		<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of Service</a>
-		<div class="ariel-button" style="margin-top:15px;">
-			<input style="border:none;background:transparent;" type="submit" value="Publish" />
-		</div>
-		</div>
+			<div style="float:right;">
+				<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of 
+			Service</a>
+			<div class="ariel-button" style="margin-top:15px;">
+				<input style="border:none;background:transparent;" type="submit" value="Publish" />
+			</div>
+			</div>
 		</div>		
 	</div>
 </div>

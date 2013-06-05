@@ -9,7 +9,8 @@ CAT={
 	'bounty':['supply','cleaning','paper towel'],
 	'lcd':['computer','display','monitor','electronic'],
 	'redhat':['software','linux'],
-	'software':['software','programming']
+	'software':['software','programming'],
+	'kitty':['toy','decoration'],
 }
 
 def categorization(words):

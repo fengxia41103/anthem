@@ -124,16 +124,17 @@
 			}
 		});
 		
-		j$(document).on('click','.pin img',function(){
-			var id=j$(this).parents('div.pin').attr('itemId');
-			var owner_id=j$(this).parents('div.pin').attr('ownerId');
-			var title=j$(this).siblings('h3[item="title"]').html();
-			var subtitle=j$(this).siblings('p[item="subtitle"]').html();
-			var img=j$(this).attr('src');			
-			var qty=j$(this).parents('div.pin').find('span[item="qty"]').html();
-			var price=j$(this).parents('div.pin').find('span[item="price"]').html();
-			var owner=j$(this).parents('div.pin').find('.product-list-item-footer-user').attr('name');
-			var postTime=j$(this).parents('div.pin').attr('postTime');
+		// click on a PIN will bring its in-focus
+		j$(document).on('click','div.pin',function(){
+			var id=j$(this).attr('itemId');
+			var owner_id=j$(this).attr('ownerId');
+			var title=j$(this).find('h3[item="title"]').html();
+			var subtitle=j$(this).find('div[item="subtitle"]').html();
+			var img=j$(this).find('img').attr('src');			
+			var qty=j$(this).find('span[item="qty"]').html();
+			var price=j$(this).find('span[item="price"]').html();
+			var owner=j$(this).find('.product-list-item-footer-user').attr('name');
+			var postTime=j$(this).attr('postTime');
 			
 			j$('#infocus-title').html(owner);
 			j$('#infocus-subtitle').html(postTime);
@@ -214,7 +215,7 @@
 		<img src="{{ b.order.image }}" />
 
 		<h3 item="title">{{ b.order.name|title }}</h3>			
-		<p item="subtitle">{{ b.order.description }}</p>			
+		<div item="subtitle">{{ b.order.description }}</div>			
 		<p>
 			<span class="product-stat" item="qty">{{ b.order.qty }}</span>
 			<span class="product-stat-label">qty</span>
@@ -251,7 +252,7 @@
     		</div>
     		<div class="border-bottom">
     			<h4 id="infocus-product-name">iPad</h4>
-    			<blockquote id="infocus-product-description">sljdfldsj</blockquote>
+    			<div id="infocus-product-description">sljdfldsj</div>
     		</div>
     		<div class="list-of-photo">
     			<h4>Similar Posts</h4>

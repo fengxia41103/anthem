@@ -267,6 +267,9 @@ h1,h2,h3,h4,h5{
 .pin p{
 	margin-bottom: 5px;
 }
+.pin iframe{
+	width:100%;
+}
 
 .product-list-item-footer-stat{
 	font-family: ‘Arial Narrow’, sans-serif;
@@ -1448,11 +1451,10 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .ariel-pinterest-item{
-	border: 1px solid #ebebeb;
+	border: 2px solid #ebebeb;
 	border-radius: 5px;
 	webkit-border-radius:5px;
 	moz-border-radius:5px;
-	/*width: ;*/
 	height:280px;
     
     moz-column-break-inside: avoid; 
