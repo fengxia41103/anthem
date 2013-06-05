@@ -1557,9 +1557,9 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .box-shadow{
-	-webkit-box-shadow: 7px 7px 5px rgba(28, 83, 67, 0.75);
-	-moz-box-shadow:    7px 7px 5px rgba(28, 83, 67, 0.75);
-	box-shadow:         7px 7px 5px rgba(28, 83, 67, 0.75);
+	-webkit-box-shadow: 1px 1px 1px rgba(28, 83, 67, 0.35);
+	-moz-box-shadow:    1px 1px 1px rgba(28, 83, 67, 0.35);
+	box-shadow:         1px 1px 1px rgba(28, 83, 67, 0.35);
 }
 .reflectBelow	{ 
 	-webkit-box-reflect: below 0
@@ -1569,12 +1569,12 @@ button[item="submit-for-approval-btn"]:hover{
 #review-new-buy-order-table{
 	border-spacing: 20px;
 	*border-collapse: expression('separate', cellSpacing = '20px');
-	width:70%;
+	width:90%;
 	margin-left:auto;
 	margin-right:auto;
 }
 #review-product-image{
-	height:150px;
+	height:250px;
 	display:block;
 	margin-left:auto;
 	margin-right:auto;
@@ -1835,6 +1835,6 @@ table.two-col-table input{
 }
 .ss-label{
 	font-size:0.9em;
-	font-weight:bold;
+	color:#777777;
 	margin-top:10px;
 }
