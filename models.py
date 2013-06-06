@@ -197,7 +197,8 @@ class BuyOrderCart(MyBaseModel):
 	
 	# allowing multiple tracking numbers
 	shipping_tracking_number=ndb.StringProperty(repeated=True)
-	shipping_created_date=ndb.DateProperty()
+	shipping_created_date=ndb.DateProperty() # when the info was entered  by user
+	shipping_date=ndb.DateProperty() # actual shipping date by user
 	shipping_label=ndb.BlobProperty() # allowing one label file
 			
 	# a cart has multiple fills

@@ -525,11 +525,20 @@ class ShippingCart(MyBaseHandler):
 		assert cart!=None
 		
 		cart.shipping_carrier=self.request.POST['shipping-carrier']
-		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',')]
+		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',') if len(f.strip())>0]
 		cart.shipping_cost=float(self.request.POST['shipping-cost'])
 		cart.shipping_num_of_package=int(self.request.POST['shipping-package'])
 		cart.shipping_created_date=datetime.date.today()
-		cart.shipping_label=self.request.get('shipping-label')
-	
+		
+		# shipping label is optional
+		# thin about USPS
+		try:
+			cart.shipping_label=self.request.get('shipping-label')
+		except:
+			pass
+			
+		cart.shipping_date=datetime.datetime.strptime(self.request.get('shipping-date'),'%Y-%m-%d').date()
+		cart.shipping_status='Shipment Created'
+		cart.put()	
 		
 		self.response.write('0')

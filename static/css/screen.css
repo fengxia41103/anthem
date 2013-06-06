@@ -1853,7 +1853,6 @@ table.two-col-table input{
 	webkit-border-radius: 5px;
 	moz-border-radius:5px;
 	padding: 5px 0 10px 10px;
-	font-size:1.4em;
 }
 .ss-label{
 	font-size:0.9em;
@@ -1870,7 +1869,6 @@ table.two-col-table input{
 	border: 1px #888 solid;
 	padding: 20px;
 	z-index:999;
-	width:540px;
 }
 .ss-select, .ss-select option{
 	background-color:#888;

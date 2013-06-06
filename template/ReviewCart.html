@@ -53,7 +53,9 @@
 	    var carrier=j$.trim(j$('select[name="shipping-carrier"]').val());
 	    var tracking=j$.trim(j$('textarea[name="shipping-tracking"]').val());
 	    var package=j$.trim(j$('input[name="shipping-package"]').val());
-
+	    var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
+	    var cost=j$.trim(j$('input[name="shipping-cost"]').val());
+		
 	    if (carrier==''){
 	    	j$().toastmessage('showErrorToast', 'Please select a shipping method!');
 			return false;
@@ -64,6 +66,15 @@
 		}
 	    if (package==''){
 	    	j$().toastmessage('showErrorToast', 'Please enter the number of packages in this shipment!');
+			return false;
+		}
+	    if (cost==''){
+	    	j$().toastmessage('showErrorToast', 'Please enter the shipping cost!');
+			return false;
+		}
+
+	    if (shipping_date==''){
+	    	j$().toastmessage('showErrorToast', 'Please enter the shipping date!');
 			return false;
 		}
 
@@ -269,7 +280,9 @@
 		<div>
 		<label class="ss-label">Tracking Number</label>
 		<br />
-		<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number"></textarea>
+		<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number">
+			{{ cart.shipping_tracking_number|join(', ') }}
+		</textarea>
 		</div>
 
 		<table class="two-col-table">
@@ -277,25 +290,30 @@
 				<td>
 					<label class="ss-label">Number of Packages</label>
 					<br />
-					<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"/>					
+					<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"
+					value="{{ cart.shipping_num_of_package }}"/>					
 				</td>
 				<td>
 					<label class="ss-label">Cost</label>
 					<br />
-					<input type="number" name="shipping-cost" step="any" placeholder="0.0"/>
+					<input type="number" name="shipping-cost" step="any" placeholder="0.0" value="{{ cart.shipping_cost }}"/>
+				</td>
+			</tr>
+			
+			<tr>
+				<td>				
+					<label class="ss-label">Shipping Label File</label>
+					<br />
+					<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
+				</td>
+				<td>				
+		<label class="ss-label">Shipped Date</label>
+		<br />
+		<input class="ss-input" type="date" name="shipping-date" id="input-shipping-date" value="{{ cart.shipping_date }}"/>
 				</td>
 			</tr>
 		</table>		
 		
-		<div>
-		<label class="ss-label">Shipping Label File</label>
-		<br />
-		<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
-		</div>
-		
-		<p>
-		Please verify the shipment information and click the "Save Shipment" button below.
-		</p>
 		<button class="my-button" id="btn-create-shipping">Save Shipment</button>
 	
 		</form>
@@ -435,13 +453,13 @@
 	<div class="quick-pane" id="sec-shipping-summary">
 	<h3>Shipping Summary</h3>
 	<table class="sf-table table-row-border">
-		<tr><td>Created On</td>
-			<td>{{ cart.shipping_created_date }}</td>
+		<tr><td>Shipping Date</td>
+			<td>{{ cart.shipping_date }}</td>
 			<td>Carrier</td>
 			<td>{{ cart.shipping_carrier }}</td>
 		</tr>
 		<tr><td>Tracking Number</td>
-			<td>{{ cart.shipping_tracking_number }}</td>
+			<td>{{ cart.shipping_tracking_number|join('<br />') }}</td>
 			<td>No. of Packages</td>
 			<td>{{ cart.shipping_num_of_package }}</td>
 		</tr>
@@ -449,6 +467,9 @@
 			<td>{{ cart.shipping_status }}</td>
 			<td>Shipping Cost</td>
 			<td>{{ cart.shipping_cost }}</td>
+		</tr>
+		<tr><td>Last Modified Date</td>
+			<td>{{ cart.shipping_created_date }}</td>
 		</tr>
 	</table>
 	</div>	
