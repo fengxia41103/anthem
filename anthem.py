@@ -518,3 +518,18 @@ class ManageBuyOrder(MyBaseHandler):
 	def post(self):
 		me=self.get_contact()
 		
+class ShippingCart(MyBaseHandler):
+	def post(self, cart_id):
+		me=self.get_contact()
+		cart=BuyOrderCart.get_by_id(int(cart_id),parent=me.key)
+		assert cart!=None
+		
+		cart.shipping_carrier=self.request.POST['shipping-carrier']
+		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',')]
+		cart.shipping_cost=float(self.request.POST['shipping-cost'])
+		cart.shipping_num_of_package=int(self.request.POST['shipping-package'])
+		cart.shipping_created_date=datetime.date.today()
+		cart.shipping_label=self.request.get('shipping-label')
+	
+		
+		self.response.write('0')

@@ -2,6 +2,74 @@
 
 {% block customJS %}
 <script type="text/javascript">
+	// post-submit callback 
+	function showResponse(responseText, statusText, xhr, j$form)  { 
+		// for normal html responses, the first argument to the success callback 
+		// is the XMLHttpRequest object's responseText property 
+ 
+ 		// if the ajaxForm method was passed an Options Object with the dataType 
+ 		// property set to 'xml' then the first argument to the success callback 
+ 		// is the XMLHttpRequest object's responseXML property 
+  
+  		// if the ajaxForm method was passed an Options Object with the dataType 
+  		// property set to 'json' then the first argument to the success callback 
+  		// is the json data object returned by the server 
+   
+   		//alert('status: ' + statusText + '\n\nresponseText: \n' + responseText + 
+   		//'\n\nThe output div should have already been updated with the responseText.'); 
+		
+		switch (responseText){
+			case -1:
+				j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
+				break;
+			case -2:
+				j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
+				break;
+			case 0:
+				j$().toastmessage('showSuccessToast', 'Information saved');
+				break;
+			default:
+				break;
+		}
+   	} 
+
+	// pre-submit callback 
+	function showRequest(formData, jqForm, options) { 
+    	// formData is an array; here we use $.param to convert it to a string to display it 
+        // but the form plugin does this for you automatically when it submits the data 
+        var queryString = j$.param(formData); 
+             
+ 		// jqForm is a jQuery object encapsulating the form element.  To access the 
+ 		// DOM element for the form do this: 
+ 		// var formElement = jqForm[0]; 
+  		
+  		//alert('About to submit: \n\n' + queryString); 
+   		
+   		// here we could return false to prevent the form from being submitted; 
+   		// returning anything other than false will allow the form submit to continue 
+   		//return true; 
+    	
+	    // validation
+	    var carrier=j$.trim(j$('select[name="shipping-carrier"]').val());
+	    var tracking=j$.trim(j$('textarea[name="shipping-tracking"]').val());
+	    var package=j$.trim(j$('input[name="shipping-package"]').val());
+
+	    if (carrier==''){
+	    	j$().toastmessage('showErrorToast', 'Please select a shipping method!');
+			return false;
+		}
+	    if (tracking==''){
+	    	j$().toastmessage('showErrorToast', 'Please enter the primary tracking number!');
+			return false;
+		}
+	    if (package==''){
+	    	j$().toastmessage('showErrorToast', 'Please enter the number of packages in this shipment!');
+			return false;
+		}
+
+   		return true;
+   	}    
+   	
     j$(document).ready(function(){
     	{% if cart.status=='Open' or cart.status=='Rejected' %}
     		j$('input[type="number"]').prop('disabled', false);
@@ -137,6 +205,19 @@
 	    // level 2 navigation
 	    j$('.level-2-navigation').show();
 	    j$('#nav-cart-review').addClass('level-2-navigation-selected');
+	    
+	    // update shipping info
+    	// bind 'myForm' and provide a simple callback function 
+    	var options={
+    		dataType: 'json',
+    		beforeSubmit: showRequest,
+    		success: showResponse
+    	};
+    	j$('#myForm').keydown(function(e) {
+    	  	return e.which !== 13;
+    	}).ajaxForm(options,function() { 
+    		alert("Thank you for your comment!"); 
+    	});	    
     });
 </script>
 {% endblock %}
@@ -164,11 +245,12 @@
 
 	<!-- Shipping inputs are available after approval and for DOC -->
 	{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
-	<div class="shopping-cart-pane" style="display:none;">
+	<div class="shopping-cart-pane" style="display:none;" itemId="{{ cart.key.id() }}">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 			Close
 		</span>
 
+		<form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data">
 		<h1 class="ariel-blue">Enter Shipping Information</h1>		
 		<div>
 		<label class="ss-label">Select a shipping method</label>
@@ -184,10 +266,7 @@
 		<div>
 		<label class="ss-label">Tracking Number</label>
 		<br />
-		{#
-		<input class="ss-input" type="text" name="shipping-tracking" id="input-tracking-number" placeholder="eg. 013840222514114"/>
-		#}
-		<textarea class="ss-textarea" id="input-tracking-number"></textarea>
+		<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number"></textarea>
 		</div>
 
 		<table class="two-col-table">
@@ -195,7 +274,7 @@
 				<td>
 					<label>Number of Packages</label>
 					<br />
-					<input type="number" name="shipping-number-of-package" id="input-number-of-package" placeholder="1"/>					
+					<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"/>					
 				</td>
 				<td>
 					<label>Cost</label>
@@ -210,50 +289,15 @@
 		<br />
 		<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
 		</div>
-		{#		
-		<table class="ariel-table">
-		<tr><td>
-			Select a carrier
-		</td><td>
-			<select>
-				<opton value="this">this</option>
-				<opton value="that">that</option>
-			</select>
-
-		</td></tr>
-		
-		<tr><td>
-			Enter tracking number
-		</td><td>
-			<input type="text" id="input-tracking-number" placeholder="eg. 013840222514114"/>
-		</td></tr>
-		
-		<tr><td>
-			Enter number of packages
-		</td><td>
-			<input type="number" id="input-number-of-package" placeholder="eg. 5"/>
-		</td></tr>
-		
-		<tr><td>
-			Upload shipping label file
-		</td><td>
-			<input type="file" id="input-shipping-label-file" />
-		</td></tr>
-		
-		<tr><td>
-			Enter shipping cost
-		</td><td>
-			<input type="number" step="any" placeholder=""/>
-		</td></tr>
-		</table>
-		#}
 		
 		<p class="ariel-blue">
 		Please verify the shipment information and click the "Create Shipment" button below.
 		Shiping label file will be emailed to all buyers and sellers.
 		</p>
-		<button class="my-button">Create Shipment</button>
-	</div>   
+		<button class="my-button" id="btn-create-shipping">Save Shipment</button>
+	
+		</form>
+	</div>
 	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
 	{% endif %}
 	

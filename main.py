@@ -37,6 +37,7 @@ routes = [
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/manage', handler='anthem.ManageBuyOrderCart',name='cart-manage'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
+	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 	Route('/user/profile',handler='anthem.ManageUserProfile',name='user-profie'),	
 ]
 

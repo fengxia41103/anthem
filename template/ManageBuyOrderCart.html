@@ -42,6 +42,7 @@
 				<td>Posting Buyer</td>
 				<td>Status</td>
 				<td>Shipping</td>
+				<td>Item Count</td>
 			</tr>
 	</thead>
 	<tbody>
@@ -83,6 +84,7 @@
 					{% endif %}
 				</td>                                        					
 				<td>{{ c.shipping_status }}</td>
+				<td>{{ c.fills|count }}</td>
 			</tr>
 		{% endfor %}
 	</tbody>

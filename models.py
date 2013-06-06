@@ -191,9 +191,8 @@ class BuyOrderCart(MyBaseModel):
 	# shipping related
 	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'],default='Open')
 	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
-	shipping_carrier=ndb.StringProperty()
-	shipping_cost=ndb.FloatProperty()
 	shipping_carrier=ndb.StringProperty(choices=SHIPPING_METHOD)
+	shipping_cost=ndb.FloatProperty()
 	shipping_num_of_package=ndb.IntegerProperty()
 	
 	# allowing multiple tracking numbers
