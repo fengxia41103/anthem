@@ -9,6 +9,9 @@ body{
 h1,h2,h3,h4,h5{
 	font-family: Verdana, Geneva, sans-serif;
 }
+input,textarea,label,span,p,div,select{
+	font-family: Verdana, Geneva, sans-serif;
+}
 
 /* Main layout */
 .level-1-navigation{
@@ -24,13 +27,13 @@ h1,h2,h3,h4,h5{
 	margin-left:auto;
 	margin-right:auto;
 	display:block;
-	margin-bottom:50px;
-	margin-top:50px;
+	margin-bottom:30px;
+	margin-top:30px;
 	padding:20px;
-	border:2px #292421 solid;
+	border:5px #292421 solid;
 }
 .level-1-navigation img:hover{
-	border:2px #ce8 solid;
+	border:5px #4ac948 solid;
 	border-radius:20px;
 	-moz-border-radius:20px;
 	-webkit-border-radius:20px;
@@ -44,6 +47,12 @@ h1,h2,h3,h4,h5{
 	list-style-type:none;
 	margin-left:0;
 	padding-left:0;
+}
+.level-1-navigation-selected img{
+	border:5px #4ac948 solid;
+	border-radius:20px;
+	-moz-border-radius:20px;
+	-webkit-border-radius:20px;
 }
 
 .level-2-navigation{
@@ -367,7 +376,8 @@ ul.tags li a{
 	background: #238E68;
 	margin: 5px;
 	color: white;
-/*	font-family: Impact, Charcoal, sans-serif;       	*/	font-family: ‘Arial Narrow’, sans-serif;
+/*	font-family: Impact, Charcoal, sans-serif;       	*/
+	font-family: ‘Arial Narrow’, sans-serif;
 }
 
 .pin-command-center button{
@@ -1820,10 +1830,9 @@ table.two-col-table input{
 	webkit-border-radius: 5px;
 	moz-border-radius:5px;
 	padding: 10px 0 10px 10px;
-	font-size:0.9em;
 }
 .ss-textarea{
-	width:463px;
+	width:469px;
 	height:50px;
 	background-color:#888;
 	color:white;
@@ -1853,7 +1862,7 @@ table.two-col-table input{
 	font-weight:bold;
 }
 .shopping-cart-pane{
-	background: #ffffcc; 
+	background: #E3CF57; 
 	position:fixed;
 	top:0px;
 	right:0;
@@ -1867,7 +1876,7 @@ table.two-col-table input{
 	background-color:#888;
 	color:white;
 	border:none;
-	width:500px;
+	width:510px;
 	height: 40px;
 	border-radius: 5px;
 	webkit-border-radius: 5px;

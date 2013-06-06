@@ -195,11 +195,19 @@
     	j$('select#seller_filter').change(function(){
     		window.location = '{{url}}?seller='+j$(this).val();
     	});
+    	
+    	// level 2 navigation
+    	j$('#nav-banking').addClass('level-1-navigation-selected');
     });    
 </script>
 {% endblock %}
 
 {% block main %}
+<h1 class="ariel-blue">Money Matter</h1>
+<p class="ariel-blue ariel-p">
+Take a moment to log a payment that you have issued for a buy and a revenue that you have received from a sale. 
+We will tell you profit & loss of each transaction so that you can monitor the health of your business.
+</p>
 
 <div id="tabs-min">
 	<ul>
@@ -207,7 +215,11 @@
         <li><a href="#tabs-2">Register Earnings</a></li>
 	</ul>
 	<div id="tabs-1">
-    Paying a seller will withdraw funds from Buyer's bank account and transfer them to the Seller's account.
+		<p>
+    	Did you pay someone for a transaction? If <strong>Yes</strong>, follow these steps to register a payment that 
+    	you have issued. 
+    	</p>
+    	
 		<div class="quick-pane">
 			<h3>Step 1: Enter total amount</h3>
 			<div class="searchbox">
@@ -265,7 +277,11 @@
 	</div>
 
 	<div id="tabs-2">
-    Distruting earning will withdraw funds from Client's bank account and transfer them to the Buyer's account.
+		
+		<p>
+    	Did you receive money from someone? If <strong>Yes</strong>, follow these steps to log earnings.
+    	</p>
+    	
 		<div class="quick-pane">
 			<h3>Step 1: Enter total amount</h3>
 			<div class="searchbox">

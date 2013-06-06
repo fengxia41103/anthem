@@ -201,7 +201,10 @@
 	    	j$(this).hide();
 	    	j$(this).siblings('div.shopping-cart-pane').slideToggle(600);
 	    });
-	    
+
+		// level 1 navigation
+		j$('#nav-order').addClass('level-1-navigation-selected');
+			    
 	    // level 2 navigation
 	    j$('.level-2-navigation').show();
 	    j$('#nav-cart-review').addClass('level-2-navigation-selected');
@@ -251,9 +254,9 @@
 		</span>
 
 		<form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data">
-		<h1 class="ariel-blue">Enter Shipping Information</h1>		
+		<h3>Enter Shipping Information</h3>		
 		<div>
-		<label class="ss-label">Select a shipping method</label>
+		<label class="ss-label">Shipping Method</label>
 		<br />
 		<select class="ss-select" name="shipping-carrier">
 			{% for s in shipping_methods %}
@@ -272,12 +275,12 @@
 		<table class="two-col-table">
 			<tr>
 				<td>
-					<label>Number of Packages</label>
+					<label class="ss-label">Number of Packages</label>
 					<br />
 					<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"/>					
 				</td>
 				<td>
-					<label>Cost</label>
+					<label class="ss-label">Cost</label>
 					<br />
 					<input type="number" name="shipping-cost" step="any" placeholder="0.0"/>
 				</td>
@@ -285,14 +288,13 @@
 		</table>		
 		
 		<div>
-		<label class="ss-label">Upload Shipping Label File</label>
+		<label class="ss-label">Shipping Label File</label>
 		<br />
 		<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
 		</div>
 		
-		<p class="ariel-blue">
-		Please verify the shipment information and click the "Create Shipment" button below.
-		Shiping label file will be emailed to all buyers and sellers.
+		<p>
+		Please verify the shipment information and click the "Save Shipment" button below.
 		</p>
 		<button class="my-button" id="btn-create-shipping">Save Shipment</button>
 	

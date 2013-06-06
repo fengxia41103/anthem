@@ -3,6 +3,7 @@
 {% block customJS %}
 <script type="text/javascript">
     j$(document).ready(function(){	
+    	j$('#nav-order').addClass('level-1-navigation-selected');
 		j$('.level-2-navigation').show();
 		j$('#nav-cart-manage').addClass('level-2-navigation-selected');
 
@@ -29,9 +30,10 @@
 {% endblock %}
 
 {% block main %}
-	<h1 class="ariel-blue">Manage Carts</h1>
+	<h1 class="ariel-blue">Manage Approvals</h1>
 	<p class="ariel-blue ariel-p">
-		You can review and manage shopping orders that have been placed by you (as a seller) and ones that need your approval (as a buyer).
+		You can review and manage shopping orders that have been placed by you (as a seller) and ones that need your approval (as a buyer). Use the 
+		links to get details of a cart to assist your decision. May the force be with you.
 	</p>
 
 <table class="table-row-border" id="table-carts">
@@ -50,7 +52,9 @@
 			<tr>
 				<td>
 					<a href="{{ review_url }}?cart={{ c.key.id() }}">
+						<span class="ss-label">
 						Cart# {{ c.key.id() }}
+						</span>
 					</a>
 					
 				</td>
