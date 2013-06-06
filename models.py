@@ -195,7 +195,9 @@ class BuyOrderCart(MyBaseModel):
 	shipping_cost=ndb.FloatProperty()
 	shipping_carrier=ndb.StringProperty(choices=SHIPPING_METHOD)
 	shipping_num_of_package=ndb.IntegerProperty()
-	shipping_tracking_number=ndb.StringProperty()
+	
+	# allowing multiple tracking numbers
+	shipping_tracking_number=ndb.StringProperty(repeated=True)
 	shipping_created_date=ndb.DateProperty()
 	shipping_label=ndb.BlobProperty() # allowing one label file
 			

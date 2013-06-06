@@ -692,8 +692,7 @@ table#fill-list{
 	border-radius: 20px;
 	color: #ffffff;
 	display: block;
-	font: 18px Georgia, "Times New 
-	Roman", Times, serif;
+	font: 18px Georgia, "Times New Roman", Times, serif;
 	letter-spacing: 1px;
 	margin: 10px auto;
 	padding: 7px 25px;
@@ -1820,6 +1819,17 @@ table.two-col-table input{
 	padding: 10px 0 10px 10px;
 	font-size:0.9em;
 }
+.ss-textarea{
+	width:463px;
+	height:50px;
+	background-color:#888;
+	color:white;
+	border:none;
+	border-radius: 5px;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	padding:20px;
+}
 
 .ss-input{
 	background-color:#888;
@@ -1842,7 +1852,7 @@ table.two-col-table input{
 .shopping-cart-pane{
 	background: #ffffcc; 
 	position:fixed;
-	top:50px;
+	top:0px;
 	right:0;
 	border-radius: 0 0 10px 10px;
 	border: 1px #888 solid;
