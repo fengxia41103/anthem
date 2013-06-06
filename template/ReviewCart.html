@@ -161,35 +161,7 @@
 		<button class="my-button" item="approval-process">Reject</button>
 	{% endif %}
 	</div>
-	{% else %}
-		<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
-	{% endif %}
 
-	<style>
-	.shopping-cart-pane{
-		background: #888; /* Old browsers */
-		position:fixed;
-		top:50px;
-		right:0;
-		border-radius: 0 0 10px 10px;
-		border: 1px #888 solid; 
-		padding: 20px;
-		z-index:999;
-		width:540px;
-	}
-	.ss-select, .ss-select option{
-		background-color:#888;
-		color:white;
-		border:none;
-		width:500px; 
-		height: 40px;
-		border-radius: 5px;
-		webkit-border-radius: 5px;
-		moz-border-radius:5px;
-		padding: 5px 0 10px 10px;
-		font-size:1.4em;
-	}	
-	</style>
 	<!-- Shipping inputs are available after approval and for DOC -->
 	{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
 	<div class="shopping-cart-pane" style="display:none;">
@@ -197,7 +169,7 @@
 			Close
 		</span>
 
-		<h1 class="ariel-blue" style="color:white;">Enter Shipping Information</h1>		
+		<h1 class="ariel-blue">Enter Shipping Information</h1>		
 		<div>
 		<label class="ss-label">Select a shipping method</label>
 		<br />
@@ -273,7 +245,7 @@
 		</table>
 		#}
 		
-		<p class="ariel-blue" style="color:white;">
+		<p class="ariel-blue">
 		Please verify the shipment information and click the "Create Shipment" button below.
 		Shiping label file will be emailed to all buyers and sellers.
 		</p>
@@ -473,4 +445,9 @@
 		</table>
 	{% endif %}
 	</div>
+
+	{% else %}
+		<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
+
+	{% endif %}
 {% endblock %}

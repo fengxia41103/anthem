@@ -52,6 +52,20 @@
 						Cart# {{ c.key.id() }}
 					</a>
 					
+				</td>
+				<td>
+					{% if c.terminal_buyer %}
+						{{ c.terminal_buyer.get().nickname }}
+					{% endif %}
+				</td>
+				<td>{{ c.terminal_seller.get().nickname }}</td>
+				<td>
+					{% if c.broker %}
+						{{ c.broker.get().nickname }}
+					{% endif %}
+				</td>
+				<td>
+					{{ c.status }}
 					{% if c.fills|length > 0 %}
 					<div>
 						{% if c.status=='Open' and me.can_be_doc() %}
@@ -66,20 +80,8 @@
 						{% endif %}
 					</div>
 					{% else %}
-					{% endif %}                                        					
-				</td>
-				<td>
-					{% if c.terminal_buyer %}
-						{{ c.terminal_buyer.get().nickname }}
 					{% endif %}
-				</td>
-				<td>{{ c.terminal_seller.get().nickname }}</td>
-				<td>
-					{% if c.broker %}
-						{{ c.broker.get().nickname }}
-					{% endif %}
-				</td>
-				<td>{{ c.status }}</td>
+				</td>                                        					
 				<td>{{ c.shipping_status }}</td>
 			</tr>
 		{% endfor %}
