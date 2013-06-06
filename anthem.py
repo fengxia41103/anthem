@@ -1,5 +1,10 @@
 import webapp2
 from google.appengine.api import users
+from google.appengine.ext import blobstore
+from google.appengine.api import images
+from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.ext.blobstore import delete, delete_async
+
 from webapp2 import uri_for,redirect
 import os
 import urllib
@@ -15,7 +20,16 @@ from myUtil import *
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'])
-        
+
+class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
+	def get(self, resource):
+		logging.info(resource)
+		
+		# resource is actually a blobkey
+  		resource = str(urllib.unquote(resource))
+  		blob_info = blobstore.BlobInfo.get(resource)
+  		self.send_blob(blob_info)
+                      
 class ComplexEncoder(json.JSONEncoder):
 	def default(self, obj):
 		if isinstance(obj, datetime.date):
@@ -336,6 +350,16 @@ class ReviewCart(MyBaseHandler):
 		template_values['me']=me		
 		template_values['cart']=cart
 		template_values['url']=uri_for('cart-review')
+		
+		# to save label file using BlobStore
+		template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s' % (cart.key.id()))
+		
+		# serve label file if any
+		if cart.shipping_label:
+			template_values['shipping_label']='/blob/serve/%s/'% cart.shipping_label
+		else:
+			template_values['shipping_label']=None
+		
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
 		self.response.write(template.render(template_values))
 	
@@ -518,9 +542,13 @@ class ManageBuyOrder(MyBaseHandler):
 	def post(self):
 		me=self.get_contact()
 		
-class ShippingCart(MyBaseHandler):
+class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 	def post(self, cart_id):
-		me=self.get_contact()
+		user = users.get_current_user()
+		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
+			email=user.email(),
+			nickname=user.nickname())
+
 		cart=BuyOrderCart.get_by_id(int(cart_id),parent=me.key)
 		assert cart!=None
 		
@@ -533,7 +561,19 @@ class ShippingCart(MyBaseHandler):
 		# shipping label is optional
 		# thin about USPS
 		try:
-			cart.shipping_label=self.request.get('shipping-label')
+			#cart.shipping_label=self.request.get('shipping-label')
+			uploads=self.get_uploads('shipping-label')
+			logging.info(uploads)
+				
+			blob_info = uploads[0]
+			if cart.shipping_label:
+				# if there is existing
+				# delete this from blobstore
+				# NOTE: blobstore can not overwrite, but can delte
+				delete_async(cart.shipping_label)
+			
+			# now save new blob key
+			cart.shipping_label=blob_info.key()
 		except:
 			pass
 			

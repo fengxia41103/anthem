@@ -29,6 +29,7 @@ routes = [
 	Route('/auth/<provider>/callback', handler='handlers.AuthHandler:_auth_callback', name='auth_callback'),
 
 	# Anthem
+	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
 	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),  	
 	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),  
 	Route('/buyorder/owner/<owner_id:\d+>/<cat:[^/]+>/', handler='anthem.BrowseBuyOrderByOwnerByCat',name='buyorder-browse-owner-cat'),  

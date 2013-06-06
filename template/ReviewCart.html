@@ -264,7 +264,8 @@
 			Close
 		</span>
 
-		<form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data">
+		<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
+		<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
 		<h3>Enter Shipping Information</h3>		
 		<div>
 		<label class="ss-label">Shipping Method</label>
@@ -303,7 +304,6 @@
 			<tr>
 				<td>				
 					<label class="ss-label">Shipping Label File</label>
-					<br />
 					<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
 				</td>
 				<td>				
@@ -314,6 +314,12 @@
 			</tr>
 		</table>		
 		
+		<br />
+		{% if shipping_label %}
+			<a href="{{ shipping_label }}">View saved shipping label</a>
+			<br />
+		{% endif %}
+	
 		<button class="my-button" id="btn-create-shipping">Save Shipment</button>
 	
 		</form>
@@ -470,6 +476,12 @@
 		</tr>
 		<tr><td>Last Modified Date</td>
 			<td>{{ cart.shipping_created_date }}</td>
+			<td>Shipping Label</td>
+			<td>
+				{% if shipping_label %}
+					<a href="{{ shipping_label }}">Download</a>
+				{% endif %}
+			</td>
 		</tr>
 	</table>
 	</div>	
