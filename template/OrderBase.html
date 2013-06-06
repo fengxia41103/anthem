@@ -5,51 +5,41 @@
 		{% if me.can_be_nur() %}
 		<li id="nav-buyorder-browse">
 			<a href="/buyorder/browse" title="Browse and shop">
-				<span class="ss-label">
 				<img src="http://cdn4.iconfinder.com/data/icons/devine_icons/128/PNG/Folder%20and%20Places/Stack.png" />
-				Shopping
-				</span>
 			</a>
+			<h3>Shopping</h3>
 		</li>
 
 		<li id="nav-cart-review">
 			<a href="/cart/review?cart={{ cart.key.id() }}" title="Review my shopping cart">
-				<span class="ss-label">
 				<img src="http://cdn3.iconfinder.com/data/icons/glyph/227/Tag-128.png" />
-				Place Order
-				</span>
 			</a>
+			<h3>Place Order</h3>
 		</li>		
 		{% endif %}
 		
 		{% if me.can_be_doc() %}
 		<li id="nav-buyorder-post">
 			<a href="/buyorder/new" title="Post a new order">
-				<span class="ss-label">
 				<img src="http://cdn2.iconfinder.com/data/icons/picons-essentials/57/compose-128.png" />
-				Post New
-				</span>
 			</a>
+			<h3>Post New</h3>
 		</li>
 		{% endif %}
 
 		<li id="nav-cart-manage">
 			<a href="/cart/manage" title="Manage shopping orders">
-				<span class="ss-label">
 				<img src="http://cdn4.iconfinder.com/data/icons/vectory-personnel-2/40/user_approve-128.png" />
-				Approval
-				</span>
 			</a>
+			<h3>Approval</h3>
 		</li>
 		
 		{% if me.can_be_doc() %}
 		<li id="nav-buyorder-owner">
 			<a href="/buyorder/owner/{{ me.key.id() }}/" title="View my posted orders by category">
-				<span class="ss-label">
 				<img src="http://cdn5.iconfinder.com/data/icons/high-resolution-app-tab-bar-icons/60/Category.png" />
-				Categories
-				</span>
 			</a>
+			<h3>Categories</h3>
 		</li>
 		{% endif %}
 

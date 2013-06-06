@@ -48,10 +48,16 @@ h1,h2,h3,h4,h5{
 
 .level-2-navigation{
 	width:150px;
-	background-color: #888;
+	background-color: #fafafa;
 	text-align:center;
 }
+
 .level-2-navigation h3{
+	margin-top:0;
+	font-size:0.9em;
+}
+
+.level-2-navigation-selected h3{
 	color:white;
 	border-bottom: 4px white solid;
 	padding-bottom:20px;
@@ -75,9 +81,7 @@ h1,h2,h3,h4,h5{
 	border-radius:5px;
 	/*background-color: #888;*/
 }
-.level-2-navigation-selected{
-	background-color:white;
-}
+
 .level-2-navigation li:hover{
 	background-color:#4AC948;
 }
@@ -87,7 +91,10 @@ h1,h2,h3,h4,h5{
 
 .level-2-navigation li a{
 	text-decoration:none;
-	color: #333; 
+	color:blue;
+}
+.level-2-navigation-selected{
+	background-color:#DB7093;
 }
 
 .level-2-navigation img{
@@ -1803,10 +1810,6 @@ table.two-col-table td:nth-child(2n+1){
 	width:50%;
 	padding-right:20px;
 }
-table.two-col-table label{
-	font-size:0.9em;
-	font-weight:bold;
-}
 table.two-col-table input{
 	/*color:#ebebeb;*/
 	color:white;
@@ -1845,10 +1848,10 @@ table.two-col-table input{
 }
 .ss-label{
 	font-size:0.9em;
-	color:#777777;
+	color:#888;
 	margin-top:10px;
+	font-weight:bold;
 }
-
 .shopping-cart-pane{
 	background: #ffffcc; 
 	position:fixed;
