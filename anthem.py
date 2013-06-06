@@ -444,7 +444,7 @@ class BankingCart(MyBaseHandler):
 		# receivable carts
 		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0)
 		if self.request.GET.has_key('client'):
-			client_id=int(self.request.GET['client'])
+			client_id=self.request.GET['client']
 			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
 		template_values['receivable_carts']=receivable_carts
 		template_values['clients']=set([c.terminal_buyer for c in receivable_carts if c.terminal_buyer])
