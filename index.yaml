@@ -28,3 +28,8 @@ indexes:
   - name: tags
   - name: created_time
     direction: desc
+
+- kind: BuyOrderCart
+  properties:
+  - name: terminal_seller
+  - name: payable_balance

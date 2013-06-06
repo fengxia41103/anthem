@@ -436,7 +436,7 @@ class BankingCart(MyBaseHandler):
 		# payable carts
 		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
 		if self.request.GET.has_key('seller'):
-			seller_id=int(self.request.GET['seller'])
+			seller_id=self.request.GET['seller']
 			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
 		template_values['payable_carts']=payable_carts
 		template_values['sellers']=set([c.terminal_seller for c in payable_carts])
