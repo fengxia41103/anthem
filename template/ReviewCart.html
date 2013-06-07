@@ -112,7 +112,7 @@
 							
 							// if this is the last row, we now have an empty cart
 							// redirect to browse page
-							window.location.href = "/buyorder/browse";
+							//window.location.href = "/buyorder/browse";
 							break;
 						default:
 							break;
@@ -424,12 +424,16 @@
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
 		<table class="table-row-border">
 			{% for f in cart.fills %}
-			<tr><td><img src="{{ f.order.get().image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/></td>
+			<tr><td>
+					<a href="/buyorder/browse/{{ f.order.id() }}/">
+					<img src="{{ f.order.get().image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/>
+					</a>
+				</td>
 				<td>
 					<h4>
-					{{ f.order.get().name }}
+					{{ f.order.get().name|title }}
 					</h4>
-					{{ f.order.get().description|truncate(30) }}
+					{{ f.order.get().description }}
 				</td>
 				<td>
 					{% if cart.status=='Open' or cart.status=='Rejected' %}

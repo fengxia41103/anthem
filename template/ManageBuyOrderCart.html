@@ -65,7 +65,9 @@
 							</td>
 							<td>Posting Buyer</td>
 							<td>
-								{{ c.broker.get().nickname }}
+								{% if c.broker %}
+									{{ c.broker.get().nickname }}
+								{% endif %}
 							</td>
 						</tr>								
 						<tr><td>Payable</td>

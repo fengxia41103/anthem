@@ -232,6 +232,17 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 		
 		self.response.write(json.dumps([json.dumps(o.to_dict(),cls=ComplexEncoder) for o in queries]))
 
+class BrowseBuyOrderById(MyBaseHandler):
+	def get(self,order_id):
+		template_values = {}
+		template_values['me']=me=self.get_contact()
+		template_values['cart']=me=self.get_open_cart()
+		template_values['order']=order=BuyOrder.get_by_id(int(order_id))
+		assert order!=None
+		
+		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrderById.html')
+		self.response.write(template.render(template_values))
+
 class BrowseBuyOrder(MyBaseHandler):
 	def get(self):
 		me=self.get_contact()
@@ -261,7 +272,7 @@ class BrowseBuyOrder(MyBaseHandler):
 			nd=self.request.GET['nd']
 		except:
 			nd=None
-			
+
 		# list of buyorder to browse
 		if owner_id:
 			queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
@@ -522,7 +533,7 @@ class ManageBuyOrderCart(MyBaseHandler):
 		open_cart=template_values['cart']=self.get_open_cart()
 		
 		# get all carts that belong to this user
-		template_values['my_carts']=carts=BuyOrderCart.query(ancestor=me.key)
+		template_values['my_carts']=carts=BuyOrderCart.query(ancestor=me.key).filter(BuyOrderCart.status!='Open')
 
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrderCart.html')

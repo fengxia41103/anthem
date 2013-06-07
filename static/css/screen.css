@@ -121,6 +121,7 @@ input,textarea,label,span,p,div,select,td{
 }
 ul.tags{
 	padding-left:0;
+	margin-bottom:10px;
 }
 ul.tags li{
 	list-style-type:none;
@@ -1789,7 +1790,7 @@ div.list-of-photo{
 .list-of-photo ul{
 	list-style-type:none;
 	margin:0;
-	padding:0;
+	padding-bottom:50px;
 }
 .list-of-photo li img{
 	width:50px;

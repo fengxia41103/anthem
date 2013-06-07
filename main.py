@@ -30,8 +30,9 @@ routes = [
 
 	# Anthem
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
-	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),  	
-	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),  
+	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder'),
+	Route('/buyorder/browse/<order_id:\d+>/', handler='anthem.BrowseBuyOrderById',name='buyorder-browse-id'),
+	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),
 	Route('/buyorder/owner/<owner_id:\d+>/<cat:[^/]+>/', handler='anthem.BrowseBuyOrderByOwnerByCat',name='buyorder-browse-owner-cat'),  
 	Route('/buyorder/owner/<owner_id:\d+>/', handler='anthem.BrowseBuyOrderByOwner',name='buyorder-browse-owner'),  
 	Route('/buyorder/manage', handler='anthem.ManageBuyOrder',name='buyorder-manage'),  

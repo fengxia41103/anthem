@@ -1,0 +1,50 @@
+{% extends "/template/OrderBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		// get buyorders posted by this author
+		j$.post(
+			'/buyorder/owner/{{ order.owner.id() }}/',
+			'',
+			function(result){
+				var data=j$.parseJSON(result);
+				
+				var html='<ul>';
+				for (var i=0; i<data.length;i++){
+					if (i<10){
+						// limit to 10
+						var tt=j$.parseJSON(data[i]);
+						html+='<li><img src="'+tt['image']+'" /></li>';
+					}
+				}
+				html+='</ul>';
+				j$('#my-list-of-buyorder').html(html);
+			}
+		);				
+	});
+</script>
+{% endblock %}
+
+
+{% block main %}
+    <div class="pin-in-focus box-shadow">
+    	<div class="border-bottom">
+    		<h1 id="infocus-title">{{ order.owner.get().nickname }}</h1>
+    		<h4>Posted On <span id="infocus-subtitle">{{ order.created_time }}</span><h4>
+    	</div>
+    	<div class="image-house">				
+    		<a id="infocus-image-link" href="">
+    		<img id="infocus-image" src="{{ order.image }}" />
+    		</a>
+    	</div>
+    	<div class="border-bottom">
+    		<h4 id="infocus-product-name">{{ order.name }}</h4>
+    		<div id="infocus-product-description">{{ order.description }}</div>
+    	</div>
+    	<div class="list-of-photo">
+    		<h4>Similar Posts</h4>
+    			<div id="my-list-of-buyorder"></div>
+    	</div>
+    </div>
+{% endblock %}
