@@ -1790,12 +1790,14 @@ div.list-of-photo{
 .list-of-photo ul{
 	list-style-type:none;
 	margin:0;
+	margin-bottom:50px;
 	padding-bottom:50px;
 }
 .list-of-photo li img{
 	width:50px;
 	height:50px;
 	margin:0;
+	margin-bottom:10px;
 	padding:0;
 	float:left;
 }

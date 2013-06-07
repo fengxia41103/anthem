@@ -101,6 +101,24 @@ class MyBaseHandler(webapp2.RequestHandler):
 			my_cart.put()
 		return my_cart
 							
+class EditBuyOrder(MyBaseHandler):
+	def get(self, order_id):
+		template_values = {}
+		template_values['me']=me=self.get_contact()
+		open_cart=template_values['cart']=self.get_open_cart()
+		
+		order=BuyOrder.get_by_id(int(order_id))
+		assert order
+		
+		# only owner of this order can edit
+		# TODO: super user should be able, too
+		if order.owner==me.key or me.can_be_super():
+			template_values['order']=order
+		else:
+			return self.response.write('You do not have the right to edit this order.')
+				
+		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
+		self.response.write(template.render(template_values))
 
 class PublishNewBuyOrder(MyBaseHandler):
 	def get(self):
@@ -114,6 +132,11 @@ class PublishNewBuyOrder(MyBaseHandler):
 		# load publish buyorder page
 		template_values = {}
 		template_values['me']=me
+		
+		# this is used to differentiate new order vs. editing an existing one
+		# since we are reusing this template HTML
+		template_values['order']=None
+		
 		open_cart=template_values['cart']=self.get_open_cart()
 		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
 		self.response.write(template.render(template_values))
@@ -238,7 +261,7 @@ class BrowseBuyOrderById(MyBaseHandler):
 		template_values['me']=me=self.get_contact()
 		template_values['cart']=me=self.get_open_cart()
 		template_values['order']=order=BuyOrder.get_by_id(int(order_id))
-		assert order!=None
+		assert order
 		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrderById.html')
 		self.response.write(template.render(template_values))
@@ -319,11 +342,11 @@ class BrowseBuyOrder(MyBaseHandler):
 
 		# get BuyOrder instance
 		buyorder=BuyOrder.get_by_id(int(buyorder_id))
-		assert buyorder!=None
+		assert buyorder
 		
 		# there is one and only one open cart		
 		my_cart=self.get_open_cart()
-		assert my_cart!=None
+		assert my_cart
 			
 		# we have established an OPEN cart
 		existing=False		
@@ -357,7 +380,7 @@ class ReviewCart(MyBaseHandler):
 		
 		me=self.get_contact()
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
-		assert cart!=None		
+		assert cart
 
 		template_values['shipping_methods']=SHIPPING_METHOD
 		template_values['me']=me		
@@ -381,7 +404,7 @@ class ReviewCart(MyBaseHandler):
 		cart_id=int(self.request.POST['cart'])
 		me=self.get_contact()
 		cart=BuyOrderCart.get_by_id(cart_id,parent=me.key)
-		assert cart!=None		
+		assert cart
 		status='0'
 		
 		if self.request.POST.has_key('action'):
@@ -479,7 +502,7 @@ class BankingCart(MyBaseHandler):
 		if action=='payable':
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
-				assert cart!=None
+				assert cart
 				slip=AccountingSlip()
 				slip.amount=float(d['amount'])
 				slip.party_a=me.key
@@ -490,7 +513,7 @@ class BankingCart(MyBaseHandler):
 		elif action=='receivable':
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
-				assert cart!=None
+				assert cart
 				slip=AccountingSlip()
 				slip.amount=float(d['amount'])
 				slip.party_a=me.key
@@ -574,7 +597,7 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 			nickname=user.nickname())
 
 		cart=BuyOrderCart.get_by_id(int(cart_id),parent=me.key)
-		assert cart!=None
+		assert cart
 		
 		cart.shipping_carrier=self.request.POST['shipping-carrier']
 		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',') if len(f.strip())>0]

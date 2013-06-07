@@ -142,9 +142,6 @@
     }
     
     j$(document).ready(function(){		
-    	j$('#publish-new-buy-order-btn').on('click',function(){
-    	});
-    	
     	j$('#input-product-name').on('change',function(){
     		if (j$(this).val().length>=500){
 				j$().toastmessage('showWarningToast', 'Name is too long. Max is 500 characters.');    		
@@ -255,13 +252,18 @@
     		j$('#review-order-total').html(total);
 			
 			// tinyMCE editor content
-     		//var content=tinyMCE.activeEditor.getContent({format : 'raw'});
-     		var content=tinyMCE.activeEditor.getContent();
+     		var content=tinyMCE.activeEditor.getContent({format : 'raw'});
+     		//var content=tinyMCE.activeEditor.getContent();
 			j$('#review-product-description').html(content);
 			
-			// this is the actual INPUT field that will be submitted in form
+			// MUST: this is the actual INPUT field that will be submitted in form
 			j$('#input-product-description').html(content);
      	});
+
+		// if editing, set image selected
+		{% if order %}
+    		j$('#user-input-image').parent('.ariel-pinterest-item').find('.ariel-checkbox').addClass('ariel-checkbox-checked');
+		{% endif %}
 
 		// level 1 navigatino
 		j$('#nav-order').addClass('level-1-navigation-selected');
@@ -294,63 +296,52 @@ items to give you a starting point for your listing.
 		<div class="ss">
 			<label class="ss-label">Product</label>
 			<br />
-			<input class="ss-input" name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+				{% if order %}
+					<input class="ss-input" name="product" type="text" id="input-product-name" value="{{ order.name }}"/>
+				{% else %}
+					<input class="ss-input" name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+				{% endif %}
 			<table class="two-col-table">
 				<tr><td>
 						<label class="ss-label">Price</label><br />
-						<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
+						{% if order %}
+							<input name="price" type="number" id="input-price" step="any" min="0" value="{{ order.price }}" />
+						{% else %}
+							<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
+						{% endif %}
 					</td><td>
 						<label class="ss-label">Qty</label><br />
-						<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
+						{% if order %}						
+							<input name="qty" type="number" id="input-qty" min="1" value="{{ order.qty }}"/>
+						{% else %}
+							<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
+						{% endif %}
 					</td>
 				</tr>
 			</table>
 			
 			<label class="ss-label">Brief Description</label>
 			<br />
-			<textarea class="ss-textarea"></textarea>
+			{% if order %}
+				<textarea class="ss-textarea">{{ order.description }}</textarea>
+			{% else %}
+				<textarea class="ss-textarea"></textarea>
+			{% endif %}
 			<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
 			<br />
 			<label class="ss-label">For Client (optional)</label>
 			<br />
-			<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
-			
+			{% if order %}
+				{% if order.terminal_buyer %}
+				<input class="ss-input" name="client" type="email" id="input-client-name" value="{{ order.terminal_buyer.get().nickname }}"/>
+				{% else %}
+					<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+				{% endif %}
+			{% else %}
+				<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+			{% endif %}
 		</div>
 	</div>
-	{#
-		<table class="ariel-table">
-		<tr><td>
-		Choose only one client
-		</td><td>
-		<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
-		</td></tr>
-		
-		<tr><td>
-		Product name
-		</td><td>
-		<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
-		</td></tr>
-		
-		<tr><td>
-		Write about the product
-		</td><td>
-		<input name="description" type="text" id="input-product-description" placeholder="eg. Serial number starts with NO233xxx"/>
-		</td></tr>
-		
-		<tr><td>
-		Name the price
-		</td><td>
-		<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
-		</td></tr>
-		
-		<tr><td>
-		Enter quantity
-		</td><td>
-		<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
-		</td></tr>
-		</table>
-	</div>		
-	#}
 	
 	<div id="step-2">
 		<p class="ariel-p">
@@ -373,14 +364,17 @@ items to give you a starting point for your listing.
 		<tr><td>
 		Picture link
 		</td><td>
-		<input type="url" class="url" placeholder="http://..."/>
-		<input type="url" name="url" style="display:none;"/>
-		
+		<input type="url" name="url" class="url" placeholder="http://..."/>
+
 		<span class="ariel-button" id="btn-apply-user-input-image">Use</span>
 		</td></tr>
 		</table>
 		<div class="ariel-pinterest-item" style="width:25%;margin-right:auto;margin-left:auto;display:block;">
-			<img id="user-input-image" src="" />
+			{% if order %}
+				<img id="user-input-image" src="{{ order.image }}" />
+			{% else %}
+				<img id="user-input-image" src="" />
+			{% endif %}
 			<p>
 				<span class="ariel-checkbox">&nbsp;</span>
 				Yes, use this one
@@ -392,8 +386,8 @@ items to give you a starting point for your listing.
 	<div id="step-3">
 		<div class="image-select-pane">
 			<table id="review-new-buy-order-table">
-			<tr><td class="box-shadow" valign="middle">
-			<img id="review-product-image" src="" style="width:150px;"/>
+			<tr><td valign="middle">
+			<img id="review-product-image" src="" style="width:150px;" class="box-shadow"/>
 			</td><td>
 			
 			<table class="ariel-table table-row-border">
