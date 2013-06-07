@@ -85,7 +85,7 @@ class Contact(ndb.Model):
 	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
 	nickname=ndb.StringProperty() # user name
-	phone=ndb.PickleProperty(default={'home':'','office':'','mobile':''}) # a dict
+	communication=ndb.PickleProperty(default={'home':'','office':'','mobile':''}) # a dict
 
 	# a Contact can sign up multiple membership kinds
 	memberships=ndb.StructuredProperty(Membership,repeated=True)
@@ -97,6 +97,15 @@ class Contact(ndb.Model):
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty()
+	
+	# shipping method preference
+	# write whatever you want
+	# eg. state, carrier, 
+	shipping_preference=ndb.StringProperty()
+	
+	# payment method preference
+	# write whatever you want
+	payment_preference=ndb.StringProperty()
 	
 	def can_be_doc(self):
 		# if a Doc membership is Active
