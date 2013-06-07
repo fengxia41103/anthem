@@ -70,7 +70,8 @@ input,textarea,label,span,p,div,select,td{
 .level-2-navigation-selected h3{
 	color:white;
 	border-bottom: 4px white solid;
-	padding-bottom:20px;
+	padding-bottom:10px;
+	margin-bottom:10px;
 }
 
 .level-2-navigation div{
@@ -1860,6 +1861,21 @@ table.two-col-table input{
 	margin-top:10px;
 	font-weight:bold;
 }
+
+/* this is to simulate a table column without using table */
+.fixed-width-label{
+	font-size:0.9em;
+	color:#888;
+	font-weight:bold;
+	width:25%;
+	display:inline-block;
+	text-align:right;
+	margin-right:20px;
+}
+.fixed-width-label:after{
+	content:':';
+}
+
 .shopping-cart-pane{
 	background: #E3CF57; 
 	position:fixed;
