@@ -215,10 +215,10 @@ class BuyOrderCart(MyBaseModel):
 	# owner of BuyOrder is always "a"
 	# payout: terminal seller is "b", slip is a-2-b, thus a cost to the broker
 	# payin: termian client is "b", slip is b-2-a, thus an income to the broker
-	payout_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
-	payin_slips=ndb.StructuredProperty(AccountingSlip,repeated=True)
-	payout=ndb.ComputedProperty(lambda self: sum([p.amount for p in self.payout_slips]))
-	payin=ndb.ComputedProperty(lambda self: sum([p.amount for p in self.payin_slips]))
+	payout_slips=ndb.KeyProperty(kind='AccountingSlip',repeated=True)
+	payin_slips=ndb.KeyProperty(kind='AccountingSlip',repeated=True)
+	payout=ndb.ComputedProperty(lambda self: sum([p.get().amount for p in self.payout_slips]))
+	payin=ndb.ComputedProperty(lambda self: sum([p.get().amount for p in self.payin_slips]))
 	payable_balance=ndb.ComputedProperty(lambda self: self.payable-self.payout)
 	receivable_balance=ndb.ComputedProperty(lambda self: self.receivable-self.payin)
 	

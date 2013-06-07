@@ -9,8 +9,9 @@ body{
 h1,h2,h3,h4,h5{
 	font-family: Verdana, Geneva, sans-serif;
 }
-input,textarea,label,span,p,div,select{
+input,textarea,label,span,p,div,select,td{
 	font-family: Verdana, Geneva, sans-serif;
+	font-size:10pt;
 }
 
 /* Main layout */
@@ -1441,9 +1442,8 @@ button[item="submit-for-approval-btn"]:hover{
   	border-spacing: 10px;
   	*border-collapse: expression('separate', cellSpacing = '10px');
 }
-.ariel-table td:nth-child(2n+1){
-	font-family: Verdana, Geneva, sans-serif;
-	font-size:10pt;
+/*.ariel-table td:nth-child(2n+1){*/
+.ariel-table td{
 	color:#898989;
 	text-align:right;	
 }

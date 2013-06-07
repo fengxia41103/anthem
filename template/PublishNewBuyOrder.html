@@ -30,6 +30,13 @@
 				break;
 			case 0:
 				j$().toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
+				
+				// reset inputs
+				j$('div#step-1').find('input').val('');
+				j$('div#step-1').find('textarea').val('');
+				j$('div#step-2').find('input').val('');
+				j$('div#step-2').find('textarea').val('');
+				j$('.css3-columns-4').html('');
 				break;
 			default:
 				break;
