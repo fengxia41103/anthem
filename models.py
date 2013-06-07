@@ -110,25 +110,10 @@ class Contact(ndb.Model):
 		# if a Client membership is Active
 		return (self.is_active and any([m.role in ['Client','Super','Trial'] for m in self.memberships]))
 	
-#######################################
-#
-# Financial transaction models
-#
-#######################################
-class AccountingSlip(ndb.Model):
-	# StructuredProperty within a Contact
-	created_time=ndb.DateTimeProperty(auto_now_add=True)
-	last_modified_time=ndb.DateTimeProperty(auto_now=True)
-	
-	party_a=ndb.KeyProperty(kind='Contact')
-	party_b=ndb.KeyProperty(kind='Contact')
-	#method=ndb.KeyProperty(kind='Billing') # transaction method
-	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a']) # who gives the amount to whom
-	amount=ndb.FloatProperty()
 
 #######################################
 #
-# Business transaction models
+# Abstract models
 #
 #######################################
 class MyBaseModel(ndb.Model):
@@ -140,6 +125,24 @@ class MyBaseModel(ndb.Model):
 	owner=ndb.KeyProperty(kind='Contact')
 	last_modified_by=ndb.KeyProperty(kind='Contact')
 		
+#######################################
+#
+# Financial transaction models
+#
+#######################################
+class AccountingSlip(MyBaseModel):
+	party_a=ndb.KeyProperty(kind='Contact')
+	party_b=ndb.KeyProperty(kind='Contact')
+	#method=ndb.KeyProperty(kind='Billing') # transaction method
+	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a']) # who gives the amount to whom
+	amount=ndb.FloatProperty()
+
+
+#######################################
+#
+# Business transaction models
+#
+#######################################
 class BuyOrder(MyBaseModel):
 	terminal_buyer=ndb.KeyProperty(kind='Contact') # optional
 	name=ndb.StringProperty()

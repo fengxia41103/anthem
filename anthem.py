@@ -460,7 +460,8 @@ class BankingCart(MyBaseHandler):
 		
 		action=self.request.POST['action']
 		data=json.loads(self.request.POST['data'])
-		datastore_write_bundle=[]
+		payable_bundle=[]
+		receivable_bundle=[]
 		
 		if action=='payable':
 			for d in data:
@@ -471,8 +472,8 @@ class BankingCart(MyBaseHandler):
 				slip.party_a=me.key
 				slip.party_b=cart.terminal_seller
 				slip.money_flow='a-2-b'
-				cart.payout_slips.append(slip)
-				datastore_write_bundle.append(cart)
+				slip.last_modified_by=me.key
+				payable_bundle.append(slip)
 		elif action=='receivable':
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=me.key)
@@ -482,10 +483,20 @@ class BankingCart(MyBaseHandler):
 				slip.party_a=me.key
 				slip.party_b=cart.terminal_buyer
 				slip.money_flow='b-2-a'
-				cart.payin_slips.append(slip)
-				datastore_write_bundle.append(cart)
+				slip.last_modified_by=me.key
+				receivable_bundle.append(slip)
 		
-		ndb.put_multi(datastore_write_bundle)
+		# write slips to data store		
+		ndb.put_multi(payable_bundle+receivable_bundle)
+		
+		# update cart
+		for slip in payable_bundle:
+			cart.payout_slips.append(slip.key)
+		for slip in receivable_bundle:
+			cart.payin_slips.append(slip.key)
+		cart.put()
+		
+		# return status
 		self.response.write(status)
 
 class ManageUserProfile(MyBaseHandler):

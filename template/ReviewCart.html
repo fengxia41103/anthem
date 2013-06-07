@@ -494,14 +494,14 @@
 		<thead>
 			<tr><td>Transaction Created On</td>
 				<td>Amount</td>
-				<td>Payment Method</td>
+				<td>Recorded By</td>
 			</tr>
 		</thead>
 		<tbody>		
 		{% for s in cart.payout_slips %}
-			<tr><td>{{ s.created_time }}</td>
-				<td>{{ s.amount }}</td>
-				<td>{{ s.billing }}</td>
+			<tr><td>{{ s.get().created_time }}</td>
+				<td>{{ s.get().amount }}</td>
+				<td>{{ s.get().last_modified_by.get().nickname }}</td>
 			</tr>
 		{% endfor %}
 		</tbody>
@@ -513,14 +513,14 @@
 		<thead>
 			<tr><td>Transaction Created On</td>
 				<td>Amount</td>
-				<td>Payment Method</td>
+				<td>Recorded By</td>
 			</tr>
 		</thead>
 		<tbody>		
 		{% for s in cart.payin_slips %}
-			<tr><td>{{ s.created_time }}</td>
-				<td>{{ s.amount }}</td>
-				<td>{{ s.billing }}</td>
+			<tr><td>{{ s.get().created_time }}</td>
+				<td>{{ s.get().amount }}</td>
+				<td>{{ s.get().last_modified_by.get().nickname }}</td>
 			</tr>
 		{% endfor %}
 		</tbody>
