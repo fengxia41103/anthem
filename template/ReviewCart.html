@@ -424,12 +424,12 @@
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
 		<table class="table-row-border">
 			{% for f in cart.fills %}
-			<tr><td><img src="{{ f.order.get().image }}" style="height:50px;padding:10px;" class="box-shadow"/></td>
+			<tr><td><img src="{{ f.order.get().image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/></td>
 				<td>
+					<h4>
 					{{ f.order.get().name }}
-					<blockquote>
-					{{ f.order.get().description }}
-					</blockquote>
+					</h4>
+					{{ f.order.get().description|truncate(30) }}
 				</td>
 				<td>
 					{% if cart.status=='Open' or cart.status=='Rejected' %}
