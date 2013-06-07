@@ -154,8 +154,11 @@
 					
 					var html='<ul>';
 					for (var i=0; i<data.length;i++){
-						var tt=j$.parseJSON(data[i]);
-						html+='<li><img src="'+tt['image']+'" /></li>';
+						if (i<10){
+							// limit to 10
+							var tt=j$.parseJSON(data[i]);
+							html+='<li><img src="'+tt['image']+'" /></li>';
+						}
 					}
 					html+='</ul>';
 					j$('#my-list-of-buyorder').html(html);
@@ -188,7 +191,7 @@
 	<p class="ariel-blue ariel-p">
 	Browse or use the search box to find products people are looking to buy, and add product to your shopping cart if you want sell to the buyer.
 	</p>
-
+	<br />
 
 	<div class="searchbox">
 	<input type="text" placeholder="Enter a keyword" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>
@@ -209,7 +212,7 @@
 		</table>
 		
 		<div style="float:right;">
-			<label class="ss-label">Total</label>
+			<label class="">Total</label>
 			<span class="border-top-red" id="this-cart-total">
 				{{ cart.payable }}
 			</span>
@@ -274,7 +277,9 @@
     		</div>
     		<div class="list-of-photo">
     			<h4>Similar Posts</h4>
-    			<div id="my-list-of-buyorder"></div>
+    			<blockquote>
+    				<div id="my-list-of-buyorder"></div>
+    			</blockquote>
     		</div>
     	</div>
     </div>

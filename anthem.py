@@ -207,6 +207,8 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 		template_values = {}
 		template_values['me']=me=self.get_contact()
 		open_cart=template_values['cart']=self.get_open_cart()
+		
+		# limit to 10
 		orders=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
 				
 		# group them by "queues"

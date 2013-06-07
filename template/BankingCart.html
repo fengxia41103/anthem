@@ -256,7 +256,9 @@ We will tell you profit & loss of each transaction so that you can monitor the h
 					<td>{{ c.terminal_seller.get().nickname }}</td>
 					<td><span itemId="{{ c.key.id() }}" item="payable-max">{{ c.payable_balance }}</span></td>
 					<td>
-						<input type="number" itemId="{{ c.key.id() }}" item="payable-payment" value="{{ c.payable_balance }}" step="any" min="0" 
+						<input type="number" itemId="{{ c.key.id() }}" item="payable-payment" value="{{ c.payable_balance }}" 
+						step="any" 
+						min="0" 
 						max="{{ c.payable_balance }}"/>
 					</td>
 					<td><span itemId="{{ c.key.id() }}" item="payable-balance">0</span></td>
