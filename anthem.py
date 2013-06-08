@@ -55,8 +55,9 @@ class ComplexEncoder(json.JSONEncoder):
 
 class MainPage(webapp2.RequestHandler):
 	def get(self):
-		self.response.headers['Content-Type']='text/plain'
-		self.response.write('hey feng')
+		self.response.headers['Content-Type']='text/html'
+		logout=users.create_logout_url('/')
+		self.response.write('<a href="'+logout+'">hey feng</a>')
 
 class MyBaseHandler(webapp2.RequestHandler):
 	def __init__(self, request=None, response=None):
@@ -494,7 +495,9 @@ class BankingCart(MyBaseHandler):
 
 class ManageUserProfile(MyBaseHandler):
 	def get(self):
-		self.template_values['membership_options']=MONTHLY_MEMBERSHIP_FEE
+		signed_memberships=[m.role for m in self.me.memberships]	
+		new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in signed_memberships]
+		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in new_memberships}
 			
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserProfile.html')

@@ -15,12 +15,13 @@
 
 {% block main %}
 	{% if owner %}
-	<div class="border-bottom">
-    	<h1 class="ariel-blue">Categories</h1>
-        <p class="ariel-blue ariel-p">
-        Browse orders grouped by categories and click on a category tag below as navigation shortcut.
-        </p>
+    <h1 class="ariel-blue">Inventory</h1>
+   	<p class="ariel-blue ariel-p">
+    Browse orders grouped by categories and click on a category tag below as navigation shortcut.
+    </p>
 
+
+	<div class="border-bottom">
 		<ul class="tags">
 		{% for k in cats %}
 			<li><a href="#tab-{{ loop.index }}">{{ k|title }}</a></li>			
@@ -50,7 +51,7 @@
 	
 	{% else %}
 		<!-- placeholder: import a NO-FOUND page -->
-		Sorry I found noting.
+		You have an empty inventory. Want to <a href="/buyorder/new" class="bubble-button">add</a> a product?
 	{% endif %}
 	</div>
 	

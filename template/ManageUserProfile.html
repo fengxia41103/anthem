@@ -4,7 +4,7 @@
 <script type="text/javascript">
 	j$(document).ready(function(){
 		j$('#btn-add-membership').click(function(){
-			var table=j$(this).siblings('table.table-row-border');
+			var table=j$(this).siblings('table.table-row-border');			
 			var html='<tr>';
 			html+='<td><select>';
 			{% for role,fee in membership_options.iteritems() %}
@@ -13,7 +13,7 @@
 			html+='</select></td>';
 			html+='<td>New</td>';
 			html+='<td></td><td></td><td></td><td></td>';
-			html+='<td><span class="command-link">Start</span> | <span class="command-link">Delete</span></td></tr>';
+			html+='<td><span class="command-link" item="start-membership">Start</span> | <span class="command-link" item="delete-membership">Delete</span></td></tr>';
 			
     		j$(table).find('tbody').append(html);
 		});
@@ -34,7 +34,6 @@
 		});
 		
 		j$('.command-link').click(function(){
-			j$(this).hide();
 			j$(this).closest('td').find('textarea').show();
 			j$(this).closest('td').find('input').show();
 			j$(this).closest('td').find('button').show();
@@ -46,8 +45,9 @@
 			j$(this).closest('td').find('button').hide();			
 			j$(this).closest('td').find('.command-link').show();
 		});
+		
 		j$('button#btn-save-shipping-address').click(function(){
-			var address=j$('textarea#shipping-address').html();		
+			var address=j$('textarea#shipping-address').val();		
 		});
 		j$('button#btn-save-communication').click(function(){
 			var home=j$('#phone-home').val();		
@@ -86,6 +86,8 @@
 		</tr>
 		<tr><td>Communication</td>
 			<td>
+				<span class="command-link" style="float:right;" id="edit-phone">Add</span>
+				<span style="float:right;"> | </span>
 				<span class="command-link" style="float:right;" id="edit-phone">Edit</span>
 				<table>
 				{% for i, p in me.communication.iteritems() %}
@@ -93,7 +95,7 @@
 					<td><label class="cart-summary-label">{{i}}</label></tr>
 					<td>
 					{{ p }}
-					<input id="phone-{{ i }}" type="phone" placeholder="eg. 801-891-8888" value="" style="display:none;"/>
+					<input id="comm-{{ i }}" type="text" placeholder="eg. 801-891-8888" value="" style="display:none;"/>
 					</td>
 					</tr>
 				{% endfor %}

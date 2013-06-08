@@ -24,7 +24,7 @@ class Membership(ndb.Model):
 	payment_to_date=ndb.FloatProperty(default=0) # accumulative
 	
 	# membership service role
-	role=ndb.StringProperty(default='Nur',choices=['Nur','Doc','Client','Super','Trial'])
+	role=ndb.StringProperty(default='Nur',choices=MONTHLY_MEMBERSHIP_FEE.keys())
 	
 	# as of writing, ComputedProperty does not support Date, 5/30/2013	
 	expiration_date=ndb.DateProperty()
@@ -89,6 +89,7 @@ class Contact(ndb.Model):
 
 	# a Contact can sign up multiple membership kinds
 	memberships=ndb.StructuredProperty(Membership,repeated=True)
+	active_roles=ndb.ComputedProperty(lambda self: [m.role for m in self.memberships if m.is_active],repeated=True)
 	is_active=ndb.ComputedProperty(lambda self: any([m.is_active for m in self.memberships]))
 	
 	# a Contact can have multiple billing methods
@@ -100,13 +101,26 @@ class Contact(ndb.Model):
 	
 	# shipping method preference
 	# write whatever you want
-	# eg. state, carrier, 
+	# eg. state, carrier, international
 	shipping_preference=ndb.StringProperty()
 	
 	# payment method preference
 	# write whatever you want
+	# eg. cash only, COD
 	payment_preference=ndb.StringProperty()
 	
+	# user reputation score
+	# we shouldn't save comments here because this will burden datastore everytime we need
+	# to validate Contact. Instead, we will retrieve comments and compute brand_equity score
+	# when somebody views this user's comments.
+	# user_comments=ndb.KeyProperty(kind='UserComment',repeated=True)
+	
+	# reputation score should not be computed!
+	# thus allowing super user to manually set its value.
+	# this is potentially needed to help user transit a status
+	# from other site to ours
+	reputation_score=ndb.IntegerProperty()
+		
 	def can_be_doc(self):
 		# if a Doc membership is Active
 		return (self.is_active and any([m.role in ['Doc','Super','Trial'] for m in self.memberships]))
@@ -118,7 +132,6 @@ class Contact(ndb.Model):
 	def can_be_client(self):
 		# if a Client membership is Active
 		return (self.is_active and any([m.role in ['Client','Super','Trial'] for m in self.memberships]))
-	
 
 #######################################
 #
@@ -237,3 +250,12 @@ class BuyOrderCart(MyBaseModel):
 	# this is what we actually earned based on payin and payout
 	realized_profit=ndb.ComputedProperty(lambda self: self.payin-self.payout)
 	realized_gross_margin=ndb.ComputedProperty(lambda self: self.realized_profit/self.payout*100.0 if self.payout else 0)	
+
+#######################################
+#
+# Communication models
+#
+#######################################
+class UserComment(MyBaseModel): 
+	comment=ndb.StringProperty()
+	rating=ndb.IntegerProperty() # 1-5

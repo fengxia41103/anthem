@@ -8,7 +8,6 @@ body{
 
 h1,h2,h3,h4,h5{
 	font-family: Verdana, Geneva, sans-serif;
-	margin-bottom:20px;
 }
 input,textarea,label,span,p,div,select,td{
 	font-family: Verdana, Geneva, sans-serif;
@@ -16,6 +15,34 @@ input,textarea,label,span,p,div,select,td{
 }
 
 /* Main layout */
+.header{
+	background-color: #292421;
+	height:5%;
+	width:100%;
+	color:white;
+	display:block;
+}
+table.header-layout{
+	width:100%;
+	height:100%;
+}
+table.header-layout td{
+	padding:5px 20px;
+}
+
+.header-layout td:nth-child(3n){
+	text-align:right;
+	vertical-align:middle;
+}
+.header-layout td:nth-child(3n+1){
+	text-align:left;
+	vertical-align:middle;
+}
+.header-layout td:nth-child(3n+2){
+	text-align:center;
+	vertical-align:middle;
+}
+
 .level-1-navigation{
 	opacity:80%;
 	width:100px;
@@ -24,21 +51,16 @@ input,textarea,label,span,p,div,select,td{
 }
 
 .level-1-navigation img{
-	width:50px;
-	height:50px;
-	margin-left:auto;
-	margin-right:auto;
-	display:block;
-	margin-bottom:30px;
-	margin-top:30px;
-	padding:20px;
-	border:5px #292421 solid;
+	max-width:50px;
+	height:25px;
+	border:2px #292421 solid;
+	padding: 5px 30px;
 }
 .level-1-navigation img:hover{
-	border:5px #4ac948 solid;
-	border-radius:20px;
-	-moz-border-radius:20px;
-	-webkit-border-radius:20px;
+	border:2px #eee dotted;
+	border-radius:10px;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
 }
 
 .level-1-navigation ul{
@@ -47,14 +69,13 @@ input,textarea,label,span,p,div,select,td{
 }
 .level-1-navigation li{
 	list-style-type:none;
-	margin-left:0;
-	padding-left:0;
+	float:left;
 }
 .level-1-navigation-selected img{
-	border:5px #4ac948 solid;
-	border-radius:20px;
-	-moz-border-radius:20px;
-	-webkit-border-radius:20px;
+	border:2px #eee solid;
+	border-radius:10px;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
 }
 
 .level-2-navigation{
@@ -587,11 +608,8 @@ a.login-button:hover{
 	background-color: #888;
 	color:white;
 	position:fixed;
-	/*top:0;
-	left:66%;
-	*/
 	right:0;
-	top:50px;
+	top:60px;
 	border-radius: 0 0 10px 10px;
 	-webkit-border-radius: 0 0 10px 10px;
 	-moz-border-radius: 0 0 10px 10px;
@@ -1562,17 +1580,30 @@ button[item="submit-for-approval-btn"]:hover{
 	padding: 5px 10px;
 }
 .ariel-button{
-	background-color: #00bec6;
+	background-color: #888;
 	border-radius:5px;
 	webkit-border-radius:5px;
 	moz-border-radius:5px;
 	padding: 10px 20px;
 	color:white;
-	font-size:1.2em;
 	text-align:center;
 }
 .ariel-button:hover{
 	background-color:orange;
+}
+
+.bubble-button{
+	background-color: #ddd;
+	border-radius:20px;
+	webkit-border-radius:20px;
+	moz-border-radius:20px;
+	padding: 5px 20px;
+	color:#333;
+	text-align:center;
+}
+.bubble-button:hover{
+	background-color:#888;
+	color:white;
 }
 
 .box-shadow{

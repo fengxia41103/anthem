@@ -51,12 +51,15 @@
 
 {% autoescape true %}
 <body>
+
 {% block header%}
 
-{% endblock %}
-
-<table id="site-layout">
-<tr><td class="level-1-navigation">
+<div class="header">
+	<table class="header-layout">
+	<tr><td>
+	<h4>Anthem Market Place</h4>
+	</td><td>
+	<span class="level-1-navigation">
 		<ul>		
 			<li id="nav-order">
 				<a href="/buyorder/browse">
@@ -79,11 +82,18 @@
 				</a>
 			</li>
 		</ul>
-		<h3 class="rotate" style="display:block;">
-			Anthem Market Place
-		</h3>
-	</td>
-	
+	</span>
+	</td><td>
+	{{ me.nickname }}
+	<a href="{{ url_logout }}" class="bubble-button" style="margin-right:50px;">Logout</a>
+	</td></tr>
+	</table>
+</div>
+{% endblock %}
+
+<div>
+<table id="site-layout">
+<tr>
 	<td class="level-2-navigation" style="display:none;">
 		{% block level_2_navigation %}
 		
@@ -95,6 +105,7 @@
 		</div>
 	</td>
 </tr></table>
+</div>
  
 {% block footer %}{% endblock %}
 </body>
