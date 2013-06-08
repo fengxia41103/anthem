@@ -58,13 +58,17 @@
     		<h4>Posted On <span id="infocus-subtitle">{{ order.created_time }}</span><h4>
     	</div>
     	<div class="image-house">
-            <div>
-    		<label class="ss-label">Offer Qty</label>
-  			<input  item="qty" type="number" id="infocus-qty" value="1" min="1"/>
-  			<label class="ss-label">Offer Price</label>
-  			<input item="price" type="number" id="infocus-price" value="{{ order.price }}" step="any" />
-				<button item="btn-new-buyorder-fill" itemId="{{ order.key.id() }}">Add to cart</button>
-			</div>
+    		{% if me.key == order.owner %}
+				<a href="/buyorder/edit/{{ order.key.id() }}/">Edit</a>            
+            {% else %}
+            	<div>
+    			<label class="ss-label">Offer Qty</label>
+  				<input  item="qty" type="number" id="infocus-qty" value="1" min="1"/>
+  				<label class="ss-label">Offer Price</label>
+  				<input item="price" type="number" id="infocus-price" value="{{ order.price }}" step="any" />
+					<button item="btn-new-buyorder-fill" itemId="{{ order.key.id() }}">Add to cart</button>
+				</div>
+			{% endif %}
 									
     		<img id="infocus-image" src="{{ order.image }}" />
     	</div>

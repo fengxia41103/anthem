@@ -1576,9 +1576,9 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .box-shadow{
-	-webkit-box-shadow: 1px 1px 1px rgba(28, 83, 67, 0.35);
-	-moz-box-shadow:    1px 1px 1px rgba(28, 83, 67, 0.35);
-	box-shadow:         1px 1px 1px rgba(28, 83, 67, 0.35);
+	-webkit-box-shadow: 7px 7px 5px rgba(28, 83, 67, 0.35);
+	-moz-box-shadow:    7px 7px 5px rgba(28, 83, 67, 0.35);
+	box-shadow:         7px 7px 5px rgba(28, 83, 67, 0.35);
 }
 .reflectBelow	{ 
 	-webkit-box-reflect: below 0
@@ -1805,10 +1805,6 @@ div.list-of-photo{
 .list-of-photo li img:hover{
 	border-bottom: 2px red solid;
 	padding-bottom:10px;	
-}
-
-.list-of-category-section a{
-	text-decoration:none;
 }
 
 /* ss style input sections */

@@ -386,8 +386,12 @@ items to give you a starting point for your listing.
 	<div id="step-3">
 		<div class="image-select-pane">
 			<table id="review-new-buy-order-table">
-			<tr><td valign="middle">
-			<img id="review-product-image" src="" style="width:150px;" class="box-shadow"/>
+			<tr><td valign="middle" class="box-shadow">
+				{% if order %}
+					<img id="review-product-image" src="{{ order.image }}" style="width:150px;"/>
+				{% else %}
+					<img id="review-product-image" src="" style="width:150px;"/>
+				{% endif %}
 			</td><td>
 			
 			<table class="ariel-table table-row-border">
@@ -433,12 +437,18 @@ items to give you a starting point for your listing.
 		</div>
 		
 		<div class="image-select-pane" style="border:none;">
+			
 			<div style="float:right;">
-				<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of 
-			Service</a>
-			<div class="ariel-button" style="margin-top:15px;">
-				<input style="border:none;background:transparent;" type="submit" value="Publish" />
-			</div>
+			{% if order %}
+				<div class="ariel-button" style="margin-top:15px;">
+					<input style="border:none;background:transparent;" type="submit" value="Save" />
+				</div>
+			{% else %}
+				<span class="ariel-checkbox-regular" id="checkbox-agree-term-service">&nbsp;</span>I agree with <a href="" class="ariel-blue">Term of Service</a>
+				<div class="ariel-button" style="margin-top:15px;">
+					<input style="border:none;background:transparent;" type="submit" value="Publish" />
+				</div>
+			{% endif %}
 			</div>
 		</div>		
 	</div>
