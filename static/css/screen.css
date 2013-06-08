@@ -1794,12 +1794,17 @@ div.list-of-photo{
 	padding-bottom:50px;
 }
 .list-of-photo li img{
-	width:50px;
 	height:50px;
+	width:auto;
 	margin:0;
 	margin-bottom:10px;
 	padding:0;
 	float:left;
+	border-bottom: 1px white solid;
+}
+.list-of-photo li img:hover{
+	border-bottom: 2px red solid;
+	padding-bottom:10px;	
 }
 
 .list-of-category-section a{

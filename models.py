@@ -85,7 +85,7 @@ class Contact(ndb.Model):
 	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
 	nickname=ndb.StringProperty() # user name
-	communication=ndb.PickleProperty(default={'home':'','office':'','mobile':''}) # a dict
+	communication=ndb.PickleProperty(default={'phone':''}) # a dict
 
 	# a Contact can sign up multiple membership kinds
 	memberships=ndb.StructuredProperty(Membership,repeated=True)

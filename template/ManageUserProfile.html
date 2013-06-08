@@ -49,7 +49,7 @@
 		j$('button#btn-save-shipping-address').click(function(){
 			var address=j$('textarea#shipping-address').html();		
 		});
-		j$('button#btn-save-phone').click(function(){
+		j$('button#btn-save-communication').click(function(){
 			var home=j$('#phone-home').val();		
 			var office=j$('#phone-office').val();		
 			var mobile=j$('#phone-mobile').val();
@@ -84,11 +84,11 @@
 				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
 			</td>
 		</tr>
-		<tr><td>Phone</td>
+		<tr><td>Communication</td>
 			<td>
 				<span class="command-link" style="float:right;" id="edit-phone">Edit</span>
 				<table>
-				{% for i, p in me.phone.iteritems() %}
+				{% for i, p in me.communication.iteritems() %}
 					<tr>
 					<td><label class="cart-summary-label">{{i}}</label></tr>
 					<td>
@@ -100,7 +100,7 @@
 				</table>
 				<br />
 				
-				<button class="ariel-button" id="btn-save-phone" style="display:none;">Save</button> 
+				<button class="ariel-button" id="btn-save-communication" style="display:none;">Save</button> 
 				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
 			</td>
 		</tr>

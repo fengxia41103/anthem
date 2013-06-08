@@ -238,6 +238,8 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 		queue={}
 		for o in orders:
 			template_values['owner']=o.owner
+			
+			# category as dict key
 			for q in o.queues:
 				if queue.has_key(q): queue[q].append(o)
 				else: queue[q]=[o]

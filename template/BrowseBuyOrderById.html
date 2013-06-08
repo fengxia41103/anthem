@@ -23,6 +23,26 @@
 			}
 		);				
 		
+		j$(document).on('mouseenter','.pin-in-focus .image-house',function(){
+			j$(this).find('.pin-command-center').fadeIn({duration:400});
+		}).on('mouseleave','.pin-in-focus .image-house',function(){
+			j$(this).find('.pin-command-center').fadeOut({duration:400});
+		});
+		
+	    // fill order shortcut    
+    	j$(document).on('click','button[item="btn-new-buyorder-fill"]',function(){
+	    	var id=j$(this).attr('itemId');
+	    	var price=j$('#infocus-price').val();
+	    	var qty=j$('#infocus-qty').val();
+	    	j$.post(
+	    		'/buyorder/browse',
+	    		{'id':id,'price':price,'qty':qty},
+	    		function(result){
+	    			j$().toastmessage('showSuccessToast','Your shopping cart has been updated.');
+	    		}	
+		    );
+	    });
+	    		
 		// level 1 navigation
 		j$('#nav-order').addClass('level-1-navigation-selected');
 		
@@ -37,10 +57,16 @@
     		<h1 id="infocus-title">{{ order.owner.get().nickname }}</h1>
     		<h4>Posted On <span id="infocus-subtitle">{{ order.created_time }}</span><h4>
     	</div>
-    	<div class="image-house">				
-    		<a id="infocus-image-link" href="">
+    	<div class="image-house">
+            <div>
+    		<label class="ss-label">Offer Qty</label>
+  			<input  item="qty" type="number" id="infocus-qty" value="1" min="1"/>
+  			<label class="ss-label">Offer Price</label>
+  			<input item="price" type="number" id="infocus-price" value="{{ order.price }}" step="any" />
+				<button item="btn-new-buyorder-fill" itemId="{{ order.key.id() }}">Add to cart</button>
+			</div>
+									
     		<img id="infocus-image" src="{{ order.image }}" />
-    		</a>
     	</div>
     	<div class="border-bottom">
     		<h4 id="infocus-product-name">{{ order.name }}</h4>
