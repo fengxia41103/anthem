@@ -55,10 +55,8 @@ class ComplexEncoder(json.JSONEncoder):
 
 class MainPage(webapp2.RequestHandler):
 	def get(self):
-		self.response.headers['Content-Type']='text/html'
-		logout=users.create_logout_url('/')
-		self.response.write('<a href="'+logout+'">hey feng</a>')
-
+		self.redirect('/buyorder/browse')
+		
 class MyBaseHandler(webapp2.RequestHandler):
 	def __init__(self, request=None, response=None):
 		webapp2.RequestHandler.__init__(self,request,response) # extend the base class
@@ -338,14 +336,18 @@ class BrowseBuyOrder(MyBaseHandler):
 			
 		# update cart
 		self.cart.put()
-		
 		self.response.write(json.dumps(self.cart.to_dict(),cls=ComplexEncoder))
 
 class ReviewCart(MyBaseHandler):
 	def get(self):
 		cart_id=int(self.request.GET['cart'])
-		
-		cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
+
+		try:
+			owner_id=self.request.GET['owner']
+			owner_key=ndb.Key('Contact',owner_id)
+			cart=BuyOrderCart.get_by_id(cart_id,parent=owner_key)
+		except:		
+			cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
 		assert cart
 
 		self.template_values['shipping_methods']=SHIPPING_METHOD
@@ -508,8 +510,13 @@ class ManageBuyOrderCart(MyBaseHandler):
 		self.template_values['review_url']=uri_for('cart-review')		
 		
 		# get all carts that belong to this user
-		self.template_values['my_carts']=carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.status!='Open')
+		# these are ones user has file as a Nur
+		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key)
 
+		# get all carts that this user is the broker
+		# these are ones need approval
+		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status=='In Approval')
+		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrderCart.html')
 		self.response.write(template.render(self.template_values))
