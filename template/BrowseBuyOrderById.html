@@ -60,7 +60,8 @@
     	<div class="image-house">
     		{% if me.key == order.owner %}
 				<a href="/buyorder/edit/{{ order.key.id() }}/">Edit</a>            
-            {% else %}
+            {% elif cart.broker %}
+            	{% if cart.broker == order.owner %}
             	<div>
     			<label class="ss-label">Offer Qty</label>
   				<input  item="qty" type="number" id="infocus-qty" value="1" min="1"/>
@@ -68,6 +69,9 @@
   				<input item="price" type="number" id="infocus-price" value="{{ order.price }}" step="any" />
 					<button item="btn-new-buyorder-fill" itemId="{{ order.key.id() }}">Add to cart</button>
 				</div>
+				{% else %}
+				You can not add this item to your cart because your cart has items posted by a different user.
+				{% endif %}
 			{% endif %}
 									
     		<img id="infocus-image" src="{{ order.image }}" />

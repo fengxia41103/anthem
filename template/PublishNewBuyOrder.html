@@ -57,34 +57,38 @@
    		// here we could return false to prevent the form from being submitted; 
    		// returning anything other than false will allow the form submit to continue 
    		//return true; 
+		
+		{% if order %}
+		
+		{% else %}
+    		// term service agreed
+    		var agree=j$('#checkbox-agree-term-service').hasClass('ariel-checkbox-checked');
+    		if (!agree){
+    			j$().toastmessage('showWarningToast', 'You need to agree to the Term of Service.');
+    			return false;
+    		}
+ 		{% endif %}
+ 		   	
+	    // validation
+	    var user=j$.trim(j$('#review-client-name').html());
+	    var name=j$.trim(j$('#review-product-name').html());
+	    var description=j$.trim(j$('#review-product-description').html());
+	    var qty=j$.trim(j$('#review-qty').html());
+	    var price=j$.trim(j$('#review-price').html());
+	    var image=j$('#review-product-image').attr('src');
 
-    	// term service agreed
-    	var agree=j$('#checkbox-agree-term-service').hasClass('ariel-checkbox-checked');
-    	if (!agree){
-    		j$().toastmessage('showWarningToast', 'You need to agree to the Term of Service.');
-    		return false;
-    	}else{
-	    	// validation
-	    	var user=j$.trim(j$('#review-client-name').html());
-	    	var name=j$.trim(j$('#review-product-name').html());
-	    	var description=j$.trim(j$('#review-product-description').html());
-	    	var qty=j$.trim(j$('#review-qty').html());
-	    	var price=j$.trim(j$('#review-price').html());
-	    	var image=j$('#review-product-image').attr('src');
-
-	    	if (name==''){
-	    		j$().toastmessage('showErrorToast', 'Product name is required!');
-				return false;
-			}
-	    	if (qty==''){
-	    		j$().toastmessage('showErrorToast', 'Product quantity is required!');
-				return false;
-			}
-	    	if (price==''){
-	    		j$().toastmessage('showErrorToast', 'Product price is required!');
-				return false;
-			}
-    	}
+	    if (name==''){
+	    	j$().toastmessage('showErrorToast', 'Product name is required!');
+			return false;
+		}
+	    if (qty==''){
+	    	j$().toastmessage('showErrorToast', 'Product quantity is required!');
+			return false;
+		}
+	    if (price==''){
+	    	j$().toastmessage('showErrorToast', 'Product price is required!');
+			return false;
+		}
    		return true;
    	}                                                           
     
@@ -245,7 +249,7 @@
      		// populate review info upon user viewing this tab
      		// the review data will be later submitted to create an instance
     		j$('#review-client-name').html(j$('#input-client-name').val());
-    		
+			j$('#review-product-name').html(j$('#input-product-name').val());    		
     		j$('#review-price').html(j$('#input-price').val());
     		j$('#review-qty').html(j$('#input-qty').val());
     		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$('#input-price').val());

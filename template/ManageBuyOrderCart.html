@@ -79,10 +79,16 @@
 					</table>
 					
 					{% if c.fills|length > 0 %}
-					<div>
+					<div class="list-of-photo">
+						<ul>
 						{% for f in c.fills %}
-							<img src="{{ f.order.get().image }}" width="60px" height="60px"/>
+							<li>
+							<a href="/buyorder/browse/{{ f.order.id() }}/">
+								<img src="{{ f.order.get().image }}" width="60px" height="60px"/>
+							</a>
+							</li>
 						{% endfor %}
+						</ul>
 					</div>
 					
 					<div>
