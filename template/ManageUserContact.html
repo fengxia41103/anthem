@@ -9,7 +9,12 @@
 		});
 		
 		j$(document).on('click','span[item="delete-comm"]',function(){
-			j$(this).parents('tr:first').remove();
+			var trs=j$('#table-comm tbody tr');
+			if (trs.length>1){
+				j$(this).parents('tr:first').remove();
+			}else{
+				j$().toastmessage('showWarningToast','You can not remove this because at least one communication method is required');
+			}
 		});
 		
 		j$('#btn-save').click(function(){
