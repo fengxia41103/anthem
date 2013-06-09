@@ -454,7 +454,7 @@ ul.tags li a{
 }
 
 .searchbox{
-	width: 80%;
+	width: 67%;
 	border: 15px #dcdcdc solid;
 	padding: 0;
 	background: white;	
@@ -469,18 +469,10 @@ ul.tags li a{
 	line-height: 20pt;
 	vertical-align:middle;
 	width: 70%;
-	border: 1px solid white; 
-	background: 
-	white;
+	background: white;
 	margin-right: 10px;
-	font-family: Tahoma, Geneva, sans-serif;
-	padding-left: 10px;
-}
-.searchbox button{
-	max-width: 10%;
+	border:none;
 	padding: 5px 10px;
-	font-family: Tahoma, Geneva, sans-serif; 
-	float:right;
 }
 
 ul#pinterest-filters{
@@ -721,19 +713,16 @@ table#fill-list{
 }
 
 .my-button {
-	background: #8B7D7B;
+	background: #888;
 	border: none;
 	-moz-border-radius: 20px;
 	-webkit-border-radius: 20px;
 	-khtml-border-radius: 20px;
 	border-radius: 20px;
-	color: #ffffff;
+	color: #eee;
 	display: block;
-	font: 18px Georgia, "Times New Roman", Times, serif;
-	letter-spacing: 1px;
 	margin: 10px auto;
-	padding: 7px 25px;
-	text-shadow: 0 1px 1px #000000;
+	padding: 5px 20px;
 	text-transform: uppercase;
 }
 
@@ -1005,7 +994,8 @@ button[item="submit-for-approval-btn"]:hover{
 	background-color:#fafafa;
 	padding: 10px;
 	margin-bottom: 10px;
-	border-top:2px #CD950C solid;
+	/*border-top:2px #CD950C solid;*/
+	border-top:1px #eee solid;
 }
 
 #create-new-case-section div{

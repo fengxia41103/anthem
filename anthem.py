@@ -511,7 +511,7 @@ class ManageBuyOrderCart(MyBaseHandler):
 		
 		# get all carts that belong to this user
 		# these are ones user has file as a Nur
-		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key)
+		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.status!='Open')
 
 		# get all carts that this user is the broker
 		# these are ones need approval

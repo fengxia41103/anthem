@@ -266,7 +266,7 @@
 
 		<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
 		<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
-		<h3>Enter Shipping Information</h3>		
+		<h4>Enter Shipping Information</h4>		
 		<div>
 		<label class="ss-label">Shipping Method</label>
 		<br />
@@ -328,7 +328,7 @@
 	{% endif %}
 	
 	<div class="quick-pane" id="sec-summary">
-	<h3>Cart Summary</h3>
+	<h4>Cart Summary</h4>
 	<table class="sf-table table-row-border">
 		<tr><td>Cart Name</td>
 			<td>Cart# {{ cart.key.id() }}</td>
@@ -348,7 +348,7 @@
 	</div>					
 	
 	<div class="quick-pane" id="sec-status">
-	<h3>Status</h3>
+	<h4>Status</h4>
 	<table class="sf-table table-row-border">
 		<tr><td>Status</td>
 			<td>{{ cart.status }}</td>
@@ -366,7 +366,7 @@
 	<!-- DOC only views -->
 	{% if me.can_be_doc() %}
 		<div class="quick-pane" id="sec-profit">
-		<h3>Profit</h3>
+		<h4>Profit</h4>
 		<table class="sf-table table-row-border">
 			<tr><td>Expected Profit</td>
 				<td>{{ cart.profit }}</td>
@@ -382,7 +382,7 @@
 		</div>
 	
 		<div class="quick-pane" sec="sec-accounting">
-		<h3>Accounting</h3>
+		<h4>Accounting</h4>
 		<table class="sf-table table-row-border">
 			<tr><td>Total Payable</td>
 				<td>{{ cart.payable }}</td>
@@ -404,7 +404,7 @@
 		</div>	
 	
 		<div class="quick-pane">
-		<h3>Assign Client</h3>
+		<h4>Assign Client</h4>
 		{% if cart.terminal_buyer %}
 		<table class="sf-table table-row-border">
 			<tr><td>Shipping Address</td>
@@ -418,7 +418,7 @@
 	{% endif %}
 	
 	<div class="quick-pane" id="sec-fill-list">
-	<h3>Item Details</h3>
+	<h4>Item Details</h4>
 	{% if cart.fills|count >0 %}
 		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
 		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
@@ -461,7 +461,7 @@
 	</div>
 
 	<div class="quick-pane" id="sec-shipping-summary">
-	<h3>Shipping Summary</h3>
+	<h4>Shipping Summary</h4>
 	<table class="sf-table table-row-border">
 		<tr><td>Shipping Date</td>
 			<td>{{ cart.shipping_date }}</td>
@@ -491,7 +491,7 @@
 	</div>	
 
 	<div class="quick-pane" id="sec-payment">
-	<h3>Payments</h3>
+	<h4>Payments</h4>
 	{% if cart.payout_slips %}
 		<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
 		<caption class="table-caption">Pay For This Deal</caption>
