@@ -1433,16 +1433,12 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .ariel-h2{
-	font-family: Verdana, Geneva, sans-serif;
-	font-size:14pt;
 }
 .ariel-p{
-	font-family: Verdana, Geneva, sans-serif;
-	font-size:8pt;
-	color:#898989;
+	margin:10px 0;
 }
 .ariel-blue{
-	color:#00bec6;
+	color:#242921;
 }
 
 .ariel-table{
@@ -1888,10 +1884,9 @@ table.two-col-table input{
 }
 
 /* this is to simulate a table column without using table */
+
 .fixed-width-label{
-	font-size:0.9em;
 	color:#888;
-	font-weight:bold;
 	width:25%;
 	display:inline-block;
 	text-align:right;

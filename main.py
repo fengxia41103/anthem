@@ -41,7 +41,9 @@ routes = [
 	Route('/cart/manage', handler='anthem.ManageBuyOrderCart',name='cart-manage'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
 	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
-	Route('/user/profile',handler='anthem.ManageUserProfile',name='user-profie'),	
+
+	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
+	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 ]
 
 app = WSGIApplication(routes, config=app_config, debug=True)

@@ -74,7 +74,8 @@ class MyBaseHandler(webapp2.RequestHandler):
 		user = users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
 			email=user.email(),
-			nickname=user.nickname())
+			nickname=user.nickname(),
+			cash=0)
 			
 		# initiate membership
 		# TODO: this needs to be replaced by a Membership signup page
@@ -429,7 +430,7 @@ class BankingCart(MyBaseHandler):
 		self.template_values['url']=uri_for('cart-banking')
 		self.template_values['review_url']=uri_for('cart-review')		
 		
-		carts=BuyOrderCart(parent=self.me.key).query()
+		carts=BuyOrderCart.query(ancestor=self.me.key)
 		
 		# payable carts
 		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
@@ -494,16 +495,6 @@ class BankingCart(MyBaseHandler):
 		
 		# return status
 		self.response.write(status)
-
-class ManageUserProfile(MyBaseHandler):
-	def get(self):
-		signed_memberships=[m.role for m in self.me.memberships]	
-		new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in signed_memberships]
-		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in new_memberships}
-			
-		# render
-		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserProfile.html')
-		self.response.write(template.render(self.template_values))
 	
 class ManageBuyOrderCart(MyBaseHandler):
 	def get(self):
@@ -580,4 +571,27 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		cart.shipping_status='Shipment Created'
 		cart.put()	
 		
+		self.response.write('0')
+
+class ManageUserMembership(MyBaseHandler):
+	def get(self):
+		signed_memberships=[m.role for m in self.me.memberships]	
+		new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in signed_memberships]
+		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in new_memberships}
+			
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserProfile.html')
+		self.response.write(template.render(self.template_values))
+
+class ManageUserContact(MyBaseHandler):
+	def get(self):
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserContact.html')
+		self.response.write(template.render(self.template_values))
+
+	def post(self):
+		logging.info(self.request.POST)
+		
+		self.me.communication=self.request.POST
+		self.me.put()
 		self.response.write('0')

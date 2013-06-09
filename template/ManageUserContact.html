@@ -1,0 +1,88 @@
+{% extends "/template/UserBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		j$('#add-comm').click(function(){
+			var tr=j$('#table-comm').find('tbody tr:last');
+			j$('#table-comm').find('tbody').append(j$(tr).clone());
+		});
+		
+		j$(document).on('click','span[item="delete-comm"]',function(){
+			j$(this).parents('tr:first').remove();
+		});
+		
+		j$('#btn-save').click(function(){
+			var trs=j$('#table-comm').find('tbody tr');
+			var data={};
+			j$.each(j$('#table-comm tbody tr'),function(index,val){
+				var name=j$(val).find('input[item="name"]').val();
+				var value=j$(val).find('input[item="value"]').val();
+				data[name]=value;
+			});
+			
+			j$.post(
+				'/user/contact',
+				data,
+				function(result){
+					switch(result){
+						case '0':
+							j$().toastmessage('showSuccessToast','Your information has been updated');
+							break;
+						default:	
+							j$().toastmessage('showErrorToast','What happened?');
+							break;
+					}
+				}
+			);
+		});
+		
+		// level 1 navigation
+		j$('#nav-user').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-user-contact').addClass('level-2-navigation-selected');
+	});
+</script>
+{% endblock %}
+
+{% block main %}
+<h1 class="ariel-blue">User Information</h1>
+
+<p class="ariel-blue ariel-p">
+You can manage your contact information. For <strong>email</strong> and <strong>nickname</strong>, you can change them 
+by upating your Google account.
+</p>
+
+<div class="quick-pane">
+	<label class="ss-label fixed-width-label">Nickname</label>
+	{{ me.nickname }}
+</div>
+
+<div class="quick-pane">
+	<label class="ss-label fixed-width-label">Email</label>
+	{{ me.email }}
+</div>
+
+<div class="quick-pane">
+	<span style="float:right;">
+	<a class="command-link" id="add-comm">Add</a>
+	</span>
+	
+	<input type="submit" value="Save" id="btn-save" class="my-button"/>
+
+	<table class="sf-table two-col-table" id="table-comm">
+	<thead><tr><td>Name</td><td>Value</td></tr></thead>
+	<tbody>
+	{% for name,val in me.communication.iteritems() %}
+		<tr><td><input type="text" class="ss-input" value="{{ name }}" placeholder="eg. Phone" item="name"/></td>
+			<td><input type="text" class="ss-input" value="{{ val }}" placeholder="eg. 909-123-4567" item="value"/>
+				<span class="command-link" item="delete-comm" style="float:right;">Cancel</span>
+			</td>
+		</tr>
+	{% endfor %}
+	</tbody>
+	</table>
+</div>
+{% endblock %}

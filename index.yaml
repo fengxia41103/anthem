@@ -37,4 +37,14 @@ indexes:
 - kind: BuyOrderCart
   ancestor: yes
   properties:
+  - name: payable_balance
+
+- kind: BuyOrderCart
+  ancestor: yes
+  properties:
+  - name: receivable_balance
+
+- kind: BuyOrderCart
+  ancestor: yes
+  properties:
   - name: status
