@@ -594,9 +594,16 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 		
 		valid=all([r['role'] in self.eligible_new_memberships for r in data])
 		if not valid:
+			# if UI is built right, we should never hit here
+			# validate that no duplicate role can be created for a user
 			self.response.write('-1')
 			return
 		
+		# create a member request and inactive membership
+		for r in data:
+			member_req=MembershipRequest(user=self.me.key,role=r['role'],start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date())
+			member_req.put()
+			
 		self.response.write('0')
 		
 class ManageUserContact(MyBaseHandler):
