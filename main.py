@@ -43,6 +43,7 @@ routes = [
 	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
+	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 ]
 

@@ -573,16 +573,32 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		
 		self.response.write('0')
 
-class ManageUserMembership(MyBaseHandler):
+class MyUserBaseHandler(MyBaseHandler):
+	def __init__(self, request=None, response=None):
+		MyBaseHandler.__init__(self,request,response) # extend the base class
+		self.signed_memberships=[m.role for m in self.me.memberships]	
+		self.eligible_new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in self.signed_memberships]
+
+
+class ManageUserMembership(MyUserBaseHandler):
 	def get(self):
-		signed_memberships=[m.role for m in self.me.memberships]	
-		new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in signed_memberships]
-		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in new_memberships}
+		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in self.eligible_new_memberships}
 			
 		# render
-		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserProfile.html')
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserMembership.html')
 		self.response.write(template.render(self.template_values))
 
+class ManageUserMembershipNew(MyUserBaseHandler):
+	def post(self):
+		data=json.loads(self.request.body)
+		
+		valid=all([r['role'] in self.eligible_new_memberships for r in data])
+		if not valid:
+			self.response.write('-1')
+			return
+		
+		self.response.write('0')
+		
 class ManageUserContact(MyBaseHandler):
 	def get(self):
 		# render
@@ -590,8 +606,6 @@ class ManageUserContact(MyBaseHandler):
 		self.response.write(template.render(self.template_values))
 
 	def post(self):
-		logging.info(self.request.POST)
-		
 		self.me.communication=self.request.POST
 		self.me.put()
 		self.response.write('0')

@@ -75,7 +75,7 @@ class Billing(ndb.Model):
 	# StructuredProperty within a Contact
 	name_on_account=ndb.StringProperty() # billing person's name, this can be different from the user who uses this payment
 	address=ndb.StringProperty() # billing address
-	media=ndb.StringProperty(default='Manual',choices=['MasterCard','Visa','PayPal','Manual'])
+	media=ndb.StringProperty(default='Manual',choices=['MasterCard','Visa','AMEX','Discover','PayPal','Manual'])
 	account_number=ndb.StringProperty() # account #, credit card #, and so on
 	expiration_date=ndb.DateProperty() # user manual setup
 	secret=ndb.StringProperty() # key code, whatever else

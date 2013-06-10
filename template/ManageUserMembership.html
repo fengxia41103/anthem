@@ -1,117 +1,90 @@
-{% extends "/template/base.html" %}
+{% extends "/template/UserBase.html" %}
 
 {% block customJS %}
 <script type="text/javascript">
 	j$(document).ready(function(){
-		j$('#btn-add-membership').click(function(){
-			var table=j$(this).siblings('table.table-row-border');			
-			var html='<tr>';
-			html+='<td><select>';
-			{% for role,fee in membership_options.iteritems() %}
-				html+='<option value="{{ role }}">{{ role }}</option>';
-			{% endfor %}
-			html+='</select></td>';
-			html+='<td>New</td>';
-			html+='<td></td><td></td><td></td><td></td>';
-			html+='<td><span class="command-link" item="start-membership">Start</span> | <span class="command-link" item="delete-membership">Delete</span></td></tr>';
+		// overlay
+		j$('div.overlay').click(function(e){
+			var pos=j$('div.pin-in-focus').offset();
+			var width=j$('div.pin-in-focus').outerWidth();
+			var height=j$('div.pin-in-focus').outerHeight();
+			var out=false;
+			if ((e.pageX<pos.left) || (e.pageX>(pos.left+width))){
+				out=true;
+			}
+			if ((e.pageY<pos.top) || (e.pageY>(pos.top+height))){
+				out=true;
+			}
+			if (out==true){
+				j$(this).fadeOut(200);
+			}
+		});
+		
+		j$(document).on('click','span[item="remove"]',function(){
+            var trs=j$(this).parents('table:first').find('tbody tr');
 			
-    		j$(table).find('tbody').append(html);
+            if (trs.length>1){
+            	j$(this).parents('tr:first').remove();
+            }else{
+            	j$().toastmessage('showWarningToast','You can not remove this because at least one is required');
+            }
 		});
-	
-		j$('#show-new-billing-div').click(function(){
-			j$(this).fadeOut(500,function(){
-				j$('div#div-new-billing-method-form').show();
+		
+		j$('#show-new-membership').click(function(){
+			j$('#div-new-membership').show();
+		});
+		
+		j$('#add-new-membership').click(function(){		
+            var tr=j$('#table-new-membership').find('tbody tr:last');
+            j$('#table-new-membership').find('tbody').append(j$(tr).clone());
+		});
+		
+		j$('#btn-save-new-membership').click(function(){
+			data=[];
+			j$.each(j$('#table-new-membership tbody tr'),function(index,val){
+				var role=j$(val).find('select[item="membership-role"]').val();
+				var startDate=j$(val).find('input[item="membership-start-date"]').val();
+				data.push({'role':role,'start date':startDate});		
 			});
-		});
-		j$('#btn-cancel-new-billing').click(function(){
-			j$('div#div-new-billing-method-form').fadeOut(500,function(){
-				j$('#show-new-billing-div').show();
-			});
-		});
-		
-		j$('#edit-phone').click(function(){
-			j$(this).closest('td').find('input').show();
-		});
-		
-		j$('.command-link').click(function(){
-			j$(this).closest('td').find('textarea').show();
-			j$(this).closest('td').find('input').show();
-			j$(this).closest('td').find('button').show();
-		});
-		
-		j$('button[item="cancel"]').click(function(){
-			j$(this).closest('td').find('textarea').hide();
-			j$(this).closest('td').find('input').hide();
-			j$(this).closest('td').find('button').hide();			
-			j$(this).closest('td').find('.command-link').show();
-		});
-		
-		j$('button#btn-save-shipping-address').click(function(){
-			var address=j$('textarea#shipping-address').val();		
-		});
-		j$('button#btn-save-communication').click(function(){
-			var home=j$('#phone-home').val();		
-			var office=j$('#phone-office').val();		
-			var mobile=j$('#phone-mobile').val();
 			
+			j$.post(
+				'/user/membership/new',
+				JSON.stringify(data), // this is important!
+				function(result){
+					switch(result){
+						case '-1':
+							j$().toastmessage('showErroToast','You can not add roles that you already have. If yours has expired, renew it.');
+							break;
+						case '0':
+							j$().toastmessage('showSuccessToast','Thank you! Your new membership will be activated as soon as we have processed your request.');
+							break; 
+					}	
+				}
+			);
 		});
-		
+			
 		// level 1 navigation
 		j$('#nav-user').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-user-membership').addClass('level-2-navigation-selected');
 	});
 </script>
 {% endblock %}
 
 {% block main %}
+<h1 class="ariel-blue">Memberships</h1>
 
-
-<div class="quick-pane">
-<h3>Contact Information</h3>
-	<table class="sf-table">
-		<tr><td>Email</td>
-			<td>
-				 {{ me.email }}
-			</td>
-			<td>Shipping Address</td>
-			<td>
-				<span class="command-link" style="float:right;">Edit</span>
-				{{ me.shipping_address }}
-				<br />
-				<textarea id="shipping-address" style="display:none;"></textarea>
-				<br />
-				
-				<button class="ariel-button" id="btn-save-shipping-address" style="display:none;">Save</button> 
-				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
-			</td>
-		</tr>
-		<tr><td>Communication</td>
-			<td>
-				<span class="command-link" style="float:right;" id="edit-phone">Add</span>
-				<span style="float:right;"> | </span>
-				<span class="command-link" style="float:right;" id="edit-phone">Edit</span>
-				<table>
-				{% for i, p in me.communication.iteritems() %}
-					<tr>
-					<td><label class="cart-summary-label">{{i}}</label></tr>
-					<td>
-					{{ p }}
-					<input id="comm-{{ i }}" type="text" placeholder="eg. 801-891-8888" value="" style="display:none;"/>
-					</td>
-					</tr>
-				{% endfor %}
-				</table>
-				<br />
-				
-				<button class="ariel-button" id="btn-save-communication" style="display:none;">Save</button> 
-				<button class="ariel-button" item="cancel" style="display:none;">Cancel</button> 
-			</td>
-		</tr>
-	</table>
-</div>
+<p class="ariel-blue ariel-p">
+You can <strong>add</strong> or <strong>cancel</strong> a membership at any time to have the optimal functions
+supporting your business. <a href="">Learn more</a> of different memberships and choose the ones that best fit your interest.
+</p>
 
 <div class="quick-pane">
-<h3>Memberships</h3>
-	<span class="collapse-switch" id="btn-add-membership">Add a New Membership</span>
+	<span class="command-link" id="show-new-membership" style="float:right;">Add a New Membership</span>
+	
+		
 	<table class="table-row-border">
 	<thead>	<tr><td>Role</td>
 				<td>Status</td>
@@ -137,9 +110,10 @@
 				<td>{{ m.last_payment_amount }}</td>
 				<td>{{ m.expiration_date }}</td>
 				<td>
-					{% if m.is_active %}
+					{% if m.is_active and m.role=='Trial' %}
+					{% elif m.is_active %}
 						<span class="command-link">Cancel</span> | 
-						<span class="command-link">Extend</span>
+						<span class="command-link">Renew</span>
 					{% else %}
 						<span class="command-link">Renew</span>
 					{% endif %}
@@ -150,42 +124,36 @@
 	</table>
 </div>
 
-<div class="quick-pane">
-	<h3>Billing Method</h3>
-	{% for b in me.billing_methods %}
-		<div class="ariel-pinterest-item">
-			<h4>}{{ b.media }}</h4>
-			{{ b.name_on_account }}<br />
-			{{ b.address }}<br />
-			{{ b.account_number }}<br />
-			{{ b.expiration_date }}<br />
+<div class="overlay" style="display:none;" id="div-new-membership">
+	<div class="pin-in-focus box-shadow">
+	
+		<div class="border-bottom">
+			<h1>New Membership</h1>
 		</div>
-	{% endfor %}
-
-	<span class="collapse-switch" id="show-new-billing-div">Add a New Billing Method</span>
-	<div id="div-new-billing-method-form" style="display:none;">
-	<table class="ariel-table">
-		<tr><td>Method</td>
-			<td><select>
-				<option value="Manual" selected="selected">Manual</option>
-				<option value="paypal">PayPal</option>
-				<option value="master">MasterCard</option>
-				<option value="visa">Visa</option>
-				</select>
-			</td>
-		</tr>
-		<tr><td>Account Number</td>
-			<td><input type="text" value="" placeholder="" /></td>
-		</tr>
-		<tr><td>Expiration Date</td>
-			<td><input type="date" value="" /></td>
-		</tr>
-		<tr><td>Billing Address</td>
-			<td><input type="text" value="" /></td>
-		</tr>
-	</table>
-	<button id="btn-add-new-billing" class="ariel-button">Add</button>
-	<button id="btn-cancel-new-billing" class="ariel-button">Cancel</button>
- 	</div>
+	
+		<div>
+			<span class="command-link" id="add-new-membership" style="float:right;">Add</span>
+		
+			<input type="submit" value="Save" id="btn-save-new-membership" class="my-button"/>
+	
+			<table class="sf-table two-col-table" id="table-new-membership">
+			<thead><tr><td>Role</td><td>Start Date</td></tr></thead>
+			<tbody>
+				<tr><td>
+					<select item="membership-role">
+						{% for role,fee in membership_options.iteritems() %}
+							<option value="{{ role }}">{{ role }}</option>
+						{% endfor %}
+					</select>
+					</td>
+					<td>
+						<input type="date" item="membership-start-date" value=""/>
+						<span class="command-link" item="remove" style="float:right;">Remove</span>
+					</td>
+				</tr>
+			</tbody>		
+			</table>
+		</div>
+	</div>
 </div>
 {% endblock %}
