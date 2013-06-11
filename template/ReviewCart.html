@@ -242,298 +242,304 @@
     	Review items in your shopping cart and submit. You can monitor the status of your orders
     	at any time.
     </p>
-        
-	{% if cart.fills|length > 0 %}
-	<div>
-	{% if cart.status=='Open' and me.can_be_nur() %}
-		<button class="my-button" item="approval-process">Submit for Approval</button>
-	{% elif cart.status=='Rejected' and me.can_be_nur() %}
-		<button class="my-button" item="approval-process">Submit for Approval</button>
-	{% elif cart.status=='Rejected' and me.can_be_doc() %}
-		<button class="my-button" item="approval-process">Approve</button>
-	{% elif cart.status=='In Approval' and me.can_be_doc() %}
-		<button class="my-button" item="approval-process">Approve</button>
-		<button class="my-button" item="approval-process">Reject</button>
-	{% endif %}
-	</div>
 
-	<!-- Shipping inputs are available after approval and for DOC -->
-	{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
-	<div class="shopping-cart-pane" style="display:none;" itemId="{{ cart.key.id() }}">
-		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
-			Close
-		</span>
-
-		<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
-		<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
-		<h4>Enter Shipping Information</h4>		
+	{% if cart and cart.can_view(me.key) %}
+        	
+		{% if cart.fills|length > 0 %}
 		<div>
-		<label class="ss-label">Shipping Method</label>
-		<br />
-		<select class="ss-select" name="shipping-carrier">
-			{% for s in shipping_methods %}
-				<option value="{{ s }}">{{ s }}</option>
-			{% endfor %}
-		</select>
-		</div>
-		<br />
-				
-		<div>
-		<label class="ss-label">Tracking Number</label>
-		<br />
-		<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number">
-			{{ cart.shipping_tracking_number|join(', ') }}
-		</textarea>
-		</div>
-
-		<table class="two-col-table">
-			<tr>
-				<td>
-					<label class="ss-label">Number of Packages</label>
-					<br />
-					<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"
-					value="{{ cart.shipping_num_of_package }}"/>					
-				</td>
-				<td>
-					<label class="ss-label">Cost</label>
-					<br />
-					<input type="number" name="shipping-cost" step="any" placeholder="0.0" value="{{ cart.shipping_cost }}"/>
-				</td>
-			</tr>
-			
-			<tr>
-				<td>				
-					<label class="ss-label">Shipping Label File</label>
-					<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
-				</td>
-				<td>				
-		<label class="ss-label">Shipped Date</label>
-		<br />
-		<input class="ss-input" type="date" name="shipping-date" id="input-shipping-date" value="{{ cart.shipping_date }}"/>
-				</td>
-			</tr>
-		</table>		
-		
-		<br />
-		{% if shipping_label %}
-			<a href="{{ shipping_label }}">View saved shipping label</a>
-			<br />
+		{% if cart.status=='Open' and me.can_be_nur() %}
+			<button class="my-button" item="approval-process">Submit for Approval</button>
+		{% elif cart.status=='Rejected' and me.can_be_nur() %}
+			<button class="my-button" item="approval-process">Submit for Approval</button>
+		{% elif cart.status=='Rejected' and me.can_be_doc() %}
+			<button class="my-button" item="approval-process">Approve</button>
+		{% elif cart.status=='In Approval' and me.can_be_doc() %}
+			<button class="my-button" item="approval-process">Approve</button>
+			<button class="my-button" item="approval-process">Reject</button>
 		{% endif %}
+		</div>
 	
-		<button class="my-button" id="btn-create-shipping">Save Shipment</button>
+		<!-- Shipping inputs are available after approval and for DOC -->
+		{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
+		<div class="shopping-cart-pane" style="display:none;" itemId="{{ cart.key.id() }}">
+			<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
+				Close
+			</span>
 	
-		</form>
-	</div>
-	<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
-	{% endif %}
+			<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
+			<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
+			<h4>Enter Shipping Information</h4>		
+			<div>
+			<label class="ss-label">Shipping Method</label>
+			<br />
+			<select class="ss-select" name="shipping-carrier">
+				{% for s in shipping_methods %}
+					<option value="{{ s }}">{{ s }}</option>
+				{% endfor %}
+			</select>
+			</div>
+			<br />
+					
+			<div>
+			<label class="ss-label">Tracking Number</label>
+			<br />
+			<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number">
+				{{ cart.shipping_tracking_number|join(', ') }}
+			</textarea>
+			</div>
 	
-	<div class="quick-pane" id="sec-summary">
-	<h4>Cart Summary</h4>
-	<table class="sf-table table-row-border">
-		<tr><td>Cart Name</td>
-			<td>Cart# {{ cart.key.id() }}</td>
-			<td>Created Date</td>
-			<td>{{ cart.created_time }}</td>
-		</tr><tr>
-			<td>Buyer Name</td>
-			<td>
-				{% if cart.broker %}
-					{{ cart.broker.get().nickname }}
-				{% endif %}
-			</td>
-			<td>Seller Name</td>
-			<td>{{ cart.terminal_seller.get().nickname }}</td>
-		</tr>
-	</table>
-	</div>					
-	
-	<div class="quick-pane" id="sec-status">
-	<h4>Status</h4>
-	<table class="sf-table table-row-border">
-		<tr><td>Status</td>
-			<td>{{ cart.status }}</td>
-			<td>Shipping Status</td>
-			<td>{{ cart.shipping_status }}</td>
-		</tr><tr>
-			<td>Buyer Reconciled</td>
-			<td>{{ cart.buyer_reconciled }}</td>
-			<td>Seller Reconciled</td>
-			<td>{{ cart.seller_reconciled }}</td>
-		</tr>
-	</table>
-	</div>
-	
-	<!-- DOC only views -->
-	{% if me.can_be_doc() %}
-		<div class="quick-pane" id="sec-profit">
-		<h4>Profit</h4>
+			<table class="two-col-table">
+				<tr>
+					<td>
+						<label class="ss-label">Number of Packages</label>
+						<br />
+						<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"
+						value="{{ cart.shipping_num_of_package }}"/>					
+					</td>
+					<td>
+						<label class="ss-label">Cost</label>
+						<br />
+						<input type="number" name="shipping-cost" step="any" placeholder="0.0" value="{{ cart.shipping_cost }}"/>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>				
+						<label class="ss-label">Shipping Label File</label>
+						<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
+					</td>
+					<td>				
+			<label class="ss-label">Shipped Date</label>
+			<br />
+			<input class="ss-input" type="date" name="shipping-date" id="input-shipping-date" value="{{ cart.shipping_date }}"/>
+					</td>
+				</tr>
+			</table>		
+			
+			<br />
+			{% if shipping_label %}
+				<a href="{{ shipping_label }}">View saved shipping label</a>
+				<br />
+			{% endif %}
+		
+			<button class="my-button" id="btn-create-shipping">Save Shipment</button>
+		
+			</form>
+		</div>
+		<div id="shopping-cart-visible-switch">Enter a shipping label &nbsp;</div>
+		{% endif %}
+		
+		<div class="quick-pane" id="sec-summary">
+		<h4>Cart Summary</h4>
 		<table class="sf-table table-row-border">
-			<tr><td>Expected Profit</td>
-				<td>{{ cart.profit }}</td>
-				<td>Expected Gross Margin</td>
-				<td>{{ cart.gross_margin}}%</td>
+			<tr><td>Cart Name</td>
+				<td>Cart# {{ cart.key.id() }}</td>
+				<td>Created Date</td>
+				<td>{{ cart.created_time }}</td>
+			</tr><tr>
+				<td>Buyer Name</td>
+				<td>
+					{% if cart.broker %}
+						{{ cart.broker.get().nickname }}
+					{% endif %}
+				</td>
+				<td>Seller Name</td>
+				<td>{{ cart.terminal_seller.get().nickname }}</td>
 			</tr>
-			<tr><td>Realized Profit</td>
-				<td>{{ cart.realized_profit }}</td>
-				<td>Realized Gross Margin</td>
-				<td>{{ cart.realized_gross_margin }}</td>
+		</table>
+		</div>					
+		
+		<div class="quick-pane" id="sec-status">
+		<h4>Status</h4>
+		<table class="sf-table table-row-border">
+			<tr><td>Status</td>
+				<td>{{ cart.status }}</td>
+				<td>Shipping Status</td>
+				<td>{{ cart.shipping_status }}</td>
+			</tr><tr>
+				<td>Buyer Reconciled</td>
+				<td>{{ cart.buyer_reconciled }}</td>
+				<td>Seller Reconciled</td>
+				<td>{{ cart.seller_reconciled }}</td>
 			</tr>
 		</table>
 		</div>
+		
+		<!-- DOC only views -->
+		{% if me.can_be_doc() %}
+			<div class="quick-pane" id="sec-profit">
+			<h4>Profit</h4>
+			<table class="sf-table table-row-border">
+				<tr><td>Expected Profit</td>
+					<td>{{ cart.profit }}</td>
+					<td>Expected Gross Margin</td>
+					<td>{{ cart.gross_margin}}%</td>
+				</tr>
+				<tr><td>Realized Profit</td>
+					<td>{{ cart.realized_profit }}</td>
+					<td>Realized Gross Margin</td>
+					<td>{{ cart.realized_gross_margin }}</td>
+				</tr>
+			</table>
+			</div>
+		
+			<div class="quick-pane" sec="sec-accounting">
+			<h4>Accounting</h4>
+			<table class="sf-table table-row-border">
+				<tr><td>Total Payable</td>
+					<td>{{ cart.payable }}</td>
+					<td>Total Receivable</td>
+					<td>{{ cart.receivable }}</td>
+				</tr>
+				<tr><td>Bank Withdraw</td>
+					<td>{{ cart.payout }}</td>
+					<td>Bank Deposit</td>
+					<td>{{ cart.payin }}</td>
+				</tr>
+				<tr>
+					<td>Payable Balance</td>
+					<td>{{ cart.payable_balance }}</td>
+					<td>Receivable</td>
+					<td>{{ cart.receivable_balance }}</td>
+				</tr>
+			</table>
+			</div>	
+		
+			<div class="quick-pane">
+			<h4>Assign Client</h4>
+			{% if cart.terminal_buyer %}
+			<table class="sf-table table-row-border">
+				<tr><td>Shipping Address</td>
+					<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
+					<td>Email</td>
+					<td>{{ cart.terminal_buyer.get().email }}</td>
+				</tr>
+			</table>
+			{% endif %}
+			</div>
+		{% endif %}
+		
+		<div class="quick-pane" id="sec-fill-list">
+		<h4>Item Details</h4>
+		{% if cart.fills|count >0 %}
+			<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
+			<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
+			<table class="table-row-border">
+				{% for f in cart.fills %}
+				<tr><td>
+						<a href="/buyorder/browse/{{ f.order.id() }}/">
+						<img src="{{ f.order.get().image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/>
+						</a>
+					</td>
+					<td>
+						<h4>
+						{{ f.order.get().name|title }}
+						</h4>
+						{{ f.order.get().description }}
+					</td>
+					<td>
+						{% if cart.status=='Open' or cart.status=='Rejected' %}
+							<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
+						{% else %}
+							{{ f.price }}
+						{% endif %}
+						<div class="arrow_box" style="display:none;">
+							<label>Sell price: </label>
+							<input type="number" item="client-price" itemId="{{ f.order.id() }}" value="{{ f.client_price }}" step="any"/>	
+						</div>
+					</td>
+					<td>
+						{% if cart.status=='Open' or cart.status=='Rejected' %}
+							<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
+						{% else %}
+							{{ f.qty }}
+						{% endif %}
+					</td>
+					<td><span class="command-link" itemId="{{ f.order.id() }}" item="buyorder-fill-remove">Remove</span></td>
+				</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+		</div>
 	
-		<div class="quick-pane" sec="sec-accounting">
-		<h4>Accounting</h4>
+		<div class="quick-pane" id="sec-shipping-summary">
+		<h4>Shipping Summary</h4>
 		<table class="sf-table table-row-border">
-			<tr><td>Total Payable</td>
-				<td>{{ cart.payable }}</td>
-				<td>Total Receivable</td>
-				<td>{{ cart.receivable }}</td>
+			<tr><td>Shipping Date</td>
+				<td>{{ cart.shipping_date }}</td>
+				<td>Carrier</td>
+				<td>{{ cart.shipping_carrier }}</td>
 			</tr>
-			<tr><td>Bank Withdraw</td>
-				<td>{{ cart.payout }}</td>
-				<td>Bank Deposit</td>
-				<td>{{ cart.payin }}</td>
+			<tr><td>Tracking Number</td>
+				<td>{{ cart.shipping_tracking_number|join('<br />') }}</td>
+				<td>No. of Packages</td>
+				<td>{{ cart.shipping_num_of_package }}</td>
 			</tr>
-			<tr>
-				<td>Payable Balance</td>
-				<td>{{ cart.payable_balance }}</td>
-				<td>Receivable</td>
-				<td>{{ cart.receivable_balance }}</td>
+			<tr><td>Shipping Status</td>
+				<td>{{ cart.shipping_status }}</td>
+				<td>Shipping Cost</td>
+				<td>{{ cart.shipping_cost }}</td>
+			</tr>
+			<tr><td>Last Modified Date</td>
+				<td>{{ cart.shipping_created_date }}</td>
+				<td>Shipping Label</td>
+				<td>
+					{% if shipping_label %}
+						<a href="{{ shipping_label }}">Download</a>
+					{% endif %}
+				</td>
 			</tr>
 		</table>
 		</div>	
 	
-		<div class="quick-pane">
-		<h4>Assign Client</h4>
-		{% if cart.terminal_buyer %}
-		<table class="sf-table table-row-border">
-			<tr><td>Shipping Address</td>
-				<td>{{ cart.terminal_buyer.get().shipping_address }}</td>
-				<td>Email</td>
-				<td>{{ cart.terminal_buyer.get().email }}</td>
-			</tr>
-		</table>
+		<div class="quick-pane" id="sec-payment">
+		<h4>Payments</h4>
+		{% if cart.payout_slips %}
+			<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
+			<caption class="table-caption">Pay For This Deal</caption>
+			<thead>
+				<tr><td>Transaction Created On</td>
+					<td>Amount</td>
+					<td>Recorded By</td>
+				</tr>
+			</thead>
+			<tbody>		
+			{% for s in cart.payout_slips %}
+				<tr><td>{{ s.get().created_time }}</td>
+					<td>{{ s.get().amount }}</td>
+					<td>{{ s.get().last_modified_by.get().nickname }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+			</table>
+		{% endif %}
+		{% if cart.payin_slips %}
+			<table class="table-row-border" style="width:49%;">
+			<caption class="table-caption">Earn From This Deal</caption>
+			<thead>
+				<tr><td>Transaction Created On</td>
+					<td>Amount</td>
+					<td>Recorded By</td>
+				</tr>
+			</thead>
+			<tbody>		
+			{% for s in cart.payin_slips %}
+				<tr><td>{{ s.get().created_time }}</td>
+					<td>{{ s.get().amount }}</td>
+					<td>{{ s.get().last_modified_by.get().nickname }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+			</table>
 		{% endif %}
 		</div>
-	{% endif %}
 	
-	<div class="quick-pane" id="sec-fill-list">
-	<h4>Item Details</h4>
-	{% if cart.fills|count >0 %}
-		<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
-		<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
-		<table class="table-row-border">
-			{% for f in cart.fills %}
-			<tr><td>
-					<a href="/buyorder/browse/{{ f.order.id() }}/">
-					<img src="{{ f.order.get().image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/>
-					</a>
-				</td>
-				<td>
-					<h4>
-					{{ f.order.get().name|title }}
-					</h4>
-					{{ f.order.get().description }}
-				</td>
-				<td>
-					{% if cart.status=='Open' or cart.status=='Rejected' %}
-						<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
-					{% else %}
-						{{ f.price }}
-					{% endif %}
-					<div class="arrow_box" style="display:none;">
-						<label>Sell price: </label>
-						<input type="number" item="client-price" itemId="{{ f.order.id() }}" value="{{ f.client_price }}" step="any"/>	
-					</div>
-				</td>
-				<td>
-					{% if cart.status=='Open' or cart.status=='Rejected' %}
-						<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
-					{% else %}
-						{{ f.qty }}
-					{% endif %}
-				</td>
-				<td><span class="command-link" itemId="{{ f.order.id() }}" item="buyorder-fill-remove">Remove</span></td>
-			</tr>
-			{% endfor %}
-		</table>
-	{% endif %}
-	</div>
-
-	<div class="quick-pane" id="sec-shipping-summary">
-	<h4>Shipping Summary</h4>
-	<table class="sf-table table-row-border">
-		<tr><td>Shipping Date</td>
-			<td>{{ cart.shipping_date }}</td>
-			<td>Carrier</td>
-			<td>{{ cart.shipping_carrier }}</td>
-		</tr>
-		<tr><td>Tracking Number</td>
-			<td>{{ cart.shipping_tracking_number|join('<br />') }}</td>
-			<td>No. of Packages</td>
-			<td>{{ cart.shipping_num_of_package }}</td>
-		</tr>
-		<tr><td>Shipping Status</td>
-			<td>{{ cart.shipping_status }}</td>
-			<td>Shipping Cost</td>
-			<td>{{ cart.shipping_cost }}</td>
-		</tr>
-		<tr><td>Last Modified Date</td>
-			<td>{{ cart.shipping_created_date }}</td>
-			<td>Shipping Label</td>
-			<td>
-				{% if shipping_label %}
-					<a href="{{ shipping_label }}">Download</a>
-				{% endif %}
-			</td>
-		</tr>
-	</table>
-	</div>	
-
-	<div class="quick-pane" id="sec-payment">
-	<h4>Payments</h4>
-	{% if cart.payout_slips %}
-		<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
-		<caption class="table-caption">Pay For This Deal</caption>
-		<thead>
-			<tr><td>Transaction Created On</td>
-				<td>Amount</td>
-				<td>Recorded By</td>
-			</tr>
-		</thead>
-		<tbody>		
-		{% for s in cart.payout_slips %}
-			<tr><td>{{ s.get().created_time }}</td>
-				<td>{{ s.get().amount }}</td>
-				<td>{{ s.get().last_modified_by.get().nickname }}</td>
-			</tr>
-		{% endfor %}
-		</tbody>
-		</table>
-	{% endif %}
-	{% if cart.payin_slips %}
-		<table class="table-row-border" style="width:49%;">
-		<caption class="table-caption">Earn From This Deal</caption>
-		<thead>
-			<tr><td>Transaction Created On</td>
-				<td>Amount</td>
-				<td>Recorded By</td>
-			</tr>
-		</thead>
-		<tbody>		
-		{% for s in cart.payin_slips %}
-			<tr><td>{{ s.get().created_time }}</td>
-				<td>{{ s.get().amount }}</td>
-				<td>{{ s.get().last_modified_by.get().nickname }}</td>
-			</tr>
-		{% endfor %}
-		</tbody>
-		</table>
-	{% endif %}
-	</div>
-
+		{% else %}
+			<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
+	
+		{% endif %}
+		
 	{% else %}
-		<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
-
+		Sorry, you do not have access this cart. Why not <a href="/buyorder/browse">Go Shopping</a>!
 	{% endif %}
 {% endblock %}

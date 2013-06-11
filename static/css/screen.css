@@ -1839,9 +1839,7 @@ table.two-col-table{
   	border:none;
 	margin-top:10px;
 	margin-bottom:10px;
-	width:67%;
-	margin-left:auto;
-	margin-right:auto;
+	width:500px;
 }
 
 table.two-col-table td:nth-child(2n+1){

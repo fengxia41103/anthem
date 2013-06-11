@@ -11,10 +11,12 @@
 		</li>
 
 		<li id="nav-cart-review">
+			{% if cart %}
 			<a href="/cart/review?cart={{ cart.key.id() }}" title="Review my shopping cart">
 				<img src="http://cdn4.iconfinder.com/data/icons/devine_icons/128/PNG/Folder%20and%20Places/Stack.png" />
 			</a>
 			<h3>My Cart</h3>
+			{% endif %}
 		</li>		
 		{% endif %}
 		
@@ -23,7 +25,7 @@
 			<a href="/buyorder/owner/{{ me.key.id() }}/" title="View my posted orders by category">
 				<img src="http://cdn5.iconfinder.com/data/icons/high-resolution-app-tab-bar-icons/60/Category.png" />
 			</a>
-			<h3>My Posts</h3>
+			<h3>Inventory</h3>
 		</li>
 		{% endif %}
 

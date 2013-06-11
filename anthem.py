@@ -362,21 +362,25 @@ class ReviewCart(MyBaseHandler):
 			cart=BuyOrderCart.get_by_id(cart_id,parent=owner_key)
 		except:		
 			cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
-		assert cart
-
-		self.template_values['shipping_methods']=SHIPPING_METHOD
-		self.template_values['cart']=cart
-		self.template_values['url']=uri_for('cart-review')
+		if not cart:
+			self.template_values['cart']=None
 		
-		# to save label file using BlobStore
-		self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s' % (cart.key.id()))
-		
-		# serve label file if any
-		if cart.shipping_label:
-			self.template_values['shipping_label']='/blob/serve/%s/'% cart.shipping_label
 		else:
-			self.template_values['shipping_label']=None
-		
+			assert cart
+
+			self.template_values['shipping_methods']=SHIPPING_METHOD
+			self.template_values['cart']=cart
+			self.template_values['url']=uri_for('cart-review')
+			
+			# to save label file using BlobStore
+			self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s' % (cart.key.id()))
+			
+			# serve label file if any
+			if cart.shipping_label:
+				self.template_values['shipping_label']='/blob/serve/%s/'% cart.shipping_label
+			else:
+				self.template_values['shipping_label']=None
+			
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
 		self.response.write(template.render(self.template_values))
 	

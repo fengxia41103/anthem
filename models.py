@@ -275,6 +275,11 @@ class BuyOrderCart(MyBaseModel):
 	realized_profit=ndb.ComputedProperty(lambda self: self.payin-self.payout)
 	realized_gross_margin=ndb.ComputedProperty(lambda self: self.realized_profit/self.payout*100.0 if self.payout else 0)	
 
+	def can_view(self,user_key):
+		# if usre is either a buyer, a seller or a broker
+		# otherwise, they don't have the right to view this cart content!
+		return self.terminal_seller==user_key or self.terminal_buyer==user_key or self.broker==user_key
+		
 #######################################
 #
 # Communication models
