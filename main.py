@@ -31,6 +31,7 @@ routes = [
 	# Anthem
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
 	Route('/buyorder/edit/<order_id:\d+>/', handler='anthem.EditBuyOrder',name='buyorder-edit'),
+	Route('/buyorder/delete/<order_id:\d+>/', handler='anthem.DeleteBuyOrder',name='buyorder-delete'),
 	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder', name='buyorder-new'),
 	Route('/buyorder/browse/<order_id:\d+>/', handler='anthem.BrowseBuyOrderById',name='buyorder-browse-id'),
 	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),
@@ -42,6 +43,7 @@ routes = [
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
 	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 
+	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
 	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	

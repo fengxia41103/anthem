@@ -113,8 +113,7 @@ class EditBuyOrder(MyBaseHandler):
 		order=BuyOrder.get_by_id(int(order_id))
 		assert order
 		
-		# only owner of this order can edit
-		# TODO: super user should be able, too
+		# only owner of this order or super can edit
 		if order.owner==self.me.key or self.me.can_be_super():
 			self.template_values['order']=order
 		else:
@@ -123,6 +122,20 @@ class EditBuyOrder(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/PublishNewBuyOrder.html')
 		self.response.write(template.render(self.template_values))
 
+class DeleteBuyOrder(MyBaseHandler):
+	def post(self, order_id):
+		order=BuyOrder.get_by_id(int(order_id))
+		assert order
+		
+		# only owner of this order or super can edit
+		if order.owner==self.me.key or self.me.can_be_super():
+			if order.filled_qty:
+				return self.response.write('There are open shopping orders on this item. You can not delete this.')
+			order.key.delete()
+			self.response.write('Order has been deleted')
+		else:
+			return self.response.write('You do not have the right to edit this order.')
+				
 class PublishNewBuyOrder(MyBaseHandler):
 	def get(self):
 		if not self.me.can_be_doc():
@@ -377,15 +390,18 @@ class ReviewCart(MyBaseHandler):
 			action=self.request.POST['action']
 			id=int(self.request.POST['id'])
 			obj=self.request.POST['kind']
+			batch=[]
 			
 			if obj=='BuyOrderFill':
+				# NOTE: these can only be allowed when cart is still OPEN!
+				
 				matching_key=ndb.Key('BuyOrder',id)
 				
 				# we allow remove fill from cart
 				if action=='remove':
 					new_fills=[f for f in cart.fills if f.order!=matching_key]
 					cart.fills=new_fills
-
+					
 				# update client price
 				elif action=='update client price':
 					price=float(self.request.POST['price'])
@@ -405,7 +421,16 @@ class ReviewCart(MyBaseHandler):
 					qty=int(self.request.POST['qty'])
 					for f in cart.fills:
 						if f.order!=matching_key: continue
+						# update order's filled qty
+						order=f.order.get()
+						order.filled_qty+= (qty-f.qty)
+						batch.append(order)
+						
+						# update fill
 						f.qty=qty
+						
+				# update affected order's if qty changed
+				ndb.put_multi(batch)
 			
 			# approval process
 			elif obj=='BuyOrderCart':
@@ -414,10 +439,19 @@ class ReviewCart(MyBaseHandler):
 				elif action.lower()=='approve' and cart.status=='In Approval':
 					cart.status='Ready for Processing'
 					
-					# TODO: send email to seller here
+					# update buyorder filled qty
+					for f in cart.fills:
+						order=f.order.get()
+						order.approved_qty+=f.qty
+						batch.append(order)
+					ndb.put_multi(batch)
+					
+					# TODO: send email to all parties here
+					
 				elif action.lower()=='reject' and cart.status=='In Approval':
 					cart.status='Rejected'
-					# TODO: send email to seller here
+					# TODO: send email to all parties here
+					
 				else:
 					# TODO: give an assert now
 					raise Exception('Unknown path')	
@@ -614,5 +648,12 @@ class ManageUserContact(MyBaseHandler):
 
 	def post(self):
 		self.me.communication=self.request.POST
+		self.me.put()
+		self.response.write('0')
+
+class ManageUserContactPreference(MyBaseHandler):
+	def post(self):
+		self.me.shipping_preference=self.request.POST['shipping']
+		self.me.payment_preference=self.request.POST['payment']
 		self.me.put()
 		self.response.write('0')

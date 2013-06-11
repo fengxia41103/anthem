@@ -105,17 +105,17 @@ class Contact(ndb.Model):
 	billing_methods=ndb.StructuredProperty(Billing,repeated=True)
 	
 	# we don't need to know its residential
-	shipping_address=ndb.StringProperty(indexed=False)
+	shipping_address=ndb.StringProperty(indexed=False,default='')
 	
 	# shipping method preference
 	# write whatever you want
 	# eg. state, carrier, international
-	shipping_preference=ndb.StringProperty(indexed=False)
+	shipping_preference=ndb.StringProperty(indexed=False,default='')
 	
 	# payment method preference
 	# write whatever you want
 	# eg. cash only, COD
-	payment_preference=ndb.StringProperty()
+	payment_preference=ndb.StringProperty(indexed=False,default='')
 	
 	# user reputation score
 	# we shouldn't save comments here because this will burden datastore everytime we need
@@ -127,12 +127,12 @@ class Contact(ndb.Model):
 	# thus allowing super user to manually set its value.
 	# this is potentially needed to help user transit a status
 	# from other site to ours
-	reputation_score=ndb.IntegerProperty()
+	reputation_score=ndb.IntegerProperty(default=0)
 	
 	# banking balance
 	# this is how much money this user has on his account
 	# payout will withdraw from this; payin will deposit to this
-	cash=ndb.FloatProperty()
+	cash=ndb.FloatProperty(default=0)
 		
 	def can_be_doc(self):
 		# if a Doc membership is Active
@@ -180,11 +180,11 @@ class AccountingSlip(MyBaseModel):
 #######################################
 class BuyOrder(MyBaseModel):
 	terminal_buyer=ndb.KeyProperty(kind='Contact') # optional
-	name=ndb.StringProperty()
-	description=ndb.TextProperty()
-	image=ndb.StringProperty()
-	qty=ndb.IntegerProperty()
-	price=ndb.FloatProperty()
+	name=ndb.StringProperty(required=True)
+	description=ndb.TextProperty(default='')
+	image=ndb.StringProperty(required=True)
+	qty=ndb.IntegerProperty(required=True)
+	price=ndb.FloatProperty(required=True)
 	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)
 
 	# tags is a string list tokenized self.name and self.description by white space
@@ -197,6 +197,17 @@ class BuyOrder(MyBaseModel):
 	# instead, we will parse the tags and look for keywords that internally will map to a particular category
 	# category keywords will function as tags when searching
 	queues=ndb.ComputedProperty(lambda self: categorization(self.tags), repeated=True,indexed=True)
+	
+	# filled qty
+	# order can only be deleted if filled_qty=0, meaning nobody has an expose to this record
+	filled_qty=ndb.IntegerProperty(default=0)
+	approved_qty=ndb.IntegerProperty(default=0)
+	unfilled_qty=ndb.ComputedProperty(lambda self: self.qty-self.approved_qty)
+	
+	# closed
+	# if set, this will not show on the browse page, and won't accept fills
+	# however, existing fills are not affected
+	is_closed=ndb.BooleanProperty()
 	
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference

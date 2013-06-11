@@ -17,7 +17,7 @@
 			}
 		});
 		
-		j$('#btn-save').click(function(){
+		j$('#btn-save-comm').click(function(){
 			var trs=j$('#table-comm').find('tbody tr');
 			var data={};
 			j$.each(j$('#table-comm tbody tr'),function(index,val){
@@ -29,6 +29,26 @@
 			j$.post(
 				'/user/contact',
 				data,
+				function(result){
+					switch(result){
+						case '0':
+							j$().toastmessage('showSuccessToast','Your information has been updated');
+							break;
+						default:	
+							j$().toastmessage('showErrorToast','What happened?');
+							break;
+					}
+				}
+			);
+		});
+
+		j$('#btn-save-preference').click(function(){
+			var shipping=j$(this).parents('div.quick-pane:first').find('textarea[item="shipping-preference"]').val();
+			var payment=j$(this).parents('div.quick-pane:first').find('textarea[item="payment-preference"]').val();
+			
+			j$.post(
+				'/user/contact/preference',
+				{'shipping':shipping,'payment':payment},
 				function(result){
 					switch(result){
 						case '0':
@@ -75,7 +95,7 @@ by upating your Google account.
 	<a class="command-link" id="add-comm">Add</a>
 	</span>
 	
-	<input type="submit" value="Save" id="btn-save" class="my-button"/>
+	<input type="submit" value="Save" id="btn-save-comm" class="my-button"/>
 
 	<table class="sf-table two-col-table" id="table-comm">
 	<thead><tr><td>Name</td><td>Value</td></tr></thead>
@@ -89,5 +109,26 @@ by upating your Google account.
 	{% endfor %}
 	</tbody>
 	</table>
+</div>
+
+<div class="quick-pane">
+	<h3>Posting Preference</h3>
+	
+	<p>
+		These preferences will be added to all your posts. Think of them as an email signature where
+		you indicate things that you want users to be aware of.
+	</p>
+	
+	<input type="submit" value="Save" id="btn-save-preference" class="my-button"/>
+	<div>
+		<label class="ss-label">Shpping Preference</label>
+		<br />
+		<textarea class="ss-textarea" value="{{ me.shipping_preference }}" item="shipping-preference"></textarea>
+	</div>
+	<div>	
+		<label class="ss-label">Payment Preference</label>
+		<br />
+		<textarea class="ss-textarea" value="{{ me.payment_preference }}" item="payment-preference"></textarea>
+	</div>
 </div>
 {% endblock %}

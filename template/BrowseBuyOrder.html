@@ -134,6 +134,8 @@
 			var price=j$(this).find('span[item="price"]').html();
 			var owner=j$(this).find('.product-list-item-footer-user').attr('name');
 			var postTime=j$(this).attr('postTime');
+			var shipping=j$(this).find('span[item="shipping-preference"]').html();
+			var payment=j$(this).find('span[item="payment-preference"]').html();
 			
 			j$('#infocus-title').html(owner);
 			j$('#infocus-subtitle').html(postTime);
@@ -142,6 +144,9 @@
 			j$('#infocus-price').val(price);
 			j$('#infocus-product-name').html(title);
 			j$('#infocus-product-description').html(subtitle);
+			j$('#infocus-shipping-preference').html(shipping);
+			j$('#infocus-payment-preference').html(payment);
+			
 			j$('div.overlay').fadeIn(300);
 			j$('button[item="btn-new-buyorder-fill"]').attr('itemId',id);
 			
@@ -177,16 +182,6 @@
 {% endblock %}
 
 {% block main %}
-	{#
-	<h1>
-	{% if me %}
-		Welcome, {{ me.nickname }}! (<a href="{{url_logout}}">Logout</a>)
-	{% else %}
-		<a href="{{url_login}}">Sign in or register</a>
-	{% endif %}
-	</h1>
-	#}
-	
 	<h1 class="ariel-blue">Browse and Shop</h1>
 	<p class="ariel-blue ariel-p">
 	Browse or use the search box to find products people are looking to buy, and add product to your shopping cart if you want sell to the buyer.
@@ -233,8 +228,14 @@
 		<h3 item="title">{{ b.order.name|title }}</h3>			
 		
 		<div item="subtitle" style="">{{ b.order.description }}</div>			
+		<div style="text-align:right;">
+			<span item="shipping-preference">{{ b.order.owner.get().shipping_preference }}</span>
+			<br />
+			<span item="payment-preference">{{ b.order.owner.get().payment_preference }}</span>
+		</div>
+ 
 		<p>
-			<span class="product-stat" item="qty">{{ b.order.qty }}</span>
+			<span class="product-stat" item="qty">{{ b.order.unfilled_qty }}</span>
 			<span class="product-stat-label">qty</span>
 			
 			<span class="product-stat" item="price">{{ b.order.price }}</span>
@@ -270,6 +271,12 @@
     		<div class="border-bottom">
     			<h4 id="infocus-product-name">iPad</h4>
     			<div id="infocus-product-description">sljdfldsj</div>
+    			
+    			<div style="text-align:right;">
+    				<span id="infocus-shipping-preference"></span>
+    				<br />
+    				<span id="infocus-payment-preference"></span>    				
+    			</div>
     		</div>
     		<div class="list-of-photo">
     			<h4>Similar Posts</h4>

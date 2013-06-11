@@ -9,6 +9,10 @@ body{
 h1,h2,h3,h4,h5{
 	font-family: Verdana, Geneva, sans-serif;
 }
+h1,h2,h3{
+	margin-bottom:20px;
+}
+
 input,textarea,label,span,p,div,select,td{
 	font-family: Verdana, Geneva, sans-serif;
 	font-size:10pt;
@@ -1835,7 +1839,9 @@ table.two-col-table{
   	border:none;
 	margin-top:10px;
 	margin-bottom:10px;
-	width:500px;
+	width:67%;
+	margin-left:auto;
+	margin-right:auto;
 }
 
 table.two-col-table td:nth-child(2n+1){

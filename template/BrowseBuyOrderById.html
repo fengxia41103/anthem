@@ -42,7 +42,19 @@
 	    		}	
 		    );
 	    });
-	    		
+	    
+	    // delete order
+	    j$('#btn-delete').click(function(){
+	    	var id=j$(this).attr('itemId');
+			j$.post(
+				'/buyorder/delete/'+id+'/',
+				[],
+				function(result){
+					j$().toastmessage('showNoticeToast',result);	
+				}
+			);	    
+	    });
+	    
 		// level 1 navigation
 		j$('#nav-order').addClass('level-1-navigation-selected');
 		
@@ -59,7 +71,8 @@
     	</div>
     	<div class="image-house">
     		{% if me.key == order.owner %}
-				<a href="/buyorder/edit/{{ order.key.id() }}/">Edit</a>            
+				<a href="/buyorder/edit/{{ order.key.id() }}/" class="command-link">Edit</a> | 
+				<span class="command-link" itemId="{{ order.key.id() }}" id="btn-delete">Delete</span>
             {% elif cart.broker %}
             	{% if cart.broker == order.owner %}
             	<div>
@@ -79,6 +92,11 @@
     	<div class="border-bottom">
     		<h4 id="infocus-product-name">{{ order.name }}</h4>
     		<div id="infocus-product-description">{{ order.description }}</div>
+    		<div style="text-align:right;">
+    			{{ me.shipping_preference }}
+    			<br />
+    			{{ me.payment_preference }}
+    		</div>
     	</div>
     	<div class="list-of-photo">
     		<h4>Similar Posts</h4>
