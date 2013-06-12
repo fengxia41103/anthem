@@ -1,0 +1,154 @@
+{% extends "/template/ReportBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		var payable_data=j$.parseJSON('{{ payable_chart_data }}');
+		
+        j$('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: 'Seller Deal Share'
+            },
+            subtitle: {
+            	text: 'From {{ start }} to {{ end }}'
+            },
+            tooltip: {
+        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+            	percentageDecimals: 1,
+                formatter: function() {
+                    // round to 1st decimal point
+                    // return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                    return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage) +' %';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function() {
+                        	// round to 1st decimal point
+                           	// return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                            return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage) +' %';
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Deal Share',
+                data: payable_data
+            }]
+        });
+
+		j$('#filter-days').change(function(){
+			window.location.href='/report/myseller/'+j$(this).val()+'/';
+		});
+		
+		//level 1 navigation
+		j$('#nav-report').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-report-myseller').addClass('level-2-navigation-selected');
+	});
+</script>
+{% endblock %}
+
+{% block main %}
+<h1>Seller Report</h1>
+
+
+<p>
+Seller report helps you find out from whom you have been purchasing, and how they have been handling your business.
+In addition, you can give your buyers feedbacks and rate them based on your experience.
+</p>
+
+<div class="chart-filters">
+<ul>
+	<li>
+		{% if filter_days=='7' %}
+			<a href="/report/myseller/7/" class="selected">7 Days</a>
+		{% else %}
+			<a href="/report/myseller/7/">7 Days</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='30' %}
+			<a href="/report/myseller/30/" class="selected">Month</a>
+		{% else %}
+			<a href="/report/myseller/30/">Month</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='365' %}
+			<a href="/report/myseller/365/" class="selected">Year</a>
+		{% else %}
+			<a href="/report/myseller/365/">Year</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days !='7' and filter_days!='30' and filter_days!='365' %}
+			<input type="number" step="1" value="{{ filter_days }}" id="filter-days" class="selected"/>&nbsp;Days
+		{% else %}
+			<input type="number" step="1" value="" id="filter-days"/>&nbsp;Days
+		{% endif %}
+	</li>
+</ul>
+
+</div>
+
+	
+<div>
+		
+	<table width="95%">
+		<tr><td width="60%" valign="top">
+			<div id="container" style=""></div>
+			</td><td width="35%">
+	
+	{% for seller, list in carts|groupby('terminal_seller') %}
+	<div class="quick-pane">
+		<h4>
+		{{ seller.get().nickname }}
+		</h4>
+	
+		<table class="two-col-table table-row-border">
+			<thead>
+				<tr><td></td><td>Deal Size ($)</td><td>Status</td>
+			</thead>
+			<tbody>
+			
+			<!-- list cart by age reverse most recent on top -->
+			{% for c in list|sort(reverse=True,attribute='age') %}
+				<tr><td>
+					<a href="/cart/review?cart={{ c.key.id() }}&owner={{ seller.id() }}">
+						Cart# {{ c.key.id() }}
+					</a>
+					</td><td>
+						{{ c.payable }}
+					</td><td>
+						{{ c.status }}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		<div style="text-align:right;margin-top:20px;">
+			Total: 
+			<span class="border-top-red" style="border-bottom: 3px double red;">{{ payable[seller] }}</span>
+		</div>
+	</div>
+	{% endfor %}
+		</td></tr>
+	</table>
+	
+</div>
+{% endblock %}

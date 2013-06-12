@@ -358,7 +358,6 @@ class ApproveCart(MyBaseHandler):
 		# this is a big gotcha.
 		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
 		assert cart
-		assert cart.broker==self.me.key
 		
 		batch=[]
 		action=self.request.POST['action']
@@ -674,19 +673,62 @@ class ManageUserContactPreference(MyBaseHandler):
 		self.response.write('0')
 
 class ReportMyBuyer(MyBaseHandler):
-	def get(self, in_days):
-		# we are to determine who is a good buyer to do business with
-		
-		# get all my shopping carts
-		# including open ones within the last [in_days]
-		# NOTE: must use float for comparison, otherwise it will return None
+	def get(self,in_days):
+		# we are to determine who is a good buyer from me
+
+		# get all my carts
 		carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.age<=float(in_days)*24*3600)
 		carts=[c for c in carts if c.key!=self.cart.key]
 		self.template_values['carts']=carts
-		
-		
+	
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportMyBuyer.html')
+		self.response.write(template.render(self.template_values))
+		
+class ReportMySeller(MyBaseHandler):
+	def get(self, in_days):
+		self.template_values['filter_days']=in_days
+		self.template_values['end']=datetime.date.today()
+		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
+		
+		# we are to determine who is a good seller (Nur) to do business with
+		
+		# get all shopping carts that I'm a buyer  -- Doc
+		# including open ones within the last [in_days]
+		# NOTE: must use float for comparison, otherwise it will return None
+		carts=BuyOrderCart.query(BuyOrderCart.broker==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
+		self.template_values['carts']=carts
+		
+		# group by sellers
+		sellers={}
+		for c in carts:
+			s=c.terminal_seller
+			if s not in sellers: sellers[s]=[c]
+			else: sellers[s].append(c)
+			
+		# this represents size of a deal
+		# Q: who is your large supplier?
+		payable={}
+		for s in sellers:
+			payable[s]=sum([a.payable for a in sellers[s]])
+		self.template_values['payable']=payable
+		self.template_values['payable_chart_data']=json.dumps([(s.get().nickname, payable[s]) for s in payable])
+		
+		# this represents profit
+		# Q: who is your profitable supplier by sheer number?
+		profit={}
+		for s in sellers:
+			profit[s]=sum([a.profit for a in sellers[s]])
+		self.template_values['profit']=profit
+		
+		# this represents profit margin
+		margin={}
+		for s in sellers:
+			margin[s]=profit[s]/payable[s]
+		self.template_values['margin']=margin
+		
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ReportMySeller.html')
 		self.response.write(template.render(self.template_values))
 		
 class ReportBuyOrderPopular(MyBaseHandler):
@@ -695,6 +737,7 @@ class ReportBuyOrderPopular(MyBaseHandler):
 		# including open ones within the last [in_days]
 		# NOTE: must use float for comparison, otherwise it will return None
 		carts=BuyOrderCart.query(BuyOrderCart.terminal_seller==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
+
 
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')

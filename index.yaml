@@ -32,7 +32,17 @@ indexes:
 - kind: BuyOrderCart
   properties:
   - name: broker
+  - name: age
+
+- kind: BuyOrderCart
+  properties:
+  - name: broker
   - name: status
+
+- kind: BuyOrderCart
+  properties:
+  - name: terminal_seller
+  - name: age
 
 - kind: BuyOrderCart
   properties:

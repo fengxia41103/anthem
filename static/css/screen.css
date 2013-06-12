@@ -1923,3 +1923,38 @@ table.two-col-table input{
 	font-size:1.4em;
 }
 
+div.chart-filters{
+	float:right;
+}
+
+div.chart-filters ul{
+	list-style: none;
+	margin-bottom:20px;
+}
+div.chart-filters li{
+	color:#ccc;
+	float:left;
+	padding:5px 10px;
+	margin-bottom:0px;
+}
+
+div.chart-filters li a{
+	color: #ccc;
+}
+
+div.chart-filters li a.selected{
+	border-bottom: 2px #4AC948 solid;
+}
+
+div.chart-filters li:hover{
+	border-bottom: 2px #4AC948 dotted;
+	cursor:pointer;
+}
+
+
+div.chart-filters input {
+	background:white;
+	border:1px #ccc solid;
+	padding:0 10px;
+	color:#888;
+}	

@@ -130,7 +130,10 @@
 			var title=j$(this).find('h3[item="title"]').html();
 			var subtitle=j$(this).find('div[item="subtitle"]').html();
 			var img=j$(this).find('img').attr('src');			
-			var qty=j$(this).find('span[item="qty"]').html();
+			
+			// default to fill qty of 1
+			// var qty=j$(this).find('span[item="qty"]').html();
+			
 			var price=j$(this).find('span[item="price"]').html();
 			var owner=j$(this).find('.product-list-item-footer-user').attr('name');
 			var postTime=j$(this).attr('postTime');
@@ -259,7 +262,7 @@
     		</div>
     		<div class="image-house">
 				<div class="pin-command-center" style="display:none;">
-  				<input item="qty" type="number" id="infocus-qty" value="" /> x $
+  				<input item="qty" type="number" id="infocus-qty" value="1" /> x $
   				<input item="price" type="number" id="infocus-price" value="" />
 				<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Add to cart</button>
 				</div> 
