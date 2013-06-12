@@ -53,7 +53,7 @@ routes = [
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 	
 	# report controllers
-	Route('/report/cart/<in_days:\d+>/',handler='anthem.ReportCart',name='report-cart'),	
+	Route('/report/mybuyer/<in_days:\d+>/',handler='anthem.ReportMyBuyer',name='report-mybuyer'),	
 	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	
 ]
 

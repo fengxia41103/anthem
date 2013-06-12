@@ -9,12 +9,18 @@
 		
 		// level 2 navigation
 		j$('.level-2-navigation').show();
-		j$('#nav-report-buyorder').addClass('level-2-navigation-selected');
+		j$('#nav-report-mybuyer').addClass('level-2-navigation-selected');
 	});
 </script>
 {% endblock %}
 
 {% block main %}
+<h1>Buyer Report</h1>
+
+<p>
+Review buyer report to find out from whom you have been purchasing, and how they have been handling your business.
+In addition, you can give your buyers feedbacks and rate them based on your experience.
+</p>
 
 <ul>
 {% for year, year_group in carts|groupby('created_time.year') %}
@@ -24,7 +30,11 @@
 		
 		<ul>
 		{% for c in list|sort(attribute='age') %}
-			<li>Cart# {{ c.key.id() }} &mdash; {{ c.age }}</li>
+			<li>
+				<a href="/cart/review?cart={{ c.key.id() }}">
+					Cart# {{ c.key.id() }}
+				</a>
+			</li>
 		{% endfor %}
 		</ul>
 	</li>
