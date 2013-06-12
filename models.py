@@ -159,7 +159,7 @@ class MyBaseModel(ndb.Model):
 	# object owner tied to a Contact
 	owner=ndb.KeyProperty(kind='Contact')
 	last_modified_by=ndb.KeyProperty(kind='Contact')
-		
+
 #######################################
 #
 # Financial transaction models
