@@ -42,6 +42,11 @@ indexes:
 - kind: BuyOrderCart
   ancestor: yes
   properties:
+  - name: age
+
+- kind: BuyOrderCart
+  ancestor: yes
+  properties:
   - name: payable_balance
 
 - kind: BuyOrderCart

@@ -673,13 +673,22 @@ class ManageUserContactPreference(MyBaseHandler):
 		self.me.put()
 		self.response.write('0')
 
-class ReportBuyOrderPopular(MyBaseHandler):
+class ReportCart(MyBaseHandler):
 	def get(self, in_days):
-		# get all shopping carts
+		# get all my shopping carts
 		# including open ones within the last [in_days]
-		carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.age<=int(in_days)*24*3600)
+		# NOTE: must use float for comparison, otherwise it will return None
+		carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.age<=float(in_days)*24*3600)
+		self.template_values['carts']=carts
 		
+		
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderCart.html')
+		self.response.write(template.render(self.template_values))
+		
+class ReportBuyOrderPopular(MyBaseHandler):
+	def get(self,in_days):
+
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
 		self.response.write(template.render(self.template_values))
-		
