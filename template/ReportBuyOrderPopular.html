@@ -1,0 +1,15 @@
+{% extends "/template/ReportBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+	
+		//level 1 navigation
+		j$('#nav-report').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-report-buyorder').addClass('level-2-navigation-selected');
+	});
+</script>
+{% endblock %}

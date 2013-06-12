@@ -160,6 +160,10 @@ class MyBaseModel(ndb.Model):
 	owner=ndb.KeyProperty(kind='Contact')
 	last_modified_by=ndb.KeyProperty(kind='Contact')
 
+	# age since inception, in seconds
+	# http://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
+	
 #######################################
 #
 # Financial transaction models

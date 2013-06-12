@@ -28,7 +28,7 @@ routes = [
 	Route('/auth/<provider>',handler='handlers.AuthHandler:_simple_auth', name='auth_login'),
 	Route('/auth/<provider>/callback', handler='handlers.AuthHandler:_auth_callback', name='auth_callback'),
 
-	# Anthem
+	# buyorder controllers
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
 	Route('/buyorder/edit/<order_id:\d+>/', handler='anthem.EditBuyOrder',name='buyorder-edit'),
 	Route('/buyorder/delete/<order_id:\d+>/', handler='anthem.DeleteBuyOrder',name='buyorder-delete'),
@@ -38,15 +38,22 @@ routes = [
 	Route('/buyorder/owner/<owner_id:\d+>/<cat:[^/]+>/', handler='anthem.BrowseBuyOrderByOwnerByCat',name='buyorder-browse-owner-cat'),  
 	Route('/buyorder/owner/<owner_id:\d+>/', handler='anthem.BrowseBuyOrderByOwner',name='buyorder-browse-owner'),  
 	Route('/buyorder/manage', handler='anthem.ManageBuyOrder',name='buyorder-manage'),  
+	
+	# cart controllers
+	Route('/cart/approve/<owner_id:\d+>/<cart_id:\d+>/', handler='anthem.ApproveCart',name='cart-approve'),  
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/manage', handler='anthem.ManageBuyOrderCart',name='cart-manage'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
 	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 
+	# user controllers
 	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
 	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
+	
+	# report controllers
+	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	
 ]
 
 app = WSGIApplication(routes, config=app_config, debug=True)

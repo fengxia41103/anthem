@@ -181,10 +181,17 @@
 		j$(document).on('click','button[item="approval-process"]',function(){
 			var action=j$(this).html();
 			j$.post(
-				'/cart/review?cart={{ cart.key.id() }}',
-				{'cart':{{cart.key.id()}},'action':action,'kind':'BuyOrderCart','id':'12345'}, // id is not used in this POST, so anything
+				'/cart/approve/{{ cart.owner.id() }}/{{ cart.key.id() }}/',
+				{'action':action},
 				function(result){
 					j$().toastmessage('showNoticeToast','Cart status has been updated');
+					
+					// back to previous page
+					setTimeout(function() {  
+						//window.location.reload();
+						window.history.go(-1);
+					}, 5000)
+					
 				}
 			);			
 		});
@@ -247,20 +254,31 @@
         	
 		{% if cart.fills|length > 0 %}
 		<div>
-		{% if cart.status=='Open' and me.can_be_nur() %}
+		{#
+			submit is only available to the seller who filled this cart
+			we can also use the cart.owner, which should be the same value as cart.terminal_seller
+		#}
+		{% if cart.status=='Open' and me.can_be_nur() and me.key == cart.terminal_seller%}
 			<button class="my-button" item="approval-process">Submit for Approval</button>
-		{% elif cart.status=='Rejected' and me.can_be_nur() %}
-			<button class="my-button" item="approval-process">Submit for Approval</button>
-		{% elif cart.status=='Rejected' and me.can_be_doc() %}
+		{% elif cart.status=='Rejected' and me.can_be_nur() and me.key == cart.terminal_seller %}
+			<button class="my-button" item="approval-process">Submit for Approval</button>			
+			
+		{#
+			approval can only be executed by the buyer, not the seller
+		#}
+		{% elif cart.status=='Rejected' and me.can_be_doc() and me.key==cart.broker %}
 			<button class="my-button" item="approval-process">Approve</button>
-		{% elif cart.status=='In Approval' and me.can_be_doc() %}
+		{% elif cart.status=='In Approval' and me.can_be_doc() and me.key==cart.broker %}
 			<button class="my-button" item="approval-process">Approve</button>
 			<button class="my-button" item="approval-process">Reject</button>
 		{% endif %}
 		</div>
 	
-		<!-- Shipping inputs are available after approval and for DOC -->
-		{% if cart.status=='Ready for Processing'  and me.can_be_doc() %}
+		{#
+			Shipping inputs are available after approval, and for DOC who is also the broker of this cart
+			meaning he is the posting buyer of these items
+		#}
+		{% if cart.status=='Ready for Processing'  and me.can_be_doc() and me.key==cart.broker %}
 		<div class="shopping-cart-pane" style="display:none;" itemId="{{ cart.key.id() }}">
 			<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 				Close
@@ -366,7 +384,7 @@
 		</div>
 		
 		<!-- DOC only views -->
-		{% if me.can_be_doc() %}
+		{% if me.can_be_doc() and me.key==cart.broker %}
 			<div class="quick-pane" id="sec-profit">
 			<h4>Profit</h4>
 			<table class="sf-table table-row-border">
@@ -422,8 +440,15 @@
 		<div class="quick-pane" id="sec-fill-list">
 		<h4>Item Details</h4>
 		{% if cart.fills|count >0 %}
-			<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
-			<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
+			
+			{# 
+				sell price is only available to brokers 
+			#}
+			{% if me.key==cart.broker %}
+				<span id="full-screen-switch-1" class="collapse-switch">&gt;&gt; Show sell price</span>
+				<span id="full-screen-switch-2" class="collapse-switch">&lt;&lt; Hide sell price</span>
+			{% endif %}
+			
 			<table class="table-row-border">
 				{% for f in cart.fills %}
 				<tr><td>
@@ -438,17 +463,30 @@
 						{{ f.order.get().description }}
 					</td>
 					<td>
+						{#
+							editing is only available to open cart and rejected cart
+						#}
 						{% if cart.status=='Open' or cart.status=='Rejected' %}
 							<input type="number" item="fill-price" itemId="{{ f.order.id() }}" value="{{ f.price }}" step="any"/>	
 						{% else %}
 							{{ f.price }}
 						{% endif %}
+						
+						{#
+							sell price inputs are only available to brokers
+						#}
+						{% if me.key==cart.broker %}
 						<div class="arrow_box" style="display:none;">
 							<label>Sell price: </label>
 							<input type="number" item="client-price" itemId="{{ f.order.id() }}" value="{{ f.client_price }}" step="any"/>	
 						</div>
+						{% endif %}
+						
 					</td>
 					<td>
+						{#
+							editing is only available to open cart and rejected cart
+						#}
 						{% if cart.status=='Open' or cart.status=='Rejected' %}
 							<input type="number" item="fill-qty" itemId="{{ f.order.id() }}" value="{{ f.qty }}" step="any"/>	
 						{% else %}

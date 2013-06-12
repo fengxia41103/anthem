@@ -23,8 +23,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
 	def get(self, resource):
-		logging.info(resource)
-		
 		# resource is actually a blobkey
   		resource = str(urllib.unquote(resource))
   		blob_info = blobstore.BlobInfo.get(resource)
@@ -352,6 +350,44 @@ class BrowseBuyOrder(MyBaseHandler):
 		self.cart.put()
 		self.response.write(json.dumps(self.cart.to_dict(),cls=ComplexEncoder))
 
+class ApproveCart(MyBaseHandler):
+	def post(self,owner_id,cart_id):
+		# wow! getting entity directly from key
+		# remember that NDB key is a PATH!
+		# further, Contact id is String, where everything else id is an INT.
+		# this is a big gotcha.
+		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
+		assert cart
+		assert cart.broker==self.me.key
+		
+		batch=[]
+		action=self.request.POST['action']
+		if action.lower()=='submit for approval':
+			cart.status='In Approval'
+		elif action.lower()=='approve' and cart.status=='In Approval':
+			cart.status='Ready for Processing'
+			
+			# update buyorder filled qty
+			for f in cart.fills:
+				order=f.order.get()
+				order.approved_qty+=f.qty
+				batch.append(order)
+			ndb.put_multi(batch)
+			
+			# TODO: send email to all parties here
+			
+		elif action.lower()=='reject' and cart.status=='In Approval':
+			cart.status='Rejected'
+			# TODO: send email to all parties here
+			
+		else:
+			# TODO: give an assert now
+			raise Exception('Unknown path')
+				
+		cart.last_modified_by=self.me.key
+		cart.put()
+		self.response.write('0')
+		
 class ReviewCart(MyBaseHandler):
 	def get(self):
 		cart_id=int(self.request.GET['cart'])
@@ -436,29 +472,6 @@ class ReviewCart(MyBaseHandler):
 				# update affected order's if qty changed
 				ndb.put_multi(batch)
 			
-			# approval process
-			elif obj=='BuyOrderCart':
-				if action.lower()=='submit for approval':
-					cart.status='In Approval'
-				elif action.lower()=='approve' and cart.status=='In Approval':
-					cart.status='Ready for Processing'
-					
-					# update buyorder filled qty
-					for f in cart.fills:
-						order=f.order.get()
-						order.approved_qty+=f.qty
-						batch.append(order)
-					ndb.put_multi(batch)
-					
-					# TODO: send email to all parties here
-					
-				elif action.lower()=='reject' and cart.status=='In Approval':
-					cart.status='Rejected'
-					# TODO: send email to all parties here
-					
-				else:
-					# TODO: give an assert now
-					raise Exception('Unknown path')	
 			# update cart
 			cart.put()
 			self.response.write(status)
@@ -544,7 +557,7 @@ class ManageBuyOrderCart(MyBaseHandler):
 
 		# get all carts that this user is the broker
 		# these are ones need approval
-		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status=='In Approval')
+		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed')
 		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrderCart.html')
@@ -591,8 +604,6 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		try:
 			#cart.shipping_label=self.request.get('shipping-label')
 			uploads=self.get_uploads('shipping-label')
-			logging.info(uploads)
-				
 			blob_info = uploads[0]
 			if cart.shipping_label:
 				# if there is existing
@@ -661,3 +672,14 @@ class ManageUserContactPreference(MyBaseHandler):
 		self.me.payment_preference=self.request.POST['payment']
 		self.me.put()
 		self.response.write('0')
+
+class ReportBuyOrderPopular(MyBaseHandler):
+	def get(self, in_days):
+		# get all shopping carts
+		# including open ones within the last [in_days]
+		carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.age<=int(in_days)*24*3600)
+		
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
+		self.response.write(template.render(self.template_values))
+		
