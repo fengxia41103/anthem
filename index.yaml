@@ -68,3 +68,9 @@ indexes:
   ancestor: yes
   properties:
   - name: status
+
+- kind: MyAudit
+  ancestor: yes
+  properties:
+  - name: created_time
+    direction: desc

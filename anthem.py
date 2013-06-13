@@ -362,8 +362,10 @@ class ApproveCart(MyBaseHandler):
 		batch=[]
 		action=self.request.POST['action']
 		if action.lower()=='submit for approval':
+			cart.audit_me(self.me.key,'status',cart.status,'In Approval','Submit for approval')
 			cart.status='In Approval'
 		elif action.lower()=='approve' and cart.status=='In Approval':
+			cart.audit_me(self.me.key,'status',cart.status,'Ready for Processing','Grant approval')
 			cart.status='Ready for Processing'
 			
 			# update buyorder filled qty
@@ -376,6 +378,7 @@ class ApproveCart(MyBaseHandler):
 			# TODO: send email to all parties here
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
+			cart.audit_me(self.me.key,'status',cart.status,'Rejected', 'Reject proposal')
 			cart.status='Rejected'
 			# TODO: send email to all parties here
 			
@@ -404,7 +407,6 @@ class ReviewCart(MyBaseHandler):
 		
 		else:
 			assert cart
-
 			self.template_values['shipping_methods']=SHIPPING_METHOD
 			self.template_values['cart']=cart
 			self.template_values['url']=uri_for('cart-review')
@@ -419,6 +421,9 @@ class ReviewCart(MyBaseHandler):
 			else:
 				self.template_values['shipping_label']=''
 			
+			# auditing trail
+			if self.request.GET.has_key('audit'):
+ 				self.template_values['auditing']=MyAudit.query(ancestor=cart.key).order(-MyAudit.created_time)
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
 		self.response.write(template.render(self.template_values))
 	
@@ -600,22 +605,29 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',') if len(f.strip())>0]
 		cart.shipping_num_of_package=int(self.request.POST['shipping-package'])
 		cart.shipping_cost=float(self.request.POST['shipping-cost'])
+
+		# this date is updated everytime
+		# because actions like an notification email will take place
+		# when something is changed
 		cart.shipping_created_date=datetime.date.today()
 		
 		# shipping label is optional
 		# think about USPS
 		uploads=self.get_uploads('shipping-label')
-		blob_info = uploads[0]
-		if cart.shipping_label:
-			# if there is existing
-			# delete this from blobstore
-			# NOTE: blobstore can not overwrite, but can delete
-			delete(cart.shipping_label)
-		
-		# now save new blob key
-		cart.shipping_label=blob_info.key()
-		
-		cart.shipping_date=datetime.datetime.strptime(self.request.get('shipping-date'),'%Y-%m-%d').date()
+		if len(uploads):
+			blob_info = uploads[0]
+			if cart.shipping_label:
+				# if there is existing
+				# delete this from blobstore
+				# NOTE: blobstore can not overwrite, but can delete
+				delete(cart.shipping_label)
+			
+			# now save new blob key
+			cart.shipping_label=blob_info.key()
+	
+		if len(self.request.POST['shipping-date']):
+			cart.shipping_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
+			
 		cart.shipping_status='Shipment Created'
 		cart.status='In Shipment'
 		cart.put()	

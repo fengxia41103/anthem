@@ -47,6 +47,8 @@
 	    var carrier=j$.trim(j$('select[name="shipping-carrier"]').val());
 	    var tracking=j$.trim(j$('input[name="shipping-tracking"]').val());
 	    var package=j$.trim(j$('input[name="shipping-package"]').val());
+	    
+	    // not required
 	    var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
 	    var cost=j$.trim(j$('input[name="shipping-cost"]').val());
 
@@ -62,6 +64,7 @@
 	    	j$().toastmessage('showErrorToast', 'Please enter the number of packages in this shipment!');
 			return false;
 		}
+		/*
 	    if (cost==''){
 	    	j$().toastmessage('showErrorToast', 'Please enter the shipping cost!');
 			return false;
@@ -71,6 +74,7 @@
 	    	j$().toastmessage('showErrorToast', 'Please enter the shipping date!');
 			return false;
 		}
+		*/
 
    		return true;
    	}    
@@ -248,20 +252,38 @@
     	at any time.
     </p>
 
-	{% if cart and cart.can_view(me.key) %}
-        	
+	{% if cart and cart.can_view(me.key) %}        	
 		{% if cart.fills|length > 0 %}
+
+		<!-- command buttons -->
 		<div>
-		{#
-			submit is only available to the seller who filled this cart
-			we can also use the cart.owner, which should be the same value as cart.terminal_seller
-		#}
-		{% if cart.can_enter_approval(me.key) %}
-			<button class="my-button" item="approval-process">Submit for Approval</button>
-		{% elif cart.can_approve(me.key) %}
-			<button class="my-button" item="approval-process">Approve</button>
-			<button class="my-button" item="approval-process">Reject</button>
-		{% endif %}
+			<!-- approval buttons -->
+			{% if cart.can_enter_approval(me.key) %}
+				<button class="my-button" item="approval-process">Submit for Approval</button>
+			{% endif %}
+			
+			{% if cart.can_approve(me.key) %}
+				<button class="my-button" item="approval-process">Approve</button>
+				<button class="my-button" item="approval-process">Reject</button>
+			{% endif %}
+			
+			<!-- shipping status buttons -->
+			{% if cart.can_enter_shipping_in_route(me.key) %}
+				<button class="my-button" item="shipping-process">In Route</button> 
+				<input type="date" name="shipping-date" id="input-shipping-date"/>
+			{% endif %}
+			
+			{% if cart.can_confirm_shipping_delivery(me.key) %}
+				<button class="my-button" item="shipping-process">Delivery Confirmed</button>							
+			{% endif %}
+			
+			{% if cart.can_reconcile_destination(me.key) %}
+				<button class="my-button" item="shipping-process">Destination Reconciled</button>			
+			{% endif %}
+			
+			{% if cart.can_dispute_shipping(me.key) %}
+				<button class="my-button" item="shipping-process">Dispute Shipping</button>			
+			{% endif %}
 		</div>
 	
 		{#
@@ -314,11 +336,6 @@
 						<label class="ss-label">Shipping Label File</label>
 						<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
 					</td>
-					<td>				
-			<label class="ss-label">Shipped Date</label>
-			<br />
-			<input class="ss-input" type="date" name="shipping-date" id="input-shipping-date" value="{{ cart.shipping_date }}"/>
-					</td>
 				</tr>
 			</table>		
 			
@@ -352,12 +369,6 @@
 				<td>Seller Name</td>
 				<td>{{ cart.terminal_seller.get().nickname }}</td>
 			</tr>
-		</table>
-		</div>					
-		
-		<div class="quick-pane" id="sec-status">
-		<h4>Status</h4>
-		<table class="sf-table table-row-border">
 			<tr><td>Status</td>
 				<td>{{ cart.status }}</td>
 				<td>Shipping Status</td>
@@ -369,7 +380,7 @@
 				<td>{{ cart.seller_reconciled }}</td>
 			</tr>
 		</table>
-		</div>
+		</div>					
 		
 		<!-- DOC only views -->
 		{% if me.can_be_doc() and me.key==cart.broker %}
@@ -493,15 +504,15 @@
 		</div>
 	
 		<div class="quick-pane" id="sec-shipping-summary">
-		<h4>Shipping Summary</h4>
+		<h4>Shipping Details</h4>
 		<table class="sf-table table-row-border">
-			<tr><td>Shipping Date</td>
-				<td>{{ cart.shipping_date }}</td>
-				<td>Carrier</td>
+			<tr><td>Carrier</td>
 				<td>{{ cart.shipping_carrier }}</td>
-			</tr>
-			<tr><td>Tracking Number</td>
+				<td>Tracking Number</td>
 				<td>{{ cart.shipping_tracking_number|join('<br />') }}</td>
+			</tr>
+			<tr><td>Shipped Date</td>
+				<td>{{ cart.shipping_date }}</td>
 				<td>No. of Packages</td>
 				<td>{{ cart.shipping_num_of_package }}</td>
 			</tr>
@@ -584,4 +595,40 @@
 	{% else %}
 		Sorry, you do not have access this cart. Why not <a href="/buyorder/browse">Go Shopping</a>!
 	{% endif %}
+	
+	<!-- super only view -->
+	{% if cart.broker==me.key and auditing%}
+	<div class="quick-pane">
+		<h4>Audit</h4>
+		<table class="table-row-border">
+			<thead>
+				<tr><td>When</td>
+					<td>By Whom</td>
+					<td>Field</td>
+					<td>Old</td>
+					<td>New</td>
+					<td>Reason</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for a in auditing %}
+				<tr><td>{{ a.created_time }}</td>
+					<td>
+						{% if a.owner == me.key %}
+						me
+						{% else %}
+							{{ a.owner.get().nickname }}
+						{% endif %}
+					</td>
+					<td>{{ a.field_name }}</td>
+					<td>{{ a.old_value }}</td>
+					<td>{{ a.new_value }}</td>
+					<td>{{ a.comment }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>	
+	</div>
+	{% endif %}
+		
 {% endblock %}

@@ -163,7 +163,16 @@ class MyBaseModel(ndb.Model):
 	# age since inception, in seconds
 	# http://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
 	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
-	
+
+	def audit_me(self,contact_key,field_name,old_value,new_value,comment):
+		my_audit=MyAudit(parent=self.key)
+		my_audit.owner=contact_key
+		my_audit.field_name=field_name
+		my_audit.old_value=old_value
+		my_audit.new_value=new_value
+		my_audit.comment=comment
+		my_audit.put_async() # async auditing
+		
 #######################################
 #
 # Financial transaction models
@@ -240,19 +249,28 @@ class BuyOrderCart(MyBaseModel):
 	# these flags should be MANUALLY set by each party of this transaction as an acknowledgement!
 	buyer_reconciled=ndb.BooleanProperty(default=False)
 	seller_reconciled=ndb.BooleanProperty(default=False)
-	
+
+	# overall status	
+	status=ndb.StringProperty(choices=['Open',
+		'In Approval',
+		'Ready for Processing',
+		'Rejected',
+		'Closed',
+		'In Shipment', 
+		'Shipment In Dispute',
+		'Shipment Clean',
+		],default='Open')
+
 	# shipping related
-	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'],default='Open')
-	shipping_status=ndb.StringProperty(choices=['Shipment Created','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
+	shipping_status=ndb.StringProperty(choices=['Shipment Created','In Route','Delivery Confirmed','Destination Reconciled','In Dispute'],default='')
 	shipping_carrier=ndb.StringProperty(choices=SHIPPING_METHOD)
-	shipping_cost=ndb.FloatProperty()
-	shipping_num_of_package=ndb.IntegerProperty()
+	shipping_cost=ndb.FloatProperty(default=0)
+	shipping_num_of_package=ndb.IntegerProperty(default=0)
 	
 	# allowing multiple tracking numbers
-	shipping_tracking_number=ndb.StringProperty(repeated=True)
+	shipping_tracking_number=ndb.StringProperty(default='')
 	shipping_created_date=ndb.DateProperty() # when the info was entered  by user
 	shipping_date=ndb.DateProperty() # actual shipping date by user
-	#shipping_label=ndb.BlobProperty() # allowing one label file
 	shipping_label=ndb.BlobKeyProperty()
 	
 	# a cart has multiple fills
@@ -286,6 +304,7 @@ class BuyOrderCart(MyBaseModel):
 	
 	def can_enter_approval(self,user_key):
 		# who can submit this cart for approval
+		# it is determined the current cart status and current user
 		return self.status in ['Open','Rejected'] and self.terminal_seller==user_key
 		
 	def can_approve(self,user_key):
@@ -302,10 +321,40 @@ class BuyOrderCart(MyBaseModel):
 		return self.status in ['Open','Rejected'] and self.owner==user_key
 	
 	def can_change_shipping(self,user_key):
+		# who can enter shipping information: label, packge, cost
 		# shipping can be added when status=='Ready for Processing'
 		# can only be changed when shipment has not been picked up yet: status='In Shipment' and shipping_status='Shipment Created'
+		# also, only cart broker can start, this assumes that broker is to initiate shipping process by providing a label
 		return (self.status=='Ready for Processing' or (self.status=='In Shipment' and self.shipping_status=='Shipment Created')) and self.broker==user_key
 		
+	def can_enter_shipping_in_route(self,user_key):
+		# who actually ship the physical goods? this assumed to be the terminal_seller
+		# In Route: item has been shipped (or picked by carrier) and is now in transition
+		# if there is a tracking number, user can use it to track its logistics
+		return self.status=='In Shipment' and self.shipping_status=='Shipment Created' and self.terminal_seller==user_key
+
+	def can_confirm_shipping_delivery(self,user_key):
+		# who actually confirm a delivery?
+		# NOTE: this has to be different from who can enter_in_route!
+		# so there is check & balance: one party ship, another party confirm
+		# ideally, this should be the CARRIER, not the receiver, because of moral hazard!
+		return self.status=='In Shipment' and self.shipping_status=='In Route' and self.broker==user_key
+
+	def can_reconcile_destination(self,user_key):
+		# delivery != satisfied
+		# reconciling will indicate everything is as expected
+		# eg. no broken package, no wrong items
+		return self.shipping_status=='Delivery Confirmed' and self.broker==user_key
+	
+	def can_dispute_shipping(self,user_key):
+		# who can put shipment in dispute?
+		# ideally the receiver of packages
+		# for now, assuming Doc
+		# 
+		# what to dispute?
+		# 1. seller says it's shipped, but broker doesn't see it in tracking
+		return (self.shipping_status=='In Route'  and self.broker==user_key) 
+
 #######################################
 #
 # Communication models
@@ -314,3 +363,23 @@ class BuyOrderCart(MyBaseModel):
 class UserComment(MyBaseModel): 
 	comment=ndb.StringProperty()
 	rating=ndb.IntegerProperty() # 1-5
+
+#######################################
+#
+# Auditing models
+#
+#######################################
+class MyAudit(ndb.Model):
+	# when
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
+	# by whome
+	owner=ndb.KeyProperty(kind='Contact')
+	# field name
+	field_name=ndb.StringProperty(required=True)
+	# old value
+	old_value=ndb.GenericProperty()
+	# new value
+	new_value=ndb.GenericProperty()
+	# comment,reason
+	comment=ndb.StringProperty(indexed=False,default='')	
+

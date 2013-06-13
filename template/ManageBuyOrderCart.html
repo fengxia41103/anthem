@@ -95,6 +95,22 @@
 							<td>{{ c.receivable }}</td>
 						</tr>
 						<tr></tr>
+						
+						{% if c.shipping_status %}
+						<tr><td>Shipping Status</td>
+							<td>{{ c.shipping_status }}</td>
+							<td>Shipping Label</td>
+							<td>
+								{% if c.shipping_label %}
+								<a href="/blob/serve/{{ c.shipping_label }}/">
+									Download
+								</a>
+								{% else %}
+									Not Available
+								{% endif %}
+							</td>
+						</tr>
+						{% endif %}
 					</table>
 					
 					{% if c.fills|length > 0 %}
@@ -120,9 +136,6 @@
 					{% else %}
 					{% endif %}
 					
-					{% if c.shipping_status %}
-						{{ c.shipping_status }}
-					{% endif %}
 				</td>
 			</tr>
 		{% endfor %}
