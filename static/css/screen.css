@@ -1941,14 +1941,18 @@ div.chart-filters li{
 div.chart-filters li a{
 	color: #ccc;
 }
+div.chart-filters li a:hover{
+}
 
 div.chart-filters li a.selected{
 	border-bottom: 2px #4AC948 solid;
+	color: black;
 }
 
 div.chart-filters li:hover{
 	border-bottom: 2px #4AC948 dotted;
 	cursor:pointer;
+	background-color:black;
 }
 
 
