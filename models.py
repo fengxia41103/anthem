@@ -243,7 +243,7 @@ class BuyOrderCart(MyBaseModel):
 	
 	# shipping related
 	status=ndb.StringProperty(choices=['Open','In Approval','Ready for Processing','Rejected','Closed','In Shipment'],default='Open')
-	shipping_status=ndb.StringProperty(choices=['Shipment Created','Carrier Picked Up','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
+	shipping_status=ndb.StringProperty(choices=['Shipment Created','In Route','Delivery Confirmed by Carrier','Buyer Reconciled','Incomplete Packages'])
 	shipping_carrier=ndb.StringProperty(choices=SHIPPING_METHOD)
 	shipping_cost=ndb.FloatProperty()
 	shipping_num_of_package=ndb.IntegerProperty()
@@ -283,6 +283,28 @@ class BuyOrderCart(MyBaseModel):
 		# if usre is either a buyer, a seller or a broker
 		# otherwise, they don't have the right to view this cart content!
 		return self.terminal_seller==user_key or self.terminal_buyer==user_key or self.broker==user_key
+	
+	def can_enter_approval(self,user_key):
+		# who can submit this cart for approval
+		return self.status in ['Open','Rejected'] and self.terminal_seller==user_key
+		
+	def can_approve(self,user_key):
+		# who can approve a cart
+		return self.status=='In Approval' and self.broker==user_key
+		
+	def can_change_fill(self,user_key):
+		# based on cart status, shipping, and user_key
+		# we determine whether fill info can be changed.
+		# this includes qty, price and remove fill from cart
+		
+		# basically, fill can only be changed when the cart has not entered an agreement yet
+		# also, only the cart owner can change
+		return self.status in ['Open','Rejected'] and self.owner==user_key
+	
+	def can_change_shipping(self,user_key):
+		# shipping can be added when status=='Ready for Processing'
+		# can only be changed when shipment has not been picked up yet: status='In Shipment' and shipping_status='Shipment Created'
+		return (self.status=='Ready for Processing' or (self.status=='In Shipment' and self.shipping_status=='Shipment Created')) and self.broker==user_key
 		
 #######################################
 #
