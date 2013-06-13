@@ -37,7 +37,7 @@
                         formatter: function() {
                         	// round to 1st decimal point
                            	// return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
-                            return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage) +' %';
+                            return '<b>'+ this.point.name +'</b><br /> '+ Math.round(this.percentage) +' %';
                         }
                     }
                 }
@@ -50,7 +50,15 @@
         });
 
 		j$('#filter-days').change(function(){
-			window.location.href='/report/myseller/'+j$(this).val()+'/';
+			var start = new Date(j$(this).val());
+			var end = new Date(); // today
+			var diff = new Date(end - start);
+			if (diff<0){
+				j$().toastmessage('showErrorToast','You can not pick a date in the future. Try again.');
+			}else{		
+				var days = Math.ceil(diff/1000/60/60/24);
+				window.location.href='/report/myseller/'+days+'/';
+			}
 		});
 		
 		//level 1 navigation
@@ -96,11 +104,7 @@ In addition, you can give your buyers feedbacks and rate them based on your expe
 		{% endif %}
 	</li>
 	<li>
-		{% if filter_days !='7' and filter_days!='30' and filter_days!='365' %}
-			<input type="number" step="1" value="{{ filter_days }}" id="filter-days" class="selected"/>&nbsp;Days
-		{% else %}
-			<input type="number" step="1" value="" id="filter-days"/>&nbsp;Days
-		{% endif %}
+		<input type="date" id="filter-days" value="" max="today">
 	</li>
 </ul>
 
@@ -122,7 +126,7 @@ In addition, you can give your buyers feedbacks and rate them based on your expe
 	
 		<table class="two-col-table table-row-border">
 			<thead>
-				<tr><td></td><td>Deal Size ($)</td><td>Status</td>
+				<tr><td colspan="2" style="text-align:right;">Deal Size ($)</td><td>Status</td>
 			</thead>
 			<tbody>
 			
