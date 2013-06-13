@@ -6,23 +6,27 @@
     	j$('#nav-order').addClass('level-1-navigation-selected');
 		j$('.level-2-navigation').show();
 		j$('#nav-cart-manage').addClass('level-2-navigation-selected');
-
-        // approval process
+		
+		// approval process
 		j$(document).on('click','button[item="approval-process"]',function(){
 			var action=j$(this).html();
-			var cartId=j$(this).attr('itemId');
+			var cart_id=j$(this).attr('itemId');			
+			var owner_id=j$(this).attr('ownerId');			
 			j$.post(
-				'/cart/review?cart='+cartId,
-				{'cart':cartId,'action':action,'kind':'BuyOrderCart','id':'12345'}, // id is not used in this POST, so anything
+				'/cart/approve/'+owner_id+'/'+cart_id+'/',
+				{'action':action},
 				function(result){
 					j$().toastmessage('showNoticeToast','Cart status has been updated');
 					
-					// force a refresh!
-					window.location.href = "/cart/manage";
+					// back to previous page
+					setTimeout(function() {  
+						window.location.reload();
+						//window.history.go(-1);
+					}, 3000)
+					
 				}
-			);          
-		});
-		
+			);			
+		});		
 		
 		j$('#tabs-min').tabs({
 
@@ -108,9 +112,9 @@
 					
 					<div>
 						{% if c.status=='Open' %}
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}">Submit for Approval</button>
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Submit for Approval</button>
 						{% elif c.status=='Rejected' %}
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}">Submit for Approval</button>
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Submit for Approval</button>
 						{% endif %}
 					</div>
 					{% else %}
@@ -180,8 +184,8 @@
 					
 					<div>
 						{% if c.status=='In Approval' and me.can_be_doc() %}
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}">Approve</button>
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}">Reject</button>
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Approve</button>
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Reject</button>
 						{% endif %}
 					</div>
 					{% else %}

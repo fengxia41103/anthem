@@ -44,7 +44,7 @@ routes = [
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/manage', handler='anthem.ManageBuyOrderCart',name='cart-manage'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
-	Route('/cart/shipping/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
+	Route('/cart/shipping/<owner_id:\d+>/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 
 	# user controllers
 	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	

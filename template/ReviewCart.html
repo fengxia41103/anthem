@@ -19,20 +19,14 @@
    		//'\n\nThe output div should have already been updated with the responseText.'); 
 		
 		switch (responseText){
-			case -1:
-				j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
-				break;
-			case -2:
-				j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
-				break;
 			case 0:
-				j$().toastmessage('showSuccessToast', 'Information saved');
+				j$().toastmessage('showSuccessToast', 'Shipment information has been saved');
+
 				break;
 			default:
 				break;
 		}
    	} 
-
 	// pre-submit callback 
 	function showRequest(formData, jqForm, options) { 
     	// formData is an array; here we use $.param to convert it to a string to display it 
@@ -51,11 +45,11 @@
     	
 	    // validation
 	    var carrier=j$.trim(j$('select[name="shipping-carrier"]').val());
-	    var tracking=j$.trim(j$('textarea[name="shipping-tracking"]').val());
+	    var tracking=j$.trim(j$('input[name="shipping-tracking"]').val());
 	    var package=j$.trim(j$('input[name="shipping-package"]').val());
 	    var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
 	    var cost=j$.trim(j$('input[name="shipping-cost"]').val());
-		
+
 	    if (carrier==''){
 	    	j$().toastmessage('showErrorToast', 'Please select a shipping method!');
 			return false;
@@ -82,14 +76,22 @@
    	}    
    	
     j$(document).ready(function(){
+    	// disable all inputs
+    	// now, based on conditions, we will enable certain inputs
+    	j$('input[type="number"]').prop('disabled', true);
+    	
     	{% if cart.status=='Open' or cart.status=='Rejected' %}
     		j$('input[type="number"]').prop('disabled', false);
+    		
+    	// cart has been approved
+    	// not allowing changing qty,price anymore
+    	// but can start inputting shipping
     	{% elif cart.status=='Ready for Processing' %}
-    		j$('input[type="number"]').prop('disabled', true);
     		j$('input[name^="shipping"]').prop('disabled', false);
-
-    	{% else %}
-    		j$('input[type="number"]').prop('disabled', true);
+    		
+    	// allow change shipment only when carrier has not picked up yet!
+		{% elif cart.status=='In Shipment' and cart.shipping_status=='Shipment Created' %}
+    		j$('input[name^="shipping"]').prop('disabled', false);			
 		{% endif %}
 		
 					    
@@ -190,7 +192,7 @@
 					setTimeout(function() {  
 						window.location.reload();
 						//window.history.go(-1);
-					}, 5000)
+					}, 3000)
 					
 				}
 			);			
@@ -237,8 +239,8 @@
     	j$('#myForm').keydown(function(e) {
     	  	return e.which !== 13;
     	}).ajaxForm(options,function() { 
-    		alert("Thank you for your comment!"); 
-    	});	    
+    		j$().toastmessage('showNoticeToast',"Shipment information has been saved"); 
+    	});
     });
 </script>
 {% endblock %}
@@ -283,7 +285,7 @@
 			<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
 				Close
 			</span>
-	
+			
 			<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
 			<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
 			<h4>Enter Shipping Information</h4>		
@@ -301,9 +303,7 @@
 			<div>
 			<label class="ss-label">Tracking Number</label>
 			<br />
-			<textarea class="ss-textarea" name="shipping-tracking" id="input-tracking-number">
-				{{ cart.shipping_tracking_number|join(', ') }}
-			</textarea>
+			<input class="ss-input" name="shipping-tracking" id="input-tracking-number" value="{{ cart.shipping_tracking_number|join(', ') }}" />
 			</div>
 	
 			<table class="two-col-table">

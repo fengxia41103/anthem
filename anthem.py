@@ -397,6 +397,8 @@ class ReviewCart(MyBaseHandler):
 			cart=BuyOrderCart.get_by_id(cart_id,parent=owner_key)
 		except:		
 			cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
+
+		# get cart
 		if not cart:
 			self.template_values['cart']=None
 		
@@ -408,13 +410,14 @@ class ReviewCart(MyBaseHandler):
 			self.template_values['url']=uri_for('cart-review')
 			
 			# to save label file using BlobStore
-			self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s' % (cart.key.id()))
+			# owner of the cart is the terminal_seller Contact
+			self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s/%s/' % (cart.owner.id(),cart.key.id()))
 			
 			# serve label file if any
 			if cart.shipping_label:
 				self.template_values['shipping_label']='/blob/serve/%s/'% cart.shipping_label
 			else:
-				self.template_values['shipping_label']=None
+				self.template_values['shipping_label']=''
 			
 		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
 		self.response.write(template.render(self.template_values))
@@ -583,44 +586,41 @@ class ManageBuyOrder(MyBaseHandler):
 	
 				
 class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
-	def post(self, cart_id):
+	def post(self, owner_id,cart_id):
 		user = users.get_current_user()
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
 			email=user.email(),
 			nickname=user.nickname())
 
-		cart=BuyOrderCart.get_by_id(int(cart_id),parent=me.key)
+		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
 		assert cart
-		
+		assert cart.broker==me.key
+
 		cart.shipping_carrier=self.request.POST['shipping-carrier']
 		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',') if len(f.strip())>0]
-		cart.shipping_cost=float(self.request.POST['shipping-cost'])
 		cart.shipping_num_of_package=int(self.request.POST['shipping-package'])
+		cart.shipping_cost=float(self.request.POST['shipping-cost'])
 		cart.shipping_created_date=datetime.date.today()
 		
 		# shipping label is optional
-		# thin about USPS
-		try:
-			#cart.shipping_label=self.request.get('shipping-label')
-			uploads=self.get_uploads('shipping-label')
-			blob_info = uploads[0]
-			if cart.shipping_label:
-				# if there is existing
-				# delete this from blobstore
-				# NOTE: blobstore can not overwrite, but can delte
-				delete_async(cart.shipping_label)
-			
-			# now save new blob key
-			cart.shipping_label=blob_info.key()
-		except:
-			pass
-			
+		# think about USPS
+		uploads=self.get_uploads('shipping-label')
+		blob_info = uploads[0]
+		if cart.shipping_label:
+			# if there is existing
+			# delete this from blobstore
+			# NOTE: blobstore can not overwrite, but can delete
+			delete(cart.shipping_label)
+		
+		# now save new blob key
+		cart.shipping_label=blob_info.key()
+		
 		cart.shipping_date=datetime.datetime.strptime(self.request.get('shipping-date'),'%Y-%m-%d').date()
 		cart.shipping_status='Shipment Created'
+		cart.status='In Shipment'
 		cart.put()	
-		
 		self.response.write('0')
-
+		
 class MyUserBaseHandler(MyBaseHandler):
 	def __init__(self, request=None, response=None):
 		MyBaseHandler.__init__(self,request,response) # extend the base class
