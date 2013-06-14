@@ -43,6 +43,7 @@ routes = [
 	Route('/cart/approve/<owner_id:\d+>/<cart_id:\d+>/', handler='anthem.ApproveCart',name='cart-approve'),  
 	Route('/cart/review', handler='anthem.ReviewCart',name='cart-review'),  
 	Route('/cart/banking', handler='anthem.BankingCart',name='cart-banking'),  
+	Route('/cart/shipping/<owner_id:\d+>/<cart_id:[^/]+>/inroute', handler='anthem.ShippingCartInRoute',name='cart-shipping-in-route'),  
 	Route('/cart/shipping/<owner_id:\d+>/<cart_id:[^/]+>/', handler='anthem.ShippingCart',name='cart-shipping'),  
 	Route('/cart/manage/seller', handler='anthem.ManageCartAsSeller',name='cart-manage-as-seller'),  
 	Route('/cart/manage/buyer', handler='anthem.ManageCartAsBuyer',name='cart-manage-as-buyer'),  

@@ -49,7 +49,6 @@
 	    var package=j$.trim(j$('input[name="shipping-package"]').val());
 	    
 	    // not required
-	    var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
 	    var cost=j$.trim(j$('input[name="shipping-cost"]').val());
 
 	    if (carrier==''){
@@ -78,6 +77,19 @@
 
    		return true;
    	}    
+	function shippingInRoute(shipping_date){
+		j$.post(
+			'/cart/shipping/{{ cart.owner.id() }}/{{ cart.key.id() }}/inroute',
+			{'shipping-date':shipping_date},
+			function(result){
+				switch(result){
+					case '0':
+						j$().toastmessage('showSuccessToast','Shipping is set to In Route on '+shipping_date);
+						break;
+				}
+			}
+		);	
+	}
    	
     j$(document).ready(function(){
     	// disable all inputs
@@ -200,8 +212,19 @@
 
 		// sophisticated shipping process
 		j$(document).on('click','button[item="shipping-process"]',function(){
-
-
+			var action=j$(this).html();
+			switch(action){
+				case 'In Route':
+	    			var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
+					if (shipping_date==''){
+						j$().toastmessage('showErrorToast','Shipping date is required');
+					}else{
+						shippingInRoute(shipping_date);
+					}
+					break;
+				default:
+					break;
+			} // end of switch
 		});
 								
 		// full screen switch
@@ -602,7 +625,6 @@
 					<td>Field</td>
 					<td>Old</td>
 					<td>New</td>
-					<td>Reason</td>
 				</tr>
 			</thead>
 			<tbody>
@@ -618,7 +640,6 @@
 					<td>{{ a.field_name }}</td>
 					<td>{{ a.old_value }}</td>
 					<td>{{ a.new_value }}</td>
-					<td>{{ a.comment }}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

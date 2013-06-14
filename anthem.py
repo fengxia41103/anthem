@@ -362,10 +362,10 @@ class ApproveCart(MyBaseHandler):
 		batch=[]
 		action=self.request.POST['action']
 		if action.lower()=='submit for approval':
-			cart.audit_me(self.me.key,'status',cart.status,'In Approval','Submit for approval')
+			cart.audit_me(self.me.key,'status',cart.status)
 			cart.status='In Approval'
 		elif action.lower()=='approve' and cart.status=='In Approval':
-			cart.audit_me(self.me.key,'status',cart.status,'Ready for Processing','Grant approval')
+			cart.audit_me(self.me.key,'status',cart.status)
 			cart.status='Ready for Processing'
 			
 			# update buyorder filled qty
@@ -378,7 +378,7 @@ class ApproveCart(MyBaseHandler):
 			# TODO: send email to all parties here
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
-			cart.audit_me(self.me.key,'status',cart.status,'Rejected', 'Reject proposal')
+			cart.audit_me(self.me.key,'status',cart.status)
 			cart.status='Rejected'
 			# TODO: send email to all parties here
 			
@@ -597,6 +597,19 @@ class ManageBuyOrder(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrder.html')
 		self.response.write(template.render(self.template_values))
 	
+class ShippingCartInRoute(MyBaseHandler):
+	def post(self,owner_id,cart_id):
+		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
+		assert cart
+
+		if self.request.POST.has_key('shipping-date'):
+			new_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
+			cart.audit_me(self.me.key,'Shipping Date',cart.shipping_date,new_date)
+			cart.shipping_date=new_date
+		cart.shipping_status='In Route'
+		cart.put()	
+		self.response.write('0')
+			
 				
 class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 	def post(self, owner_id,cart_id):
@@ -638,9 +651,6 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 			# now save new blob key
 			cart.shipping_label=blob_info.key()
 	
-		#if self.request.POST.has_key('shipping-date'):
-		#	cart.shipping_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
-			
 		cart.shipping_status='Shipment Created'
 		cart.status='In Shipment'
 		cart.put()	

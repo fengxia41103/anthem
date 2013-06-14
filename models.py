@@ -164,13 +164,12 @@ class MyBaseModel(ndb.Model):
 	# http://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
 	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
 
-	def audit_me(self,contact_key,field_name,old_value,new_value,comment):
+	def audit_me(self,contact_key,field_name,old_value,new_value):
 		my_audit=MyAudit(parent=self.key)
 		my_audit.owner=contact_key
 		my_audit.field_name=field_name
 		my_audit.old_value=old_value
 		my_audit.new_value=new_value
-		my_audit.comment=comment
 		my_audit.put_async() # async auditing
 		
 #######################################
@@ -383,6 +382,4 @@ class MyAudit(ndb.Model):
 	old_value=ndb.GenericProperty()
 	# new value
 	new_value=ndb.GenericProperty()
-	# comment,reason
-	comment=ndb.StringProperty(indexed=False,default='')	
 
