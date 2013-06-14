@@ -85,6 +85,7 @@
 	    	j$().toastmessage('showErrorToast', 'Product quantity is required!');
 			return false;
 		}
+				
 	    if (price==''){
 	    	j$().toastmessage('showErrorToast', 'Product price is required!');
 			return false;
@@ -268,6 +269,23 @@
 		{% if order %}
     		j$('#user-input-image').parent('.ariel-pinterest-item').find('.ariel-checkbox').addClass('ariel-checkbox-checked');
 		{% endif %}
+
+		// if there is order, meaning we are editing, we need to make sure
+		// that new qty not < filled_qty
+		// filled_qty represents items in our pipeline even some we have not approved
+		{% if order %}
+		j$('#input-qty').change(function(){
+			console.log({{ order.filled_qty }});
+			
+			var qty=j$(this).val();
+			var filled={{ order.filled_qty }};
+			if (qty<filled){
+				j$().toastmessage('showErrorToast','There are '+filled+' submitted by seller already. You can not set Qty less than this value.');
+				return false;
+			}
+		});
+		{% endif %}
+
 
 		// level 1 navigatino
 		j$('#nav-order').addClass('level-1-navigation-selected');

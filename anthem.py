@@ -328,13 +328,21 @@ class BrowseBuyOrder(MyBaseHandler):
 		
 		# we have established an OPEN cart
 		existing=False		
+		batch=[]
 		for i in xrange(len(self.cart.fills)):
 			f=self.cart.fills[i]
 			if f.order==buyorder.key:
 				# it's already in the cart, just update qty
 				existing=True
 				f.qty+=qty
-				f.last_modified_by=me.key
+				
+				# update order's filled qty
+				order=f.order.get()
+				order.filled_qty+= (qty-f.qty)
+				batch.append(order)
+				
+				# update this
+				f.last_modified_by=self.me.key
 				break
 				
 		if not existing:
@@ -346,8 +354,17 @@ class BrowseBuyOrder(MyBaseHandler):
 			self.cart.fills.append(f)
 			self.cart.broker=buyorder.owner
 			
+			# update order's filled qty
+			order=f.order.get()
+			order.filled_qty+= qty
+			batch.append(order)
+		
 		# update cart
 		self.cart.put()
+		
+		# update affected buyorders
+		ndb.put_multi(batch)
+		
 		self.response.write(json.dumps(self.cart.to_dict(),cls=ComplexEncoder))
 
 class ApproveCart(MyBaseHandler):
@@ -368,7 +385,7 @@ class ApproveCart(MyBaseHandler):
 			cart.audit_me(self.me.key,'Status',cart.status,'Ready for Processing')
 			cart.status='Ready for Processing'
 			
-			# update buyorder filled qty
+			# update buyorder approved qty
 			for f in cart.fills:
 				order=f.order.get()
 				order.approved_qty+=f.qty
@@ -448,6 +465,12 @@ class ReviewCart(MyBaseHandler):
 				if action=='remove':
 					new_fills=[f for f in cart.fills if f.order!=matching_key]
 					cart.fills=new_fills
+					
+					# update removed buyorder filled qty
+					removing=[f for f in cart.fills if f.order==matching_key]
+					order=removing[0].get()
+					order.filled_qty -= removing[0].qty
+					batch.append(order)					
 					
 				# update client price
 				elif action=='update client price':
