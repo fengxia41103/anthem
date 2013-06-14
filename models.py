@@ -282,7 +282,7 @@ class BuyOrderCart(MyBaseModel):
 	gross_margin=ndb.ComputedProperty(lambda self: self.profit/self.payable*100.0 if self.payable else 0)
 			
 	# a cart has multiple bank slips
-	# owner of BuyOrder is always "a"
+	# broker, aka owner of these buyorders, is always "a"
 	# payout: terminal seller is "b", slip is a-2-b, thus a cost to the broker
 	# payin: termian client is "b", slip is b-2-a, thus an income to the broker
 	payout_slips=ndb.KeyProperty(kind='AccountingSlip',repeated=True)

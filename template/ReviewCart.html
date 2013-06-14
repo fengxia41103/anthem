@@ -78,20 +78,6 @@
    		return true;
    	}    
 
-	function shippingInRoute(shipping_date){
-		j$.post(
-			'/cart/shipping/{{ cart.owner.id() }}/{{ cart.key.id() }}/inroute',
-			{'shipping-date':shipping_date},
-			function(result){
-				switch(result){
-					case '0':
-						j$().toastmessage('showSuccessToast','Shipping is set to In Route on '+shipping_date);
-						break;
-				}
-			}
-		);	
-	}
-   	
     j$(document).ready(function(){
     	// disable all inputs
     	// now, based on conditions, we will enable certain inputs

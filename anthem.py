@@ -560,7 +560,7 @@ class ManageCartAsSeller(MyBaseHandler):
 		
 		# get all carts that belong to this user
 		# these are ones user has file as a Nur
-		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.status!='Open')
+		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.status!='Open').order(BuyOrderCart.status,-BuyOrderCart.last_modified_time)
 
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageCartAsSeller.html')
@@ -572,7 +572,7 @@ class ManageCartAsBuyer(MyBaseHandler):
 		
 		# get all carts that this user is the broker
 		# these are ones need approval
-		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed')
+		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed').order(BuyOrderCart.status,-BuyOrderCart.last_modified_time)
 		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageCartAsBuyer.html')
@@ -668,7 +668,9 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 			
 			# now save new blob key
 			cart.shipping_label=blob_info.key()
-	
+			
+			# TODO: email seller label ready!
+			
 		cart.shipping_status='Shipment Created'
 		cart.status='In Shipment'
 		cart.put()	

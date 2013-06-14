@@ -11,7 +11,7 @@
 		// approval process
 		j$(document).on('click','button[item="approval-process"]',function(){
 			var action=j$(this).html();
-			var cart_id=j$(this).attr('itemId');			
+			var cart_id=j$(this).attr('cartId');			
 			var owner_id=j$(this).attr('ownerId');			
 			j$.post(
 				'/cart/approve/'+owner_id+'/'+cart_id+'/',
@@ -28,7 +28,65 @@
 				}
 			);			
 		});		
-		
+
+		// sophisticated shipping process
+		j$(document).on('click','button[item="shipping-process"]',function(){
+			var action=j$(this).html();
+			var cart_id=j$(this).attr('cartId');			
+			var owner_id=j$(this).attr('ownerId');				
+			var data={'action':action};
+			
+			// data validation
+			switch(action){
+				// set to in route
+				case 'In Route':
+	    			var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
+					if (shipping_date==''){
+						j$().toastmessage('showErrorToast','Shipping date is required');
+						return;
+					}else{
+						data['shipping date']=shipping_date;
+					}
+					break;
+					
+				// set to delivery confirmed	
+				case 'Delivery Confirmed':
+				case 'Destination Reconciled':
+					break;
+					
+				case 'Dispute Shipping':
+					data['action']='In Dispute';
+					break;
+				
+			} // end of switch
+
+			j$.post(
+				'/cart/shipping/process/'+ownerId+'/'+cartId+'/',
+				data,
+				function(result){
+					switch(action){
+						case 'In Route':
+							j$().toastmessage('showSuccessToast','Shipping is set to In Route on '+shipping_date);
+							break;
+						case 'Delivery Confirmed':
+							j$().toastmessage('showSuccessToast','Shipping delivery has been confirmed');
+							break;
+						case 'Destination Reconciled':
+							j$().toastmessage('showSuccessToast','Shipping has been reconciled by receiver');
+							break;
+						case 'In Dispute':
+							j$().toastmessage('showSuccessToast','Shipping has been put in dispute');
+							break;
+					}
+					
+					// reload this page
+					setTimeout(function() {  
+						window.location.reload();
+					}, 3000)
+				}
+			);	
+		});			
+				
 		j$('#my-carts').dataTable({
 			"sPaginationType": "full_numbers"
 		});
@@ -51,7 +109,7 @@
 		{% for c in my_carts %}
 			<tr>
 				<td style="text-align:left;padding:10px;">
-					<a href="{{ review_url }}?cart={{ c.key.id() }}">
+					<a href="/cart/review?cart={{ c.key.id() }}">
 						<h4>
 						Cart# {{ c.key.id() }}
 						<span class="redheart" style="float:right;">
@@ -77,10 +135,14 @@
 						</tr>								
 						<tr><td>Payable</td>
 							<td>{{ c.payable }}</td>
-							<td>Receivable</td>
-							<td>{{ c.receivable }}</td>
+							<td>Buyer Paid</td>
+							<td>{{ c.payouts }}</td>
 						</tr>
-						<tr></tr>
+						<tr><td>Payalbe Balance</td>
+							<td>{{ c.payable_balance }}</td>
+							<td></td>
+							<td></td>
+						</tr>
 						
 						{% if c.shipping_status %}
 						<tr><td>Shipping Status</td>
@@ -112,13 +174,39 @@
 						</ul>
 					</div>
 					
+					<!-- command buttons -->
 					<div>
-						{% if c.status=='Open' %}
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Submit for Approval</button>
-						{% elif c.status=='Rejected' %}
-							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Submit for Approval</button>
+						<!-- approval buttons -->
+						{% if c.can_enter_approval(me.key) %}
+							<button class="my-button" item="approval-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Submit for Approval</button>
+						{% endif %}
+			
+						{% if c.can_approve(me.key) %}
+							<button class="my-button" item="approval-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Approve</button>
+							<button class="my-button" item="approval-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Reject</button>
+						{% endif %}
+			
+						<!-- shipping status buttons -->
+						{% if c.can_enter_shipping_in_route(me.key) %}
+						<div class="my-button">
+							<button item="shipping-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">In Route</button> 
+							Shipping Date: <input type="date" name="shipping-date" id="input-shipping-date"/>
+						</div>
+						{% endif %}
+			
+						{% if c.can_confirm_shipping_delivery(me.key) %}
+							<button class="my-button" item="shipping-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Delivery Confirmed</button>							
+						{% endif %}
+			
+						{% if c.can_reconcile_destination(me.key) %}
+							<button class="my-button" item="shipping-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Destination Reconciled</button>			
+						{% endif %}
+			
+						{% if c.can_dispute_shipping(me.key) %}
+							<button class="my-button" item="shipping-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Dispute Shipping</button>			
 						{% endif %}
 					</div>
+					
 					{% else %}
 					{% endif %}
 					

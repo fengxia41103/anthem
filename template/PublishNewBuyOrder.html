@@ -226,7 +226,7 @@
     	// initialize textarea
 		tinymce.init({
     		selector: "textarea.ss-textarea",
-    		width: 505,
+    		width: "100%",
     		height: 300,
 			plugins: [
  			"advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
@@ -297,54 +297,61 @@ items to give you a starting point for your listing.
 	</ul>
 
 	<div id="step-1">
-		<div class="ss">
-			<label class="ss-label">Product</label>
-			<br />
-				{% if order %}
-					<input class="ss-input" name="product" type="text" id="input-product-name" value="{{ order.name }}"/>
-				{% else %}
-					<input class="ss-input" name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
-				{% endif %}
-			<table class="two-col-table">
-				<tr><td>
-						<label class="ss-label">Price</label><br />
-						{% if order %}
-							<input name="price" type="number" id="input-price" step="any" min="0" value="{{ order.price }}" />
-						{% else %}
-							<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
-						{% endif %}
-					</td><td>
-						<label class="ss-label">Qty</label><br />
-						{% if order %}						
-							<input name="qty" type="number" id="input-qty" min="1" value="{{ order.qty }}"/>
-						{% else %}
-							<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
-						{% endif %}
-					</td>
-				</tr>
-			</table>
+		<table class="two-col-table">
+			<tr><td colspan="2">
+					<label class="ss-label">Product</label>
+					<br />
+					{% if order %}
+						<input name="product" type="text" id="input-product-name" value="{{ order.name }}"/>
+					{% else %}
+						<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+					{% endif %}
+				</td>
+			</tr>
+				
+			<tr><td>
+					<label class="ss-label">Price</label><br />
+					{% if order %}
+						<input name="price" type="number" id="input-price" step="any" min="0" value="{{ order.price }}" />
+					{% else %}
+						<input name="price" type="number" id="input-price" placeholder="eg. 632.99" step="any" min="0" />
+					{% endif %}
+				</td><td>
+					<label class="ss-label">Qty</label><br />
+					{% if order %}						
+						<input name="qty" type="number" id="input-qty" min="1" value="{{ order.qty }}"/>
+					{% else %}
+						<input name="qty" type="number" id="input-qty" placeholder="eg. 100" min="1" />
+					{% endif %}
+				</td>
+			</tr>
+			<tr><td colspan="2">
+					<label class="ss-label">Brief Description</label>
+					<br />
+					{% if order %}
+						<textarea class="ss-textarea">{{ order.description }}</textarea>
+					{% else %}
+						<textarea class="ss-textarea"></textarea>
+					{% endif %}
+					<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
+				</td>
+			</tr>
 			
-			<label class="ss-label">Brief Description</label>
-			<br />
-			{% if order %}
-				<textarea class="ss-textarea">{{ order.description }}</textarea>
-			{% else %}
-				<textarea class="ss-textarea"></textarea>
-			{% endif %}
-			<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
-			<br />
-			<label class="ss-label">For Client (optional)</label>
-			<br />
-			{% if order %}
-				{% if order.terminal_buyer %}
-				<input class="ss-input" name="client" type="email" id="input-client-name" value="{{ order.terminal_buyer.get().nickname }}"/>
+			<tr><td colspan="2">
+				<label class="ss-label">For Client (optional)</label>
+				<br />
+				{% if order %}
+					{% if order.terminal_buyer %}
+						<input name="client" type="email" id="input-client-name" value="{{ order.terminal_buyer.get().nickname }}"/>
+					{% else %}
+						<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+					{% endif %}
 				{% else %}
-					<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+					<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
 				{% endif %}
-			{% else %}
-				<input class="ss-input" name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
-			{% endif %}
-		</div>
+				</td>
+			</tr>
+		</table>
 	</div>
 	
 	<div id="step-2">

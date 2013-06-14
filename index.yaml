@@ -41,6 +41,13 @@ indexes:
 
 - kind: BuyOrderCart
   properties:
+  - name: broker
+  - name: status
+  - name: last_modified_time
+    direction: desc
+
+- kind: BuyOrderCart
+  properties:
   - name: terminal_seller
   - name: age
 
@@ -68,6 +75,13 @@ indexes:
   ancestor: yes
   properties:
   - name: status
+
+- kind: BuyOrderCart
+  ancestor: yes
+  properties:
+  - name: status
+  - name: last_modified_time
+    direction: desc
 
 - kind: MyAudit
   ancestor: yes
