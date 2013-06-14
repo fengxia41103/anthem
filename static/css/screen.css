@@ -2,7 +2,7 @@ body{
     /*font-family: Verdana, Geneva, sans-serif; */
     /*font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;*/
 	font-family: Verdana, Geneva, sans-serif;
-	font-size:10pt;
+	font-size:9pt;
 	margin:0;
 }
 
@@ -15,7 +15,6 @@ h1,h2,h3{
 
 input,textarea,label,span,p,div,select,td{
 	font-family: Verdana, Geneva, sans-serif;
-	font-size:10pt;
 }
 
 /* Main layout */
@@ -32,6 +31,9 @@ table.header-layout{
 }
 table.header-layout td{
 	padding:10px 20px;
+}
+table td{
+	font-size:9pt;
 }
 
 .header-layout td:nth-child(3n){
@@ -197,13 +199,11 @@ ul.tags li a{
 .server-maintenance h1{
 	font-size: 15px;
 	color: red;
-	font-family: Georgia, "Times New Roman", Times, serif;
 	text-align:center;	
 }
 
 .refresh-upgrade-event h1{
 	font-size: 15px;
-	font-family: Georgia, "Times New Roman", Times, serif;	
 }
 .refresh-upgrade-event a{
 	background-color: #FFFFCC;
@@ -352,11 +352,11 @@ ul.tags li a{
 }
 
 .product-list-item-footer-stat{
-	font-family: ‘Arial Narrow’, sans-serif;
 	color:silver;
 }
 
 .product-stat{
+	font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
 	color:orange;
 }
 .product-stat-label{
@@ -403,8 +403,6 @@ ul.tags li a{
 	background: #238E68;
 	margin: 5px;
 	color: white;
-/*	font-family: Impact, Charcoal, sans-serif;       	*/
-	font-family: ‘Arial Narrow’, sans-serif;
 }
 
 .pin-command-center button{
@@ -426,8 +424,6 @@ ul.tags li a{
 .redheart {
 	color:#ff0000; 
 	font-size:14px;
-	/*font-family:'arial unicode MS', arial, geneva, sans-serif; 
-	*/
 	border-top: 2px silver solid;
 	border-left:1px silver solid;
 	border-right:1px silver solid;
@@ -496,7 +492,6 @@ ul#pinterest-filters li{
 	padding:3px 10px;
 	margin-left:5px;
 	margin-bottom:2px;
-	font-family: ‘Arial Narrow’, sans-serif;
 }
 ul#pinterest-filters li:hover{
 	color:white;
@@ -511,7 +506,6 @@ ul#pinterest-filters li:hover{
 }
 
 .my-navigation-link{
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	text-decoration:none;
 	color: #0EBFE9;
 }
@@ -655,7 +649,6 @@ a.login-button:hover{
 	border: 1px solid white; 
 	background: white;
 	margin-right: 10px;
-	font-family: Tahoma, Geneva, sans-serif;
 	padding-left: 10px;
 	width:200px;
 }
@@ -1707,7 +1700,6 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .toc{
-    font-family: ‘Palatino Linotype’, ‘Book Antiqua’, Palatino, serif;
 	color:#CD9B1D;
 	border-radius:5px;
 	width:200px;
