@@ -554,7 +554,7 @@ class BankingCart(MyBaseHandler):
 		# return status
 		self.response.write(status)
 	
-class ManageBuyOrderCart(MyBaseHandler):
+class ManageCartAsSeller(MyBaseHandler):
 	def get(self):
 		self.template_values['review_url']=uri_for('cart-review')		
 		
@@ -562,12 +562,20 @@ class ManageBuyOrderCart(MyBaseHandler):
 		# these are ones user has file as a Nur
 		self.template_values['my_carts']=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.status!='Open')
 
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageCartAsSeller.html')
+		self.response.write(template.render(self.template_values))
+
+class ManageCartAsBuyer(MyBaseHandler):
+	def get(self):
+		self.template_values['review_url']=uri_for('cart-review')		
+		
 		# get all carts that this user is the broker
 		# these are ones need approval
 		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed')
 		
 		# render
-		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrderCart.html')
+		template = JINJA_ENVIRONMENT.get_template('/template/ManageCartAsBuyer.html')
 		self.response.write(template.render(self.template_values))
 	
 		

@@ -1,0 +1,115 @@
+{% extends "/template/CartBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+    j$(document).ready(function(){	
+    	j$('#nav-cart').addClass('level-1-navigation-selected');
+
+		j$('.level-2-navigation').show();
+		j$('#nav-cart-as-buyer').addClass('level-2-navigation-selected');
+		
+		// approval process
+		j$(document).on('click','button[item="approval-process"]',function(){
+			var action=j$(this).html();
+			var cart_id=j$(this).attr('itemId');			
+			var owner_id=j$(this).attr('ownerId');			
+			j$.post(
+				'/cart/approve/'+owner_id+'/'+cart_id+'/',
+				{'action':action},
+				function(result){
+					j$().toastmessage('showNoticeToast','Cart status has been updated');
+					
+					// back to previous page
+					setTimeout(function() {  
+						window.location.reload();
+						//window.history.go(-1);
+					}, 3000)
+					
+				}
+			);			
+		});		
+		
+		j$('#broker-carts').dataTable({
+			"sPaginationType": "full_numbers"
+		});
+    });
+    
+</script>  
+{% endblock %}
+
+{% block main %}
+	<h1 class="ariel-blue">Buying Carts</h1>
+	<p class="ariel-blue ariel-p">
+		As a buyer, you need to review these carts for approval if you agree with the seller's proposing price and quantity. Once the cart has been 
+		approved, you can continue to monitor and guide these carts throughout their life cycle.
+	</p>
+
+<table class="pretty" border="0" cellpadding="0" cellspacing="0"  id="broker-carts">
+	<thead>
+		<tr><td></td></tr>
+	</thead>
+	<tbody>
+		{% for c in broker_carts %}
+			<tr>
+				<td style="text-align:left;padding:10px;">
+					<a href="{{ review_url }}?cart={{ c.key.id() }}&owner={{ c.owner.id() }}">
+						<h4>
+						Cart# {{ c.key.id() }}
+						<span class="redheart" style="float:right;">
+						{{ c.status }}
+						</span>
+						</h4>
+					</a>
+					Posted on {{ c.created_time }}
+					
+					<table class="sf-table" style="margin-top:10px;margin-bottom:10px;">
+						<tr><td>For Client</td>
+							<td>
+								{% if c.terminal_buyer %}
+									{{ c.terminal_buyer.get().nickname }}
+								{% endif %}
+							</td>
+							<td>Seller</td>
+							<td>
+								{{ c.terminal_seller.get().nickname }}
+							</td>
+						</tr>								
+						<tr><td>Payable</td>
+							<td>{{ c.payable }}</td>
+							<td>Receivable</td>
+							<td>{{ c.receivable }}</td>
+						</tr>
+						<tr></tr>
+					</table>
+					
+					{% if c.fills|length > 0 %}
+					<div class="list-of-photo">
+						<ul>
+						{% for f in c.fills %}
+							<li>
+							<a href="/buyorder/browse/{{ f.order.id() }}/">
+								<img src="{{ f.order.get().image }}" width="60px" height="60px"/>
+							</a>
+							</li>
+						{% endfor %}
+						</ul>
+					</div>
+					
+					<div>
+						{% if c.status=='In Approval' and me.can_be_doc() %}
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Approve</button>
+							<button class="my-button" item="approval-process" itemId="{{ c.key.id() }}" ownerId="{{ c.owner.id() }}">Reject</button>
+						{% endif %}
+					</div>
+					{% else %}
+					{% endif %}
+					
+					{% if c.shipping_status %}
+						{{ c.shipping_status }}
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
