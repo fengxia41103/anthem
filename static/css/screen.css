@@ -17,6 +17,13 @@ input,textarea,label,span,p,div,select,td{
 	font-family: Verdana, Geneva, sans-serif;
 }
 
+input, select
+{
+	box-sizing: border-box;
+   	-moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
 /* Main layout */
 .header{
 	background-color: #292421;
@@ -1835,12 +1842,14 @@ table.two-col-table{
 	margin-top:10px;
 	margin-bottom:10px;
 	width:500px;
+	table-layout:fixed;
 }
 
-table.two-col-table td:nth-child(2n+1){
+table.two-col-table td{
 	width:50%;
-	padding-right:20px;
+	padding:2px 5px;
 }
+
 table.two-col-table input{
 	/*color:#ebebeb;*/
 	color:white;
@@ -1852,6 +1861,19 @@ table.two-col-table input{
 	moz-border-radius:5px;
 	padding: 10px 0 10px 10px;
 }
+table.two-col-table select{
+	width:100%;
+	background-color:#888;
+	color:white;
+	border:none;
+	height: 40px;
+	border-radius: 5px;
+	webkit-border-radius: 5px;
+	moz-border-radius:5px;
+	padding: 5px 0 10px 10px;
+	font-size:1.4em;
+}
+
 .ss-textarea{
 	width:469px;
 	height:50px;

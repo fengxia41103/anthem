@@ -269,8 +269,10 @@
 			
 			<!-- shipping status buttons -->
 			{% if cart.can_enter_shipping_in_route(me.key) %}
-				<button class="my-button" item="shipping-process">In Route</button> 
-				<input type="date" name="shipping-date" id="input-shipping-date"/>
+			<div class="my-button">
+				<button item="shipping-process">In Route</button> 
+				Shipping Date: <input type="date" name="shipping-date" id="input-shipping-date"/>
+			</div>
 			{% endif %}
 			
 			{% if cart.can_confirm_shipping_delivery(me.key) %}
@@ -299,26 +301,30 @@
 			<!--form id="myForm" action="/cart/shipping/{{ cart.key.id() }}/" method="post" enctype="multipart/form-data"-->
 			<form id="myForm" action="{{ shipping_form_url }}" method="post" enctype="multipart/form-data">
 			<h4>Enter Shipping Information</h4>		
-			<div>
-			<label class="ss-label">Shipping Method</label>
-			<br />
-			<select class="ss-select" name="shipping-carrier">
-				{% for s in shipping_methods %}
-					<option value="{{ s }}">{{ s }}</option>
-				{% endfor %}
-			</select>
-			</div>
-			<br />
-					
-			<div>
-			<label class="ss-label">Tracking Number</label>
-			<br />
-			<input class="ss-input" name="shipping-tracking" id="input-tracking-number" value="{{ cart.shipping_tracking_number|join(', ') }}" />
-			</div>
-	
 			<table class="two-col-table">
-				<tr>
-					<td>
+				<tr><td>
+						<label class="ss-label">Shipping Method</label>
+						<br />
+						<select name="shipping-carrier">
+							{% for s in shipping_methods %}
+								<option value="{{ s }}">{{ s }}</option>
+							{% endfor %}
+						</select>
+					</td>
+					<td>				
+						<label class="ss-label">Shipping Label File</label>
+						<input type="file" name="shipping-label" id="input-shipping-label-file" />
+					</td>
+				</tr>
+					
+				<tr><td colspan="2">
+					<label class="ss-label">Tracking Number</label>
+					<br />
+					<input name="shipping-tracking" id="input-tracking-number" value="{{ cart.shipping_tracking_number|join(', ') }}" />
+					</td>
+				</tr>
+					
+				<tr><td>
 						<label class="ss-label">Number of Packages</label>
 						<br />
 						<input type="number" name="shipping-package" id="input-number-of-package" placeholder="1"
@@ -330,21 +336,8 @@
 						<input type="number" name="shipping-cost" step="any" placeholder="0.0" value="{{ cart.shipping_cost }}"/>
 					</td>
 				</tr>
-				
-				<tr>
-					<td>				
-						<label class="ss-label">Shipping Label File</label>
-						<input class="ss-input" type="file" name="shipping-label" id="input-shipping-label-file" />
-					</td>
-				</tr>
 			</table>		
 			
-			<br />
-			{% if shipping_label %}
-				<a href="{{ shipping_label }}">View saved shipping label</a>
-				<br />
-			{% endif %}
-		
 			<button class="my-button" id="btn-create-shipping">Save Shipment</button>
 		
 			</form>
