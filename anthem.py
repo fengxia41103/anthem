@@ -610,8 +610,13 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		assert cart.broker==me.key
 
 		cart.shipping_carrier=self.request.POST['shipping-carrier']
-		cart.shipping_tracking_number=[f.strip() for f in self.request.POST['shipping-tracking'].split(',') if len(f.strip())>0]
+		cart.shipping_tracking_number=self.request.POST['shipping-tracking']
 		cart.shipping_num_of_package=int(self.request.POST['shipping-package'])
+		
+		# cost is optional
+		# if broker already know how much this label costs him, ie. a flat rate
+		# then he can choose to enter here
+		# otherwise, he will be able to edit the cost field anytime after shipment is created
 		cart.shipping_cost=float(self.request.POST['shipping-cost'])
 
 		# this date is updated everytime
@@ -633,8 +638,8 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 			# now save new blob key
 			cart.shipping_label=blob_info.key()
 	
-		if len(self.request.POST['shipping-date']):
-			cart.shipping_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
+		#if self.request.POST.has_key('shipping-date'):
+		#	cart.shipping_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
 			
 		cart.shipping_status='Shipment Created'
 		cart.status='In Shipment'

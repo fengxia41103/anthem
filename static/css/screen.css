@@ -322,12 +322,16 @@ ul.tags li a{
   	-webkit-column-count: 3;
   	-webkit-column-gap: 10px;
   	-webkit-column-fill: auto;
-  	column-count: 32;
+  	column-count: 3;
   	column-gap: 10px;
   	column-fill: auto;
 }
   
 .pin { 
+	/*
+	max-width:282px;
+	width:260px;
+	*/
 	-moz-column-break-inside: avoid; 
 	-webkit-column-break-inside: avoid; 
 	column-break-inside: avoid; 
@@ -342,9 +346,12 @@ ul.tags li a{
 }
 
 .pin img{
-	max-width:100%;
+	width:100%;
 	padding-bottom: 5px;
 	border-bottom: 1px silver solid;
+	display:block;
+	margin-left:auto;
+	margin-right:auto;
 }
 .pin img:hover{
 	cursor:-webkit-zoom-in;
@@ -989,9 +996,11 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .quick-pane{
+	/*
 	-webkit-box-shadow: 7px 7px 5px rgba(0.5, 0.5, 0.5, 0.75);
 	-moz-box-shadow:    7px 7px 5px rgba(0.5, 0.5, 0.5, 0.75);
 	box-shadow:         7px 7px 5px rgba(0.5, 0.5, 0.5, 0.75);
+	*/
 	border-radius:5px 0 5px;
 	-webkit-border-radius:5px 0 5px;
 	-moz-border-radius:5px 0 5px;

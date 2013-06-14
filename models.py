@@ -325,6 +325,9 @@ class BuyOrderCart(MyBaseModel):
 		# shipping can be added when status=='Ready for Processing'
 		# can only be changed when shipment has not been picked up yet: status='In Shipment' and shipping_status='Shipment Created'
 		# also, only cart broker can start, this assumes that broker is to initiate shipping process by providing a label
+		# 
+		# once the shipment is "In Route", then nobody has access to this pane, and only certain field will be changed
+		# depending on which state cart is in via individual command buttons on UI
 		return (self.status=='Ready for Processing' or (self.status=='In Shipment' and self.shipping_status=='Shipment Created')) and self.broker==user_key
 		
 	def can_enter_shipping_in_route(self,user_key):

@@ -197,7 +197,13 @@
 				}
 			);			
 		});
-				
+
+		// sophisticated shipping process
+		j$(document).on('click','button[item="shipping-process"]',function(){
+
+
+		});
+								
 		// full screen switch
 		j$('#full-screen-switch-1').on('click',function(){
 			j$('.arrow_box').fadeIn(500);	
@@ -320,7 +326,7 @@
 				<tr><td colspan="2">
 					<label class="ss-label">Tracking Number</label>
 					<br />
-					<input name="shipping-tracking" id="input-tracking-number" value="{{ cart.shipping_tracking_number|join(', ') }}" />
+					<input type="text" name="shipping-tracking" id="input-tracking-number" value="{{ cart.shipping_tracking_number }}" />
 					</td>
 				</tr>
 					
@@ -375,24 +381,45 @@
 		</table>
 		</div>					
 		
+		{% if cart.shipping_status %}
+		<div class="quick-pane" id="sec-shipping-summary">
+		<h4>Shipping Details</h4>
+		<table class="sf-table table-row-border">
+			<tr><td>Carrier</td>
+				<td>{{ cart.shipping_carrier }}</td>
+				<td>Tracking Number</td>
+				<td>{{ cart.shipping_tracking_number }}</td>
+			</tr>
+			<tr><td>Shipped Date</td>
+				<td>{{ cart.shipping_date }}</td>
+				<td>No. of Packages</td>
+				<td>{{ cart.shipping_num_of_package }}</td>
+			</tr>
+			
+			<!-- broker only view -->
+			{% if me.key==cart.broker %}
+			<tr><td>Shipping Status</td>
+				<td>{{ cart.shipping_status }}</td>
+				<td>Shipping Cost</td>
+				<td>{{ cart.shipping_cost }}</td>
+			</tr>
+			{% endif %}
+			
+			<tr><td>Last Modified Date</td>
+				<td>{{ cart.shipping_created_date }}</td>
+				<td>Shipping Label</td>
+				<td>
+					{% if shipping_label %}
+						<a href="{{ shipping_label }}">Download</a>
+					{% endif %}
+				</td>
+			</tr>
+		</table>
+		</div>	
+		{% endif %}
+		
 		<!-- DOC only views -->
 		{% if me.can_be_doc() and me.key==cart.broker %}
-			<div class="quick-pane" id="sec-profit">
-			<h4>Profit</h4>
-			<table class="sf-table table-row-border">
-				<tr><td>Expected Profit</td>
-					<td>{{ cart.profit }}</td>
-					<td>Expected Gross Margin</td>
-					<td>{{ cart.gross_margin}}%</td>
-				</tr>
-				<tr><td>Realized Profit</td>
-					<td>{{ cart.realized_profit }}</td>
-					<td>Realized Gross Margin</td>
-					<td>{{ cart.realized_gross_margin }}</td>
-				</tr>
-			</table>
-			</div>
-		
 			<div class="quick-pane" sec="sec-accounting">
 			<h4>Accounting</h4>
 			<table class="sf-table table-row-border">
@@ -411,6 +438,16 @@
 					<td>{{ cart.payable_balance }}</td>
 					<td>Receivable</td>
 					<td>{{ cart.receivable_balance }}</td>
+				</tr>
+				<tr><td>Expected Profit</td>
+					<td>{{ cart.profit }}</td>
+					<td>Expected Gross Margin</td>
+					<td>{{ cart.gross_margin}}%</td>
+				</tr>
+				<tr><td>Realized Profit</td>
+					<td>{{ cart.realized_profit }}</td>
+					<td>Realized Gross Margin</td>
+					<td>{{ cart.realized_gross_margin }}</td>
 				</tr>
 			</table>
 			</div>	
@@ -495,42 +532,7 @@
 			</table>
 		{% endif %}
 		</div>
-	
-		<div class="quick-pane" id="sec-shipping-summary">
-		<h4>Shipping Details</h4>
-		<table class="sf-table table-row-border">
-			<tr><td>Carrier</td>
-				<td>{{ cart.shipping_carrier }}</td>
-				<td>Tracking Number</td>
-				<td>{{ cart.shipping_tracking_number|join('<br />') }}</td>
-			</tr>
-			<tr><td>Shipped Date</td>
-				<td>{{ cart.shipping_date }}</td>
-				<td>No. of Packages</td>
-				<td>{{ cart.shipping_num_of_package }}</td>
-			</tr>
-			
-			<!-- broker only view -->
-			{% if me.key==cart.broker %}
-			<tr><td>Shipping Status</td>
-				<td>{{ cart.shipping_status }}</td>
-				<td>Shipping Cost</td>
-				<td>{{ cart.shipping_cost }}</td>
-			</tr>
-			{% endif %}
-			
-			<tr><td>Last Modified Date</td>
-				<td>{{ cart.shipping_created_date }}</td>
-				<td>Shipping Label</td>
-				<td>
-					{% if shipping_label %}
-						<a href="{{ shipping_label }}">Download</a>
-					{% endif %}
-				</td>
-			</tr>
-		</table>
-		</div>	
-	
+		
 		<div class="quick-pane" id="sec-payment">
 		<h4>Payments</h4>
 		<!-- seller only view -->
