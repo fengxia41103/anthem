@@ -77,6 +77,7 @@
 
    		return true;
    	}    
+
 	function shippingInRoute(shipping_date){
 		j$.post(
 			'/cart/shipping/{{ cart.owner.id() }}/{{ cart.key.id() }}/inroute',
@@ -200,7 +201,7 @@
 				function(result){
 					j$().toastmessage('showNoticeToast','Cart status has been updated');
 					
-					// back to previous page
+					// reload this page
 					setTimeout(function() {  
 						window.location.reload();
 						//window.history.go(-1);
@@ -213,18 +214,57 @@
 		// sophisticated shipping process
 		j$(document).on('click','button[item="shipping-process"]',function(){
 			var action=j$(this).html();
+			var data={'action':action};
+			
+			// data validation
 			switch(action){
+				// set to in route
 				case 'In Route':
 	    			var shipping_date=j$.trim(j$('input[name="shipping-date"]').val());
 					if (shipping_date==''){
 						j$().toastmessage('showErrorToast','Shipping date is required');
+						return;
 					}else{
-						shippingInRoute(shipping_date);
+						data['shipping date']=shipping_date;
 					}
 					break;
-				default:
+					
+				// set to delivery confirmed	
+				case 'Delivery Confirmed':
+				case 'Destination Reconciled':
 					break;
+					
+				case 'Dispute Shipping':
+					data['action']='In Dispute';
+					break;
+				
 			} // end of switch
+
+			j$.post(
+				'/cart/shipping/process/{{ cart.owner.id() }}/{{ cart.key.id() }}/',
+				data,
+				function(result){
+					switch(action){
+						case 'In Route':
+							j$().toastmessage('showSuccessToast','Shipping is set to In Route on '+shipping_date);
+							break;
+						case 'Delivery Confirmed':
+							j$().toastmessage('showSuccessToast','Shipping delivery has been confirmed');
+							break;
+						case 'Destination Reconciled':
+							j$().toastmessage('showSuccessToast','Shipping has been reconciled by receiver');
+							break;
+						case 'In Dispute':
+							j$().toastmessage('showSuccessToast','Shipping has been put in dispute');
+							break;
+					}
+					
+					// reload this page
+					setTimeout(function() {  
+						window.location.reload();
+					}, 3000)
+				}
+			);	
 		});
 								
 		// full screen switch
@@ -555,56 +595,59 @@
 			</table>
 		{% endif %}
 		</div>
-		
-		<div class="quick-pane" id="sec-payment">
-		<h4>Payments</h4>
-		<!-- seller only view -->
-		{% if cart.terminal_seller==me.key %}
-			{% if cart.payout_slips %}
-				<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
-				<caption class="table-caption">Pay For This Deal</caption>
-				<thead>
-					<tr><td>Transaction Created On</td>
-						<td>Amount</td>
-						<td>Recorded By</td>
-					</tr>
-				</thead>
-				<tbody>		
-				{% for s in cart.payout_slips %}
-					<tr><td>{{ s.get().created_time }}</td>
-						<td>{{ s.get().amount }}</td>
-						<td>{{ s.get().last_modified_by.get().nickname }}</td>
-					</tr>
-				{% endfor %}
-				</tbody>
-				</table>
-			{% endif %}
-		{% endif %}
 
-		<!-- doc only view -->		
-		{% if cart.broker==me.key %}
-			{% if cart.payin_slips %}
-				<table class="table-row-border" style="width:49%;">
-				<caption class="table-caption">Earn From This Deal</caption>
-				<thead>
-					<tr><td>Transaction Created On</td>
-						<td>Amount</td>
-						<td>Recorded By</td>
-					</tr>
-				</thead>
-				<tbody>		
-				{% for s in cart.payin_slips %}
-					<tr><td>{{ s.get().created_time }}</td>
-						<td>{{ s.get().amount }}</td>
-						<td>{{ s.get().last_modified_by.get().nickname }}</td>
-					</tr>
-				{% endfor %}
-				</tbody>
-				</table>
+		{% if cart.payout_slips|count>0 or cart.payin_slips|count>0 %}
+					
+			<div class="quick-pane" id="sec-payment">
+			<h4>Payments</h4>
+			<!-- seller only view -->
+			{% if cart.terminal_seller==me.key %}
+				{% if cart.payout_slips %}
+					<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
+					<caption class="table-caption">Pay For This Deal</caption>
+					<thead>
+						<tr><td>Transaction Created On</td>
+							<td>Amount</td>
+							<td>Recorded By</td>
+						</tr>
+					</thead>
+					<tbody>		
+					{% for s in cart.payout_slips %}
+						<tr><td>{{ s.get().created_time }}</td>
+							<td>{{ s.get().amount }}</td>
+							<td>{{ s.get().last_modified_by.get().nickname }}</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+					</table>
+				{% endif %}
 			{% endif %}
-		{% endif %}
-		</div>
 	
+			<!-- doc only view -->		
+			{% if cart.broker==me.key %}
+				{% if cart.payin_slips %}
+					<table class="table-row-border" style="width:49%;">
+					<caption class="table-caption">Earn From This Deal</caption>
+					<thead>
+						<tr><td>Transaction Created On</td>
+							<td>Amount</td>
+							<td>Recorded By</td>
+						</tr>
+					</thead>
+					<tbody>		
+					{% for s in cart.payin_slips %}
+						<tr><td>{{ s.get().created_time }}</td>
+							<td>{{ s.get().amount }}</td>
+							<td>{{ s.get().last_modified_by.get().nickname }}</td>
+						</tr>
+					{% endfor %}
+					</tbody>
+					</table>
+				{% endif %}
+			{% endif %}
+			</div>
+		{%endif %}
+				
 		{% else %}
 			<h4>Your cart is empty. <a href="/buyorder/browse">Go shopping</a>!</h4>
 	
@@ -614,8 +657,7 @@
 		Sorry, you do not have access this cart. Why not <a href="/buyorder/browse">Go Shopping</a>!
 	{% endif %}
 	
-	<!-- super only view -->
-	{% if cart.broker==me.key and auditing%}
+	{% if auditing%}
 	<div class="quick-pane">
 		<h4>Audit</h4>
 		<table class="table-row-border">

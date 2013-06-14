@@ -355,7 +355,9 @@ class BuyOrderCart(MyBaseModel):
 		# 
 		# what to dispute?
 		# 1. seller says it's shipped, but broker doesn't see it in tracking
-		return (self.shipping_status=='In Route'  and self.broker==user_key) 
+		# 2. buyer confirmed delivery, but unsatisfied during reconciliation, like finding a broken packge
+		return (self.shipping_status=='In Route'  and self.broker==user_key) or (self.shipping_status=='Delivery Confirmed' and 
+		self.broker==user_key)
 
 #######################################
 #

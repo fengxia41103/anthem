@@ -362,10 +362,10 @@ class ApproveCart(MyBaseHandler):
 		batch=[]
 		action=self.request.POST['action']
 		if action.lower()=='submit for approval':
-			cart.audit_me(self.me.key,'status',cart.status)
+			cart.audit_me(self.me.key,'Status',cart.status,'In Approval')
 			cart.status='In Approval'
 		elif action.lower()=='approve' and cart.status=='In Approval':
-			cart.audit_me(self.me.key,'status',cart.status)
+			cart.audit_me(self.me.key,'Status',cart.status,'Ready for Processing')
 			cart.status='Ready for Processing'
 			
 			# update buyorder filled qty
@@ -378,7 +378,7 @@ class ApproveCart(MyBaseHandler):
 			# TODO: send email to all parties here
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
-			cart.audit_me(self.me.key,'status',cart.status)
+			cart.audit_me(self.me.key,'Status',cart.status,'Rejected')
 			cart.status='Rejected'
 			# TODO: send email to all parties here
 			
@@ -597,18 +597,36 @@ class ManageBuyOrder(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrder.html')
 		self.response.write(template.render(self.template_values))
 	
-class ShippingCartInRoute(MyBaseHandler):
+class ShippingCartProcess(MyBaseHandler):
 	def post(self,owner_id,cart_id):
 		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
 		assert cart
-
-		if self.request.POST.has_key('shipping-date'):
-			new_date=datetime.datetime.strptime(self.request.POST['shipping-date'],'%Y-%m-%d').date()
+		
+		# by setting up this, I'm allowing shipping-date to be updated
+		# independently from shipping_status
+		# however, on UI, the input is only available when cart can be In Route
+		if self.request.POST.has_key('shipping date'):
+			# update shipping date
+			new_date=datetime.datetime.strptime(self.request.POST['shipping date'],'%Y-%m-%d').date()
 			cart.audit_me(self.me.key,'Shipping Date',cart.shipping_date,new_date)
 			cart.shipping_date=new_date
-		cart.shipping_status='In Route'
+		
+		cart.audit_me(self.me.key,'Shipping Status',cart.shipping_status,self.request.POST['action'])
+		cart.shipping_status=self.request.POST['action']
+		if cart.shipping_status == 'In Dispute':
+			cart.status='Shipment In Dispute'
+			
+			# TODO: create case to dispute this cart
+			
+		elif cart.shipping_status == 'Destination Reconciled':
+			cart.status='Shipment Clean'
+
+			# set buyer reconciled flag
+			# auditing trail will record timestamp
+			cart.audit_me(self.me.key,'Buyer Reconciled',cart.buyer_reconciled,True)
+			cart.buyer_reconciled=True
+			
 		cart.put()	
-		self.response.write('0')
 			
 				
 class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
