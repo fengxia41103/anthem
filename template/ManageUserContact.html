@@ -120,15 +120,19 @@ by upating your Google account.
 	</p>
 	
 	<input type="submit" value="Save" id="btn-save-preference" class="my-button"/>
-	<div>
-		<label class="ss-label">Shpping Preference</label>
-		<br />
-		<textarea class="ss-textarea" value="{{ me.shipping_preference }}" item="shipping-preference"></textarea>
-	</div>
-	<div>	
-		<label class="ss-label">Payment Preference</label>
-		<br />
-		<textarea class="ss-textarea" value="{{ me.payment_preference }}" item="payment-preference"></textarea>
-	</div>
+	
+	<table class="two-col-table main">
+		<tr><td>
+				<label class="ss-label">Shpping Preference</label>
+				<br />
+				<textarea value="{{ me.shipping_preference }}" item="shipping-preference"></textarea>
+			</td>
+			<td>
+				<label class="ss-label">Payment Preference</label>
+				<br />
+				<textarea value="{{ me.payment_preference }}" item="payment-preference"></textarea>
+			</td>
+		</tr>
+	</table>
 </div>
 {% endblock %}

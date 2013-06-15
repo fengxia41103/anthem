@@ -220,7 +220,12 @@ class BuyOrder(MyBaseModel):
 	# if set, this will not show on the browse page, and won't accept fills
 	# however, existing fills are not affected
 	is_closed=ndb.BooleanProperty()
-	
+
+	def can_delete(self):
+		# buyorder can only be deleted if there is openning cart
+		# meaning no user is exposed to this yet
+		return self.filled_qty==0
+			
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference
 	order=ndb.KeyProperty(kind='BuyOrder')

@@ -105,7 +105,7 @@ class MyBaseHandler(webapp2.RequestHandler):
 			my_cart.shipping_cost=0
 			my_cart.put()
 		return my_cart
-							
+
 class EditBuyOrder(MyBaseHandler):
 	def get(self, order_id):
 		order=BuyOrder.get_by_id(int(order_id))
@@ -295,7 +295,7 @@ class BrowseBuyOrder(MyBaseHandler):
 		if len(self.cart.fills):
 			# cart has some fills already, we will enforce
 			# a filter to display only BuyOrders from the same owner
-			# RULE -- unique (intermediate-buyer,terminal-seller) OPEN cart rule
+			# RULE -- unique (broker,terminal-seller) OPEN cart rule
 			owner_key = self.cart.fills[0].order.get().owner
 			queries=queries.filter(BuyOrder.owner==owner_key)
 				

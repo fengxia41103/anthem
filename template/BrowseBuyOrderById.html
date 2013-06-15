@@ -71,8 +71,13 @@
     	</div>
     	<div class="image-house">
     		{% if me.key == order.owner %}
-				<a href="/buyorder/edit/{{ order.key.id() }}/" class="command-link">Edit</a> | 
-				<span class="command-link" itemId="{{ order.key.id() }}" id="btn-delete">Delete</span>
+				<a href="/buyorder/edit/{{ order.key.id() }}/" class="command-link">Edit</a>
+				 
+				{% if order.can_delete() %}
+					| 
+					<span class="command-link" itemId="{{ order.key.id() }}" id="btn-delete">Delete</span>
+				{% endif %}
+				
             {% elif cart.broker %}
             	{% if cart.broker == order.owner %}
             	<div>

@@ -349,7 +349,16 @@ items to give you a starting point for your listing.
 					{% if order %}
 						<textarea class="ss-textarea">{{ order.description }}</textarea>
 					{% else %}
-						<textarea class="ss-textarea"></textarea>
+						<textarea class="ss-textarea">
+						<dl>
+							<dt>物品新旧要求</dt>
+								<dd></dd>
+							<dt>邮寄方式要求</dt>
+							<dt>买卖双方谁承担邮寄损失</dt>
+							<dt>付款方式说明</dt>
+							<dt>其他补充说明</dt>						
+						</dl>
+						</textarea>
 					{% endif %}
 					<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
 				</td>
