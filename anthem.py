@@ -464,12 +464,14 @@ class ReviewCart(MyBaseHandler):
 				# we allow remove fill from cart
 				if action=='remove':
 					new_fills=[f for f in cart.fills if f.order!=matching_key]
+					removing=[f for f in cart.fills if f.order==matching_key][0]
+
+					# update cart with new fills
 					cart.fills=new_fills
 					
 					# update removed buyorder filled qty
-					removing=[f for f in cart.fills if f.order==matching_key]
-					order=removing[0].get()
-					order.filled_qty -= removing[0].qty
+					order=removing.order.get()
+					order.filled_qty -= removing.qty
 					batch.append(order)					
 					
 				# update client price
