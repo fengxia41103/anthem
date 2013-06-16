@@ -27,6 +27,7 @@ input, select
 /* Main layout */
 .header{
 	background-color: #292421;
+	min-height:50px;
 	height:5%;
 	width:100%;
 	color:white;
@@ -1298,19 +1299,29 @@ button[item="submit-for-approval-btn"]:hover{
 
 #portal-footer{
 	padding: 20px 0;
-	background: #8B8989;
+	/*background: #8B8989;*/
+	background:#292421;
 	color: white;
-}
-#portal-footer a{
-	text-decoration: none;
-	color:white;
+	width:100%;
+	position:fixed;
+	bottom:0;
 }
 #portal-footer ul{
-	list-style:none;
 }
-#portal-footer ul li{
-	list-style:none;
-	display:inline;
+
+#portal-footer a{
+	color:white;
+}
+#portal-footer li{
+	list-style-type:none;
+	float:left;
+	padding: 5px 10px;
+	margin-right:40px;
+}
+#portal-footer li:hover{
+	border-radius:10px;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
 }
 #portal-footer ul li:not(:first-child):before{
 	content: " | ";
