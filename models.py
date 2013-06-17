@@ -132,11 +132,11 @@ class Contact(ndb.Model):
 
 	def can_be_nur(self):
 		# if a Nur membership is Active
-		return (self.is_active and any([m.role in ['Nur','Super','Trial'] for m in self.memberships]))
+		return (self.is_active and any([m.role in ['Nur','Super'] for m in self.memberships]))
 
 	def can_be_client(self):
 		# if a Client membership is Active
-		return (self.is_active and any([m.role in ['Client','Super','Trial'] for m in self.memberships]))
+		return (self.is_active and any([m.role in ['Client','Super'] for m in self.memberships]))
 
 #######################################
 #

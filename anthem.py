@@ -727,7 +727,15 @@ class ManageUserMembershipCancel(MyUserBaseHandler):
 		# update Contact
 		self.me.put()
 		self.response.write('0')
-						
+
+class ManageUserMembershipRenew(MyUserBaseHandler):
+	def post(self, role):
+		for m in self.me.memberships:
+			if m.role==role:
+				m.member_pay(1)		
+				break
+		self.me.put()
+		
 class ManageUserMembershipNew(MyUserBaseHandler):
 	def post(self):
 		data=json.loads(self.request.body)
@@ -741,10 +749,9 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 		
 		# create a member request and inactive membership
 		for r in data:
-			role=r['role']
 			start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
 			m=Membership(role=r['role'])
-			m.member_pay(1) # always 1-month free trial
+			m.member_pay(1) # this should be set by PayPal callback
 			self.me.memberships.append(m)
 		self.me.put()
 						

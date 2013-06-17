@@ -27,6 +27,10 @@
 		j$('span[item="membership-start-date"]').html(j$.datepicker.formatDate('yy-mm-dd', d));
 		
 		j$('#show-new-membership').click(function(){
+			j$('select[item="membership-role"]').show();
+			j$('span[item="membership-role"]').hide();
+			j$('#btn-renew-membership').hide();
+			j$('#btn-save-new-membership').show();
 			j$('#div-new-membership').show();
 		});
 		
@@ -67,11 +71,19 @@
 		
 		// renew membership
 		j$('span[item="renew-membership"]').click(function(){
+			j$('select[item="membership-role"]').hide();
+			j$('span[item="membership-role"]').html(j$(this).attr('role')).show();
+			j$('#btn-renew-membership').show();
+			j$('#btn-save-new-membership').hide();
+			j$('#div-new-membership').show();
+		});
+		
+		j$('#btn-renew-membership').click(function(){
 			j$.post(
 				'/user/membership/renew/'+j$(this).attr('role')+'/',
 				function(result){
-					j$().toastmessage('showSuccessToast','Welcome back! Let me get you started.');
-				}
+					j$().toastmessage('showSuccessToast','Thank you for renewing your membership!');
+				}				
 			);
 		});
 			
@@ -148,6 +160,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 			#}
 			
 			<input type="submit" value="Save" id="btn-save-new-membership" class="my-button"/>
+			<input type="submit" value="Renew" id="btn-renew-membership" class="my-button"/>
 				
 			<table class="sf-table two-col-table" id="table-new-membership">
 			<thead><tr><td>Role</td><td>Start Date</td></tr></thead>
@@ -158,6 +171,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 							<option value="{{ role }}">{{ role }}</option>
 						{% endfor %}
 					</select>
+					<span item="membership-role"></span>
 					</td>
 					<td>
 						<span item="membership-start-date"></span>

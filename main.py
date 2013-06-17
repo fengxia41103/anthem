@@ -53,6 +53,7 @@ routes = [
 	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
 	Route('/user/membership/cancel/<role:\w+>/',handler='anthem.ManageUserMembershipCancel',name='user-membership-cancel'),	
+	Route('/user/membership/renew/<role:\w+>/',handler='anthem.ManageUserMembershipRenew',name='user-membership-renew'),	
 	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 	
