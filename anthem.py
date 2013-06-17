@@ -717,6 +717,17 @@ class ManageUserMembership(MyUserBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserMembership.html')
 		self.response.write(template.render(self.template_values))
 
+class ManageUserMembershipCancel(MyUserBaseHandler):
+	def post(self,role):	
+		for m in self.me.memberships:
+			if m.role==role:
+				m.member_cancel()		
+				break
+				
+		# update Contact
+		self.me.put()
+		self.response.write('0')
+						
 class ManageUserMembershipNew(MyUserBaseHandler):
 	def post(self):
 		data=json.loads(self.request.body)
@@ -729,14 +740,13 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 			return
 		
 		# create a member request and inactive membership
-		batch=[]
 		for r in data:
 			role=r['role']
 			start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
 			m=Membership(role=r['role'])
 			m.member_pay(1) # always 1-month free trial
-			me.memberships.append(m)
-			me.put()
+			self.me.memberships.append(m)
+		self.me.put()
 						
 		self.response.write('0')
 		

@@ -1832,6 +1832,11 @@ table.two-col-table select{
 	moz-border-radius:5px;
 	padding: 5px 0 10px 10px;
 }
+table.two-col-table option{
+	background-color:#888;
+	color:white;
+}
+
 table.two-col-table textarea{
 	width:100%;
 	background-color:#888;

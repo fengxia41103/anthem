@@ -15,35 +15,27 @@
 			if ((e.pageY<pos.top) || (e.pageY>(pos.top+height))){
 				out=true;
 			}
-			if (out==true){
+			
+			// NOTE: click on SELECT will not close overlay
+			if (out==true && !j$(e.target).is('select')){
 				j$(this).fadeOut(200);
 			}
 		});
 		
-		j$(document).on('click','span[item="remove"]',function(){
-            var trs=j$(this).parents('table:first').find('tbody tr');
-			
-            if (trs.length>1){
-            	j$(this).parents('tr:first').remove();
-            }else{
-            	j$().toastmessage('showWarningToast','You can not remove this because at least one is required');
-            }
-		});
+		// membership start date always default to today!
+		var d=new Date();
+		j$('span[item="membership-start-date"]').html(j$.datepicker.formatDate('yy-mm-dd', d));
 		
 		j$('#show-new-membership').click(function(){
 			j$('#div-new-membership').show();
 		});
 		
-		j$('#add-new-membership').click(function(){		
-            var tr=j$('#table-new-membership').find('tbody tr:last');
-            j$('#table-new-membership').find('tbody').append(j$(tr).clone());
-		});
-		
+		// this is a manual solution for now before we implement PayPal callback
 		j$('#btn-save-new-membership').click(function(){
 			data=[];
 			j$.each(j$('#table-new-membership tbody tr'),function(index,val){
 				var role=j$(val).find('select[item="membership-role"]').val();
-				var startDate=j$(val).find('input[item="membership-start-date"]').val();
+				var startDate=j$(val).find('span[item="membership-start-date"]').html();
 				data.push({'role':role,'start date':startDate});		
 			});
 			
@@ -59,6 +51,26 @@
 							j$().toastmessage('showSuccessToast','Thank you! Your new membership will be activated as soon as we have processed your request.');
 							break; 
 					}	
+				}
+			);
+		});
+		
+		// cancel membership
+		j$('span[item="cancel-membership"]').click(function(){
+			j$.post(
+				'/user/membership/cancel/'+j$(this).attr('role')+'/',
+				function(result){
+					j$().toastmessage('showSuccessToast','Thank you for using our service. Hope we will see you soon.');
+				}
+			);
+		});
+		
+		// renew membership
+		j$('span[item="renew-membership"]').click(function(){
+			j$.post(
+				'/user/membership/renew/'+j$(this).attr('role')+'/',
+				function(result){
+					j$().toastmessage('showSuccessToast','Welcome back! Let me get you started.');
 				}
 			);
 		});
@@ -112,9 +124,9 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 				<td>
 					{% if m.is_active and m.role=='Trial' %}
 					{% elif m.is_active %}
-						<span class="command-link">Cancel</span>
+						<span class="command-link" role="{{ m.role }}" item="cancel-membership">Cancel</span>
 					{% else %}
-						<span class="command-link">Renew</span>
+						<span class="command-link" role="{{ m.role }}" item="renew-membership">Renew</span>
 					{% endif %}
 				</td>
 			</tr>
@@ -131,16 +143,10 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 		</div>
 	
 		<div>
+			{#
 			<span class="command-link" id="add-new-membership" style="float:right;">Add</span>
-		
-<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-<input type="hidden" name="cmd" value="_s-xclick">
-<input type="hidden" name="hosted_button_id" value="MDHCW45BKX2TJ">
-<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-</form>
-
-
+			#}
+			
 			<input type="submit" value="Save" id="btn-save-new-membership" class="my-button"/>
 				
 			<table class="sf-table two-col-table" id="table-new-membership">
@@ -154,12 +160,21 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 					</select>
 					</td>
 					<td>
-						<input type="date" item="membership-start-date" value=""/>
-						<span class="command-link" item="remove" style="float:right;">Remove</span>
+						<span item="membership-start-date"></span>
 					</td>
 				</tr>
 			</tbody>		
 			</table>
+		</div>
+		
+		<!-- paypal button -->		
+		<div style="float:right;"
+		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+		<input type="hidden" name="cmd" value="_s-xclick">
+		<input type="hidden" name="hosted_button_id" value="MDHCW45BKX2TJ">
+		<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+		<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+		</form>
 		</div>
 	</div>
 </div>

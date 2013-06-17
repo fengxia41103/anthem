@@ -62,14 +62,14 @@ class Membership(ndb.Model):
 		# and the self.last_payment_cover_month will be NEGATIVE!
 		# so we can use this as an indicator for cancellation
 		remaining=relativedelta(datetime.date.today(),self.expiration_date)
-		in_month=remaining.years*12+remainings.months
+		in_month=remaining.years*12+remaining.months
 		refund=self.last_payment_amount*(in_month/self.last_payment_cover_month)
 		
 		# this will set is_active=False, which equals to deactivating this memebership!
 		self.last_payment_cover_month -=in_month
 		self.last_payment_received_date=datetime.date.today()
 		self.payment_to_date-=refund
-		self.expiration_date=datetime.date.today()
+		self.expiration_date=datetime.date.today() - datetime.timedelta(days=1)
 						
 class Billing(ndb.Model):
 	# StructuredProperty within a Contact
