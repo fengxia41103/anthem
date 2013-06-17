@@ -105,7 +105,7 @@
 </div>
 {% endblock %}
 
-<div>
+<div class="wrapper">
 <table id="site-layout">
 <tr>
 	<td class="level-2-navigation" style="display:none;">
@@ -118,28 +118,33 @@
 		{% block main %}{% endblock %}
 		</div>
 	</td>
-</tr></table>
+</tr>
+
+</table>
+<div class="push"></div>
 </div>
- 
+
 {% block footer %}
-<div id="portal-footer">
-	<div style="margin-right:auto;margin-left:auto;width:67%;">
-	<ul>
-		<li>&copy; 2013 All Rights Reservered by the Anthem Market Place<br />
-			Seraifaith Inc.
-		</li>
-		
-		<li>
-			<a href="mailto:anthem.marketplace@gmail.com">Contact Us</a>
-		</li>
-		<li>
-			<a href="">Term of Service</a>
-		
-		</li>
-	</ul>
-	</div>
+<div class="footer">
+<div style="margin-right:auto;margin-left:auto;width:67%;">
+<ul>
+<li>&copy; 2013 All Rights Reservered by the Anthem Market Place<br />
+	Seraifaith Inc.
+</li>
+
+<li>
+	<a href="mailto:anthem.marketplace@gmail.com">Contact Us</a>
+</li>
+<li>
+	<a href="">Term of Service</a>
+
+</li>
+</ul>
+</div>
 </div>
 {% endblock %}
+
+ 
 </body>
 {% endautoescape %}
 

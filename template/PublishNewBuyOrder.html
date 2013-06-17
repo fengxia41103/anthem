@@ -253,6 +253,7 @@
 			j$('#review-product-name').html(j$('#input-product-name').val());    		
     		j$('#review-price').html(j$('#input-price').val());
     		j$('#review-qty').html(j$('#input-qty').val());
+    		
     		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$('#input-price').val());
     		j$('#review-order-total').html(total);
 			
@@ -323,6 +324,7 @@ items to give you a starting point for your listing.
 						<input name="product" type="text" id="input-product-name" value="{{ order.name }}"/>
 					{% else %}
 						<input name="product" type="text" id="input-product-name" placeholder="eg. Apple iPad 64G White"/>
+
 					{% endif %}
 				</td>
 			</tr>
@@ -352,10 +354,7 @@ items to give you a starting point for your listing.
 						<textarea class="ss-textarea">
 						<dl>
 							<dt>物品新旧要求</dt>
-								<dd></dd>
-							<dt>邮寄方式要求</dt>
 							<dt>买卖双方谁承担邮寄损失</dt>
-							<dt>付款方式说明</dt>
 							<dt>其他补充说明</dt>						
 						</dl>
 						</textarea>
@@ -434,25 +433,37 @@ items to give you a starting point for your listing.
 			
 			<table class="table-row-border ariel-table">
 				<tr><td>
-				Product name
+				Product Name
 				</td><td>
 				<span id="review-product-name"></span>
 				</td></tr>
 				
 				<tr><td>
-				Product details
+				Product Details
 				</td><td>
 				<div id="review-product-description" class=""></div>
 				</td></tr>
 				
 				<tr><td>
-				For client
+				Payment Preference
+				</td><td>
+				<div id="review-payment-preference" class=""></div>
+				</td></tr>
+				
+				<tr><td>
+				Shipping Preference
+				</td><td>
+				<div id="review-shipping-preference" class=""></div>
+				</td></tr>
+				
+				<tr><td>
+				For Client
 				</td><td>
 				<span id="review-client-name"></span>
 				</td></tr>
 				
 				<tr><td>
-				Unit price
+				Unit Price
 				</td><td>
 				<span id="review-price"></span>
 				</td></tr>
@@ -464,7 +475,7 @@ items to give you a starting point for your listing.
 				</td></tr>
 				
 				<tr><td>
-				Total amount
+				Total Amount
 				</td><td class="ariel-blue">
 					<apex:outputPanel styleClass="border-top-red">
 					<span id="review-order-total" style="border-bottom: 3px double red;"></span>		

@@ -159,9 +159,10 @@ class PublishNewBuyOrder(MyBaseHandler):
 		qty=int(self.request.POST['qty'])
 		price=float(self.request.POST['price'])
 		image=self.request.POST['url'].strip()
-		
+
 		# manage contact -- who is the client, optional
 		buyer=None
+
 		if client_email: # if not blank
 			b_query=Contact.query(Contact.email==client_email)
 			if b_query.count():
@@ -728,10 +729,15 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 			return
 		
 		# create a member request and inactive membership
+		batch=[]
 		for r in data:
-			member_req=MembershipRequest(user=self.me.key,role=r['role'],start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date())
-			member_req.put()
-			
+			role=r['role']
+			start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
+			m=Membership(role=r['role'])
+			m.member_pay(1) # always 1-month free trial
+			me.memberships.append(m)
+			me.put()
+						
 		self.response.write('0')
 		
 class ManageUserContact(MyBaseHandler):

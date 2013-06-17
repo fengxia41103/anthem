@@ -10,14 +10,6 @@ from myUtil import *
 # User management models
 #
 #######################################
-class MembershipRequest(ndb.Model):
-	# Separate model to capture requests
-	# so we can process these independent from business models
-	user=ndb.KeyProperty(kind='Contact')
-	created_date=ndb.DateProperty(auto_now_add=True)
-	start_date=ndb.DateProperty()
-	role=ndb.StringProperty(choices=MONTHLY_MEMBERSHIP_FEE.keys())
-	
 class Membership(ndb.Model):
 	# StructuredProperty within a Contact
 	created_time=ndb.DateTimeProperty(auto_now_add=True)
