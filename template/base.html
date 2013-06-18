@@ -63,21 +63,20 @@
  	function refreshChannelMessage(html){
  		// as a circular buffer, showing 10
  		// so the oldest gets bumped off the list
- 		var existing=j$('#channel-message').find('div.channel-message');
+ 		var existing=j$('#channel-displayer').find('div.channel-message');
  		
  		if (existing.length>=10){
  			for (var i=0; i<(existing.length-10);i++){
- 				j$(existing[i]).fadeOut(500,function(){
- 					j$(this).remove();
- 				});
+ 				j$(existing[i]).remove();
  			}
  		}
- 		j$('#channel-message').append(html);
+ 		j$('#channel-displayer').append(html);
  	}
  	
 	j$(document).ready(function(){
 		j$('input[type="date"]').datepicker();
 
+		// channel write message
 		j$('input[name="channel-message"]').keypress(function(event) {
     		var keycode = (event.keyCode ? event.keyCode : event.which);
         	if(keycode == '13') {
@@ -102,7 +101,17 @@
             }
         });
                     		
-		j$('#send-channel-message').click(function(){
+        // channel window animation
+		j$('#channel-visible-switch').click(function(){
+			j$('#channel-container').show({
+				'duration':400,
+				'easing':'easeOutSine'
+			});
+			j$(this).hide();
+		});
+		j$('#channel-collapse-switch').click(function(){
+			j$('#channel-container').hide();
+			j$('#channel-visible-switch').fadeIn(400);
 		});
 	});
 	</script>	
@@ -112,40 +121,6 @@
 
 {% autoescape true %}
 <body>
-
-<style>
-
-.channel-message-displayer{
-	width:150px;
-	max-height:500px;
-	background-color:#888;
-	color: white;
-	border-radius: 5px 0 0 5px;
-	-webkit-border-radius: 5px 0 0 5px;
-	-moz-border-radius: 5px 0 0 5px;
-	position:absolute;
-	bottom:100px;
-	right:0;
-}
-
-.channel-message{
-	border-bottom: 1px #ccc dotted;
-	padding:3px;
-}
-.channel-sender{
-	margin-top: 5px;
-	color:orange;
-}
-.channel-sender:after{
-	content:':';
-}
-.channel-message-content{
-	border-left: 1px #ccc solid;
-	margin-left: 1em;
-	padding-left: 3px;
-}
-
-</style>
 
 <script type="text/javascript">
 
@@ -249,18 +224,19 @@
 
 </table>
 
-	<!-- message pane -->
-		<div class="channel-message-displayer" id="channel-message">
-		
-		</div>
-		
-		<div class="channel-message-writer" style="width:100px;">
-			<input class="ss-input" type="text" name="receiver-name" placeholder="@ah.banana.slug"/>
-			<br />
-			<input class="ss-input" type="text" name="channel-message" placeholder=""/>
-		</div>
-		
-		<button id="send-channel-message">Send</button>
+<!-- message pane -->
+<span id="channel-visible-switch">Chat</span>
+<div class="channel-message-container" style="display:none;" id="channel-container">
+	<div class="channel-message-displayer" id="channel-displayer"></div>
+	
+	<div class="channel-message-writer" style="width:100px;" id="channel-writer">
+		<input type="text" name="receiver-name" placeholder="@ah.banana.slug"/>
+		<br />
+		<input type="text" name="channel-message" placeholder=""/>
+	</div>
+	<img src="http://cdn3.iconfinder.com/data/icons/free-blue-button-icons-1/64/Collapse.png" class="channel-collapse-switch" id="channel-collapse-switch"/>
+	
+</div>
 
 <div class="push"></div>
 </div>
@@ -280,6 +256,7 @@
 	<a href="">Term of Service</a>
 
 </li>
+
 </ul>
 </div>
 </div>

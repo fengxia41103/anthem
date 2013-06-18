@@ -880,11 +880,8 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 		# eg. user temp@ff.com --> @temp@ff.com
 		# this is particular true if all users have been registered with Google first
 		receiver_name=self.request.get('receiver')
-		logging.info('1: '+receiver_name)
 		
-		msg=self.request.get('message')		
-		logging.info('2: '+msg)
-		
+		msg=self.request.get('message')				
 		if receiver_name:
 			# strip off the first @
 			g_name=receiver_name[1:]
@@ -892,14 +889,13 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 			# look up receiver Contact by this email address
 			receiver=Contact.query(Contact.nickname==g_name).get()
 			if not receiver:
-				logging.info('3: '+g_name)
+				# we shouldn't be here
 				self.response.write('Receiver contact was not found')
 				return
 			
 			data={'sender_id':sender_id,
 					'sender_name':sender.nickname,
 					'message':msg}
-			logging.info(data)
 			
 			channel.send_message(str(receiver.key.id()), json.dumps(data))
 		
