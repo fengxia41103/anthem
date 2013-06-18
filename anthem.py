@@ -850,40 +850,49 @@ class ReportBuyOrderPopular(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
 		self.response.write(template.render(self.template_values))
 
-class ChannelConnected(MyBaseHandler):
+####################################################
+#
+# Channel controllers
+#
+####################################################
+
+class ChannelConnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
+		logging.info('Channel conntected')
 		logging.info(id+' connected')
 		
-class ChannelDisconnected(MyBaseHandler):
+class ChannelDisconnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
+		logging.info('Channel disconntected')
 		logging.info(id+' disconnected')
 		
-class ChannelRouteMessage(MyBaseHandler):
+class ChannelRouteMessage(webapp2.RequestHandler):
 	def post(self):
-		sender_id=self.request.POST['sender']
-		sender=Contact.get_by_id(sender_id)
+		logging.info('channel route')
+		
+		sender_id=self.request.get('sender')
+		sender=ndb.Key('Contact',sender_id).get()
+		assert sender
 		
 		# this will mimic @tweeter style
 		# eg. user temp@ff.com --> @temp@ff.com
 		# this is particular true if all users have been registered with Google first
-		receiver_name=self.request.POST['receiver']
+		receiver_name=self.request.get('receiver')
+		logging.info('1: '+receiver_name)
 		
-		msg=self.request.POST['message']
+		msg=self.request.get('message')		
+		logging.info('2: '+msg)
 		
 		if receiver_name:
 			# strip off the first @
 			g_name=receiver_name[1:]
 			
-			# just in case we support email other than gmail
-			# we search for '@', if found, we assume this is full email address
-			# if not found, we append '@gmail.com'
-			if '@' not in g_name: g_name+='@gmail.com'
-			
 			# look up receiver Contact by this email address
 			receiver=Contact.query(Contact.nickname==g_name).get()
 			if not receiver:
+				logging.info('3: '+g_name)
 				self.response.write('Receiver contact was not found')
 				return
 			
@@ -891,9 +900,8 @@ class ChannelRouteMessage(MyBaseHandler):
 					'sender_name':sender.nickname,
 					'message':msg}
 			logging.info(data)
-			logging.info(receiver.key.id())
 			
-			channel.send_message(str(receiver.key.id()), 'lsjladjflaj')
+			channel.send_message(str(receiver.key.id()), json.dumps(data))
 		
 		else:
 			logging.info(msg)

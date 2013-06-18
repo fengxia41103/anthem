@@ -9,52 +9,7 @@
 
 	<!-- Channel API, must be the first one! -->
 	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
-</head>
-
-{% autoescape true %}
-<body>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-
-	<script type="text/javascript">
-	// some global initialization
-	var j$=jQuery.noConflict();
-    channel = new goog.appengine.Channel('{{ token }}');
-    socket = channel.open();
-    socket.onopen = onOpened;
-    socket.onmessage = onMessage;
-    socket.onerror = onError;
-    socket.onclose = onClose;
-    
-    /* https://developers.google.com/appengine/docs/python/channel/javascript */
-    function onError(err){
-    	j$().toastmessage('showErrorToast','Error code: '+err.code+'<br /> '+err.description);
-    }
-    
-    function onClose(){
-    	j$().toastmessage('showNoticeToast','Channel closed!');
-    }
-    
-    function onMessage(msg){
-    	console.log('here');
-    	var data=parseJSON(msg.data);
-    	
-    	j$('#channel-message').append(msg.data);
-    }
-    
-    function onOpened(){
-/*    	j$.post(
-    		'/channel/route',
-    		{'sender':{{me.key.id()}},
-    		 'receiver':'',
-    		 'message':'{{ me.nickname }} connected @ {{ me.key.id() }}'
-    		},
-    		function(result){
-    			j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
-    		}
-    	);
-*/    }
-    </script>
-    
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 	<!--LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dot-luv/jquery-ui.min.css" TYPE="text/css" MEDIA=screen-->
 	<LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" TYPE="text/css" MEDIA=screen>
@@ -92,29 +47,145 @@
 	<script type="text/javascript">
 	// some global initialization
 	var j$=jQuery.noConflict();
-
+ 
+ 	function formatChannelMessage(sender_name,message){
+   		var html='';
+    	html+='<div class="channel-message">';
+    	html+='<span class="channel-sender">';
+    	html+=sender_name+'</span>';
+    	html+='<br />';
+    	html+='<div class="channel-message-content">';
+    	html+=message;
+    	html+='</div>';
+    	html+='</div>';
+  		return html;
+ 	}
+ 	function refreshChannelMessage(html){
+ 		// as a circular buffer, showing 10
+ 		// so the oldest gets bumped off the list
+ 		var existing=j$('#channel-message').find('div.channel-message');
+ 		
+ 		if (existing.length>=10){
+ 			for (var i=0; i<(existing.length-10);i++){
+ 				j$(existing[i]).fadeOut(500,function(){
+ 					j$(this).remove();
+ 				});
+ 			}
+ 		}
+ 		j$('#channel-message').append(html);
+ 	}
+ 	
 	j$(document).ready(function(){
 		j$('input[type="date"]').datepicker();
-		
+
+		j$('input[name="channel-message"]').keypress(function(event) {
+    		var keycode = (event.keyCode ? event.keyCode : event.which);
+        	if(keycode == '13') {
+				var receiver_name=j$('input[name="receiver-name"]').val();
+				var message=j$('input[name="channel-message"]').val();
+				var data={'sender':'{{me.key.id()}}',
+					'receiver':receiver_name,
+					'message':message
+					}
+				j$.post(
+					'/channel/route',
+					data,
+					function(result){
+						//j$().toastmessage('showNoticeToast','Sent');
+						var html=formatChannelMessage('me',message);
+    					refreshChannelMessage(html);
+    					
+    					// clear input box
+    					j$('input[name="channel-message"]').val('');
+					}
+				);
+            }
+        });
+                    		
 		j$('#send-channel-message').click(function(){
-			var receiver_name=j$('input[name="receiver-name"]').val();
-			var message=j$('input[name="channel-message"]').val();
-			
-			j$.post(
-				'/channel/route',
-				{'sender':'{{me.key.id()}}',
-				'receiver':receiver_name,
-				'message':message
-				},
-				function(result){
-					j$().toastmessage('showNoticeToast','Sent');
-				}
-			);
 		});
 	});
 	</script>	
 	
 	{% block customJS %}{% endblock %}
+</head>
+
+{% autoescape true %}
+<body>
+
+<style>
+
+.channel-message-displayer{
+	width:150px;
+	max-height:500px;
+	background-color:#888;
+	color: white;
+	border-radius: 5px 0 0 5px;
+	-webkit-border-radius: 5px 0 0 5px;
+	-moz-border-radius: 5px 0 0 5px;
+	position:absolute;
+	bottom:100px;
+	right:0;
+}
+
+.channel-message{
+	border-bottom: 1px #ccc dotted;
+	padding:3px;
+}
+.channel-sender{
+	margin-top: 5px;
+	color:orange;
+}
+.channel-sender:after{
+	content:':';
+}
+.channel-message-content{
+	border-left: 1px #ccc solid;
+	margin-left: 1em;
+	padding-left: 3px;
+}
+
+</style>
+
+<script type="text/javascript">
+
+	// some global initialization
+	var j$=jQuery.noConflict();
+    channel = new goog.appengine.Channel('{{ token }}');
+    socket = channel.open();
+    socket.onopen = onOpened;
+    socket.onmessage = onMessage;
+    socket.onerror = onError;
+    socket.onclose = onClose;
+    
+    /* https://developers.google.com/appengine/docs/python/channel/javascript */
+    function onError(err){
+    	j$().toastmessage('showErrorToast','Error code: '+err.code+'<br /> '+err.description);
+    }
+    
+    function onClose(){
+    	j$().toastmessage('showNoticeToast','Chat closed! Refresh this page and try again.');
+    }
+    
+    function onMessage(msg){
+    	var data=j$.parseJSON(msg.data);
+		var html=formatChannelMessage(data['sender_name'],data['message']);	    	
+    	refreshChannelMessage(html);
+    }
+    
+    function onOpened(){
+    	j$.post(
+    		'/channel/route',
+    		{'sender':'{{me.key.id()}}',
+    		 'receiver':'',
+    		 'message':'{{ me.nickname }} connected @ {{ me.key.id() }}'
+    		},
+    		function(result){
+    			//j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
+    		}
+    	);
+    }
+</script>
 
 {% block header%}
 
@@ -174,24 +245,23 @@
 		{% block main %}{% endblock %}
 		</div>
 	</td>
-	
+</tr>
+
+</table>
+
 	<!-- message pane -->
-	<td>
-		<div class="channel-message quick-pane" id="channel-message">
+		<div class="channel-message-displayer" id="channel-message">
 		
 		</div>
 		
-		<div style="width:100px;">
+		<div class="channel-message-writer" style="width:100px;">
 			<input class="ss-input" type="text" name="receiver-name" placeholder="@ah.banana.slug"/>
 			<br />
 			<input class="ss-input" type="text" name="channel-message" placeholder=""/>
 		</div>
 		
 		<button id="send-channel-message">Send</button>
-	</td>
-</tr>
 
-</table>
 <div class="push"></div>
 </div>
 

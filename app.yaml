@@ -24,4 +24,4 @@ pagespeed:
   - MinifyCss
 
 inbound_services:
-- channel_presence
+  - channel_presence
