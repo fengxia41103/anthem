@@ -9,8 +9,52 @@
 
 	<!-- Channel API, must be the first one! -->
 	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
-			
+</head>
+
+{% autoescape true %}
+<body>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+	<script type="text/javascript">
+	// some global initialization
+	var j$=jQuery.noConflict();
+    channel = new goog.appengine.Channel('{{ token }}');
+    socket = channel.open();
+    socket.onopen = onOpened;
+    socket.onmessage = onMessage;
+    socket.onerror = onError;
+    socket.onclose = onClose;
+    
+    /* https://developers.google.com/appengine/docs/python/channel/javascript */
+    function onError(err){
+    	j$().toastmessage('showErrorToast','Error code: '+err.code+'<br /> '+err.description);
+    }
+    
+    function onClose(){
+    	j$().toastmessage('showNoticeToast','Channel closed!');
+    }
+    
+    function onMessage(msg){
+    	console.log('here');
+    	var data=parseJSON(msg.data);
+    	
+    	j$('#channel-message').append(msg.data);
+    }
+    
+    function onOpened(){
+/*    	j$.post(
+    		'/channel/route',
+    		{'sender':{{me.key.id()}},
+    		 'receiver':'',
+    		 'message':'{{ me.nickname }} connected @ {{ me.key.id() }}'
+    		},
+    		function(result){
+    			j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
+    		}
+    	);
+*/    }
+    </script>
+    
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 	<!--LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dot-luv/jquery-ui.min.css" TYPE="text/css" MEDIA=screen-->
 	<LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" TYPE="text/css" MEDIA=screen>
@@ -46,19 +90,31 @@
 	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
 		
 	<script type="text/javascript">
-	var j$=jQuery.noConflict();
-	
 	// some global initialization
+	var j$=jQuery.noConflict();
+
 	j$(document).ready(function(){
 		j$('input[type="date"]').datepicker();
+		
+		j$('#send-channel-message').click(function(){
+			var receiver_name=j$('input[name="receiver-name"]').val();
+			var message=j$('input[name="channel-message"]').val();
+			
+			j$.post(
+				'/channel/route',
+				{'sender':'{{me.key.id()}}',
+				'receiver':receiver_name,
+				'message':message
+				},
+				function(result){
+					j$().toastmessage('showNoticeToast','Sent');
+				}
+			);
+		});
 	});
 	</script>	
 	
 	{% block customJS %}{% endblock %}
-</head>
-
-{% autoescape true %}
-<body>
 
 {% block header%}
 
@@ -117,6 +173,21 @@
 		<div class="main">
 		{% block main %}{% endblock %}
 		</div>
+	</td>
+	
+	<!-- message pane -->
+	<td>
+		<div class="channel-message quick-pane" id="channel-message">
+		
+		</div>
+		
+		<div style="width:100px;">
+			<input class="ss-input" type="text" name="receiver-name" placeholder="@ah.banana.slug"/>
+			<br />
+			<input class="ss-input" type="text" name="channel-message" placeholder=""/>
+		</div>
+		
+		<button id="send-channel-message">Send</button>
 	</td>
 </tr>
 

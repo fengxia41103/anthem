@@ -22,3 +22,6 @@ libraries:
 pagespeed:
   enabled_rewriters:
   - MinifyCss
+
+inbound_services:
+- channel_presence

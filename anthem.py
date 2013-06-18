@@ -4,7 +4,7 @@ from google.appengine.ext import blobstore
 from google.appengine.api import images
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.blobstore import delete, delete_async
-
+from google.appengine.api import channel
 from webapp2 import uri_for,redirect
 import os
 import urllib
@@ -60,16 +60,20 @@ class MyBaseHandler(webapp2.RequestHandler):
 		webapp2.RequestHandler.__init__(self,request,response) # extend the base class
 		self.template_values={}
 		
+		self.template_values['user']=self.user = users.get_current_user()
 		self.template_values['me']=self.me=self.get_contact()
 		self.template_values['cart']=self.cart=self.get_open_cart()
 		self.template_values['url_login']=users.create_login_url(self.request.url)
 		self.template_values['url_logout']=users.create_logout_url('/')
+		
+		# use Contact id for channel token
+		self.template_values['token']=self.token = channel.create_channel(self.me.key.id())
 
 	def get_contact(self):
 		# manage contact -- who is using my service?
 		# update email and user name
 		# this is to keep Google user account in sync with internal Contact model
-		user = users.get_current_user()
+		user = self.user
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
 			email=user.email(),
 			nickname=user.nickname(),
@@ -845,3 +849,51 @@ class ReportBuyOrderPopular(MyBaseHandler):
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
 		self.response.write(template.render(self.template_values))
+
+class ChannelConnected(MyBaseHandler):
+	def post(self):
+		id=self.request.get('from')
+		logging.info(id+' connected')
+		
+class ChannelDisconnected(MyBaseHandler):
+	def post(self):
+		id=self.request.get('from')
+		logging.info(id+' disconnected')
+		
+class ChannelRouteMessage(MyBaseHandler):
+	def post(self):
+		sender_id=self.request.POST['sender']
+		sender=Contact.get_by_id(sender_id)
+		
+		# this will mimic @tweeter style
+		# eg. user temp@ff.com --> @temp@ff.com
+		# this is particular true if all users have been registered with Google first
+		receiver_name=self.request.POST['receiver']
+		
+		msg=self.request.POST['message']
+		
+		if receiver_name:
+			# strip off the first @
+			g_name=receiver_name[1:]
+			
+			# just in case we support email other than gmail
+			# we search for '@', if found, we assume this is full email address
+			# if not found, we append '@gmail.com'
+			if '@' not in g_name: g_name+='@gmail.com'
+			
+			# look up receiver Contact by this email address
+			receiver=Contact.query(Contact.nickname==g_name).get()
+			if not receiver:
+				self.response.write('Receiver contact was not found')
+				return
+			
+			data={'sender_id':sender_id,
+					'sender_name':sender.nickname,
+					'message':msg}
+			logging.info(data)
+			logging.info(receiver.key.id())
+			
+			channel.send_message(str(receiver.key.id()), 'lsjladjflaj')
+		
+		else:
+			logging.info(msg)

@@ -22,7 +22,6 @@ app_config = {
     
 # Map URLs to handlers
 routes = [
-	Route('/', handler='anthem.MainPage'),  
 	Route('/profile', handler='handlers.ProfileHandler', name='profile'),
 	Route('/logout', handler='handlers.AuthHandler:logout', name='logout'),
 	Route('/auth/<provider>',handler='handlers.AuthHandler:_simple_auth', name='auth_login'),
@@ -60,6 +59,15 @@ routes = [
 	# report controllers
 	Route('/report/myseller/<in_days:\d+>/',handler='anthem.ReportMySeller',name='report-myseller'),	
 	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	
+
+	# channel controller
+	Route('/_ah/channel/connected/',handler='anthem.ChannelConnected',name='channel-connected'),
+	Route('/_ah/channel/disconnected/',handler='anthem.ChannelDisconnected',name='channel-disconnected'),
+	Route('/channel/route',handler='anthem.ChannelRouteMessage',name='channel-route-message'),	
+
+	# if everything falls out
+	Route('/', handler='anthem.MainPage'),  
+	
 ]
 
 app = WSGIApplication(routes, config=app_config, debug=True)
