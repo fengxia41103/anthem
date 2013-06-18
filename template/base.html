@@ -63,14 +63,24 @@
  	function refreshChannelMessage(html){
  		// as a circular buffer, showing 10
  		// so the oldest gets bumped off the list
+ 		
+ 		var buffer=10;
  		var existing=j$('#channel-displayer').find('div.channel-message');
  		
- 		if (existing.length>=10){
- 			for (var i=0; i<(existing.length-10);i++){
+ 		if (existing.length>=buffer){
+ 			for (var i=0; i<(existing.length-buffer);i++){
  				j$(existing[i]).remove();
  			}
  		}
  		j$('#channel-displayer').append(html);
+ 		var height=j$('#channel-displayer').outerHeight();
+		
+		// value "450" is the CSS height of this div#channel-displayer! 		
+ 		if (parseInt(height)>=450){
+ 			j$('#channel-displayer').addClass('y-scroll');
+ 		}else{
+ 			j$('#channel-displayer').removeClass('y-scroll'); 		
+ 		}
  	}
  	
 	j$(document).ready(function(){
@@ -82,22 +92,36 @@
         	if(keycode == '13') {
 				var receiver_name=j$('input[name="receiver-name"]').val();
 				var message=j$('input[name="channel-message"]').val();
-				var data={'sender':'{{me.key.id()}}',
-					'receiver':receiver_name,
-					'message':message
-					}
-				j$.post(
-					'/channel/route',
-					data,
-					function(result){
-						//j$().toastmessage('showNoticeToast','Sent');
-						var html=formatChannelMessage('me',message);
-    					refreshChannelMessage(html);
-    					
-    					// clear input box
-    					j$('input[name="channel-message"]').val('');
-					}
-				);
+				if (receiver_name=='@me'){
+					// talking to yourself?
+					// why even bother going through the server?									
+					j$().toastmessage('showWarningToast','Now you get me worried. Why are you talking to yourself?');
+					var html=formatChannelMessage('me',message);
+    				refreshChannelMessage(html);
+    				
+    				// clear input box
+    				j$('input[name="channel-message"]').val('');
+				}else{
+					var data={'sender':'{{me.key.id()}}',
+						'receiver':receiver_name,
+						'message':message
+						}
+					j$.post(
+						'/channel/route',
+						data,
+						function(result){
+							//j$().toastmessage('showNoticeToast','Sent');
+							var html=formatChannelMessage('me',message);
+    						refreshChannelMessage(html);
+    						
+    						// clear input box
+    						j$('input[name="channel-message"]').val('');
+						}
+					);
+				}
+            }else{
+        		var count=j$(this).val().length;
+        		j$('#channel-message-character-count').html(count);
             }
         });
                     		
@@ -112,6 +136,12 @@
 		j$('#channel-collapse-switch').click(function(){
 			j$('#channel-container').hide();
 			j$('#channel-visible-switch').fadeIn(400);
+		});
+		
+		// click on channel messag will populate sender input
+		j$(document).on('click','div.channel-message',function(){
+			var sender=j$(this).find('span.channel-sender:first').html();
+			j$('input[name="receiver-name"]').val('@'+sender);
 		});
 	});
 	</script>	
@@ -234,6 +264,7 @@
 		<br />
 		<input type="text" name="channel-message" placeholder=""/>
 	</div>
+	<span id="channel-message-character-count"></span>/140
 	<img src="http://cdn3.iconfinder.com/data/icons/free-blue-button-icons-1/64/Collapse.png" class="channel-collapse-switch" id="channel-collapse-switch"/>
 	
 </div>
