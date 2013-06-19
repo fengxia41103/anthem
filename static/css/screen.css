@@ -2032,7 +2032,7 @@ div.chart-filters input {
 }
 .channel-message-writer input{
 	background: white;;
-	color:#888;
+	color: #2492c4;
 	width:250px;
 	height:30px;
 	border:none;
@@ -2041,7 +2041,6 @@ div.chart-filters input {
 }
 .channel-message-writer input:last-child{
 	border-bottom:1px #2492c4 solid;
-	color: #2492c4;
 }
 .channel-message-displayer{
 	max-height:450px;
