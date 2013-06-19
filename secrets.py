@@ -58,3 +58,6 @@ MONTHLY_MEMBERSHIP_FEE={'Nur':20,'Doc':10,'Client':10,'Super':100,'Trial':0}
 
 # Shipping methods
 SHIPPING_METHOD=['UPS','FedEx','DHL','USPS','Other']
+
+# Chat lease in minutes
+CHAT_LEASE_IN_MINUTE=480

@@ -7,6 +7,14 @@ from myUtil import *
 
 #######################################
 #
+# Dummy ancestor
+#
+#######################################
+class DummyAncestor(ndb.Model):
+	name=ndb.IntegerProperty(default=1)
+
+#######################################
+#
 # User management models
 #
 #######################################
@@ -382,3 +390,31 @@ class MyAudit(ndb.Model):
 	# new value
 	new_value=ndb.GenericProperty()
 
+#######################################
+#
+# Channel models
+#
+#######################################
+class MyChannelToken(ndb.Model):
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
+		
+	# chat client is sending nickname, so we look up by nickname
+	contact_nickname=ndb.StringProperty(required=True)
+	token=ndb.StringProperty(required=True)
+	channel_id=ndb.StringProperty(required=True)
+	
+	# this value is set once the client is connected through onOpen event
+	is_connected=ndb.BooleanProperty(default=False)
+	
+	# age since inception, in seconds
+	# this is a precaution if socket onClose does not fire, in which case
+	# server will never know the channel has been closed on the client side
+	# so we will sweep this record for any age > 2 hours and delete them
+	# 2-hour is the default channel lease
+	# on client side, once the lease is up, client has to refresh page to get
+	# a new token instead of using the same channel token, thus setting age threshold
+	# to 2-hour is sufficient 
+	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
+	is_expired=ndb.ComputedProperty(lambda self: int(self.age)>7200)
+	
+	

@@ -2,6 +2,7 @@ import babel.dates
 import urllib
 from dateutil.relativedelta import relativedelta
 import datetime
+import string,random
 
 CAT={
 	'ipad':['electronic','computer','gadget','personal device','portable computer'],
@@ -49,3 +50,5 @@ def format_datetime(value, format='medium'):
 		format="EE dd.MM.y HH:mm"
 	return babel.dates.format_datetime(value, format)
 
+def id_generator(size=12, chars=string.ascii_uppercase + string.digits):
+	return ''.join(random.choice(chars) for x in range(size))

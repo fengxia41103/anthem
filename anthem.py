@@ -58,17 +58,13 @@ class MainPage(webapp2.RequestHandler):
 class MyBaseHandler(webapp2.RequestHandler):
 	def __init__(self, request=None, response=None):
 		webapp2.RequestHandler.__init__(self,request,response) # extend the base class
-		self.template_values={}
-		
+		self.template_values={}		
 		self.template_values['user']=self.user = users.get_current_user()
 		self.template_values['me']=self.me=self.get_contact()
 		self.template_values['cart']=self.cart=self.get_open_cart()
 		self.template_values['url_login']=users.create_login_url(self.request.url)
 		self.template_values['url_logout']=users.create_logout_url('/')
 		
-		# use Contact id for channel token
-		self.template_values['token']=self.token = channel.create_channel(self.me.key.id())
-
 	def get_contact(self):
 		# manage contact -- who is using my service?
 		# update email and user name
@@ -859,45 +855,63 @@ class ReportBuyOrderPopular(MyBaseHandler):
 class ChannelConnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
-		logging.info('Channel conntected')
-		logging.info(id+' connected')
+		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
+		assert channel_token	
+		
+		channel_token.is_connected=True
+		channel_token.put()
 		
 class ChannelDisconnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
-		logging.info('Channel disconntected')
-		logging.info(id+' disconnected')
+		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
+		assert channel_token	
 		
+		channel_token.key.delete_async()
+
+		
+class ChannelToken(webapp2.RequestHandler):
+	def post(self):
+		# randomize token
+		name=self.request.get('name')
+		user_id=self.request.get('user_id')
+		random_id=user_id+id_generator()
+		random_token = channel.create_channel(random_id,CHAT_LEASE_IN_MINUTE)
+
+		channel_token=MyChannelToken(parent=ndb.Key(DummyAncestor,'ChannelAncestor'))
+		channel_token.populate(
+			created_time=datetime.datetime.today(),
+			contact_nickname=name,
+			token=random_token,
+			channel_id=random_id
+		)
+		channel_token.put()
+		self.response.write(json.dumps({'token':random_token,'channel_id':random_id}))	
+
 class ChannelRouteMessage(webapp2.RequestHandler):
 	def post(self):
-		logging.info('channel route')
-		
-		sender_id=self.request.get('sender')
-		sender=ndb.Key('Contact',sender_id).get()
-		assert sender
+		sender_name=self.request.get('sender')
 		
 		# this will mimic @tweeter style
 		# eg. user temp@ff.com --> @temp@ff.com
 		# this is particular true if all users have been registered with Google first
 		receiver_name=self.request.get('receiver')
 		
-		msg=self.request.get('message')				
-		if receiver_name:
-			# strip off the first @
-			g_name=receiver_name[1:]
-			
-			# look up receiver Contact by this email address
-			receiver=Contact.query(Contact.nickname==g_name).get()
-			if not receiver:
-				# we shouldn't be here
-				self.response.write('Receiver contact was not found')
-				return
-			
-			data={'sender_id':sender_id,
-					'sender_name':sender.nickname,
-					'message':msg}
-			
-			channel.send_message(str(receiver.key.id()), json.dumps(data))
+		# strip off first '@'
+		receiver_name=receiver_name[1:]
 		
-		else:
-			logging.info(msg)
+		# look kup live channel this client has
+		# this is to handle client openning up multiple pages
+		# each page has a random channel
+		receiver_channels=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(ndb.AND(MyChannelToken.contact_nickname==receiver_name,MyChannelToken.is_connected==True))
+		assert receiver_channels
+		
+		# iterate through all live channels this receiver
+		# is listenning to, and send the message
+		msg=self.request.get('message')				
+		data={'sender_name':sender_name,
+				'message':msg}
+		for c in receiver_channels:
+			# NOTE: send_message uses channel_id, not TOKEN!!
+			channel.send_message(c.channel_id, json.dumps(data))
+			

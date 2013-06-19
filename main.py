@@ -63,6 +63,7 @@ routes = [
 	# channel controller
 	Route('/_ah/channel/connected/',handler='anthem.ChannelConnected',name='channel-connected'),
 	Route('/_ah/channel/disconnected/',handler='anthem.ChannelDisconnected',name='channel-disconnected'),
+	Route('/channel/token',handler='anthem.ChannelToken',name='channel-token'),	
 	Route('/channel/route',handler='anthem.ChannelRouteMessage',name='channel-route-message'),	
 
 	# if everything falls out

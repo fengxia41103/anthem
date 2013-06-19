@@ -103,7 +103,10 @@
     				// clear input box
     				j$('input[name="channel-message"]').val('');
 				}else{
-					var data={'sender':'{{me.key.id()}}',
+					// Chat only cares about names, not IDs
+					// since we maintain channel token on the server side
+					// we can look up by contact name
+					var data={'sender':'{{ me.nickname }}',
 						'receiver':receiver_name,
 						'message':message
 						}
@@ -153,18 +156,15 @@
 {% autoescape true %}
 <body>
 
-<script type="text/javascript">
-
-	// some global initialization
-	var j$=jQuery.noConflict();
-    channel = new goog.appengine.Channel('{{ token }}');
-    socket = channel.open();
-    socket.onopen = onOpened;
-    socket.onmessage = onMessage;
-    socket.onerror = onError;
-    socket.onclose = onClose;
-    
+<script type="text/javascript">    
     /* https://developers.google.com/appengine/docs/python/channel/javascript */
+    var token;
+    var channel_id;
+    
+    // MUST ACCALAIM THESE GLOBAL VARIABLES!
+    var channel;
+    var socket;
+    
     function onError(err){
     	j$().toastmessage('showErrorToast','Error code: '+err.code+'<br /> '+err.description);
     }
@@ -180,17 +180,37 @@
     }
     
     function onOpened(){
+    	j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
+    }
+	function leaseChannel(){
+		// channel has default duration of 2 hours
+		// so define a function to handle renew
+		// token will be randomized on the server side
+			
     	j$.post(
-    		'/channel/route',
-    		{'sender':'{{me.key.id()}}',
-    		 'receiver':'',
-    		 'message':'{{ me.nickname }} connected @ {{ me.key.id() }}'
+    		'/channel/token',
+    		{'name':'{{ me.nickname }}',
+    		 'user_id':'{{ me.key.id() }}'
     		},
     		function(result){
-    			//j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
+    			var data=j$.parseJSON(result);
+    			token=data['token'];
+				channel_id=data['channel_id'];
+				    			
+				// some global initialization
+	    		channel = new goog.appengine.Channel(data['token'].trim());
+	    		socket = channel.open();
+	    		socket.onopen = onOpened;
+	    		socket.onmessage = onMessage;
+ 	   			socket.onerror = onError;
+	    		socket.onclose = onClose;
     		}
     	);
-    }
+	}
+	    
+    j$(document).ready(function(){
+    	leaseChannel();
+    });
 </script>
 
 {% block header%}
