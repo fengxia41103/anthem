@@ -3,19 +3,23 @@
 
 {% block level_2_navigation %}
 	<ul>
+		{% if me.can_be_nur() %}
 		<li id="nav-report-buyorder">
 			<a href="/report/buyorder/7/" title="Your sales reports">
 				<img src="http://cdn2.iconfinder.com/data/icons/picons-essentials/71/discount-128.png"/>
 			</a>
 			<h3>My Sales</h3>
 		</li>
-
+		{% endif %}
+		
+		{% if me.can_be_doc() %}
 		<li id="nav-report-myseller">
 			<a href="/report/myseller/7/" title="Your seller reports">
 				<img src="http://cdn2.iconfinder.com/data/icons/picons-essentials/71/discount-128.png"/>
 			</a>
 			<h3>My Sellers</h3>
 		</li>
+		{% endif %}
 
 	</ul>
 {% endblock %}

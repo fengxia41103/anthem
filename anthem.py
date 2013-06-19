@@ -71,7 +71,6 @@ class MyBaseHandler(webapp2.RequestHandler):
 		# this is to keep Google user account in sync with internal Contact model
 		user = self.user
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
-			parent=ndb.Key('DummyAncestor','ContactRoot'),
 			email=user.email(),
 			nickname=user.nickname(),
 			cash=0)
@@ -228,12 +227,17 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 class BrowseBuyOrderByOwner(MyBaseHandler):
 	def get(self,owner_id):
 		# limit to 10
-		orders=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
-				
+		if not self.me.can_be_nur() and self.me.can_be_doc():
+			owner_id=self.me.key.id()
+			
+		orders=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id),BuyOrder.unfilled_qty>0,BuyOrder.is_closed==False))
+		
+		self.template_values['owner']=owner_id
+
 		# group them by "queues"
 		queue={}
 		for o in orders:
-			self.template_values['owner']=o.owner
+			logging.info(o)
 			
 			# category as dict key
 			for q in o.queues:
@@ -260,15 +264,6 @@ class BrowseBuyOrderById(MyBaseHandler):
 
 class BrowseBuyOrder(MyBaseHandler):
 	def get(self):
-		if not self.me.can_be_nur():
-			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
-			self.response.write(template.render(self.template_values))
-			return		
-	
-		# load buyorder browse page
-		self.template_values['url']=uri_for('buyorder-browse')		
-
-		# filters
 		# filter by owner id
 		try:
 			owner_id=self.request.GET['owner']
@@ -283,34 +278,37 @@ class BrowseBuyOrder(MyBaseHandler):
 			nd=None
 
 		# list of buyorder to browse
-		if owner_id:
-			queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
-		elif nd:
-			# this will be OR tag test, meaning that any tag is in the ND list will be True
-			queries=BuyOrder.query(BuyOrder.tags.IN(tokenize(nd)))
-		else:
-			queries=BuyOrder.query()
-		
-		# my open cart
-		self.template_values['url_cart_review']=uri_for('cart-review')
-		
-		if len(self.cart.fills):
-			# cart has some fills already, we will enforce
-			# a filter to display only BuyOrders from the same owner
-			# RULE -- unique (broker,terminal-seller) OPEN cart rule
-			owner_key = self.cart.fills[0].order.get().owner
-			queries=queries.filter(BuyOrder.owner==owner_key)
+		queries=None
+		if not self.me.can_be_nur() and self.me.can_be_doc():
+			# I'm a doc but not a nur, only viewable my own posts!
+			queries=BuyOrder.query(BuyOrder.owner==self.me.key)
+		elif self.me.can_be_nur():
+			if len(self.cart.fills):
+				# cart has some fills already, we will enforce
+				# a filter to display only BuyOrders from the same owner
+				# RULE -- unique (broker,terminal-seller) OPEN cart rule
+				# thus, overriding owner_id parameter
+				owner_id = self.cart.fills[0].order.get().owner.id()
+
+			if owner_id and nd:
+				# owner_id and nd filters
+				queries=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.tags.IN(tokenize(nd))))
+			elif owner_id:
+				# owner_id filter only
+				queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
+			elif nd:
+				# this will be OR tag test, meaning that any tag is in the ND list will be True
+				queries=BuyOrder.query(BuyOrder.tags.IN(tokenize(nd)))
+			else:
+				# no filter
+				queries=BuyOrder.query(ndb.AND(BuyOrder.unfilled_qty>0, BuyOrder.is_closed==False))
 				
 		# compose data structure for template
-		data=[]
-		for q in queries.order(-BuyOrder.created_time).fetch(100):
-			d={}
-			d['order']=q
-
-			# place holder
-			d['filled by me']=0
-			data.append(d)		
-		self.template_values['buyorders']=data		
+		if queries:
+			queries=queries.fetch(100)
+			logging.info(queries)
+			
+		self.template_values['buyorders']=queries
 		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(self.template_values))
@@ -869,7 +867,7 @@ class ChannelDisconnected(webapp2.RequestHandler):
 		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
 		assert channel_token	
 		
-		channel_token.key.delete_async()
+		channel_token.key.delete()
 
 		
 class ChannelToken(webapp2.RequestHandler):

@@ -64,7 +64,7 @@
 	    });
 	    
 	    j$('#input-pinterest-filter').on('change',function(){
-    		j$('a#link-pinterest-filter').attr('href','{{url}}?nd='+j$(this).val());
+    		j$('a#link-pinterest-filter').attr('href','/buyorder/browse?nd='+j$(this).val());
 	    });
 	    
 	    // hot tag search, clicking on a tag will fire a search
@@ -195,7 +195,9 @@
 	<input type="text" placeholder="Enter a keyword" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>
 	<a id="link-pinterest-filter" class="ariel-button" style="float:right;">Search</a>
     </div>
-    
+
+	<!- only NUR has shopping cart! -->
+	{% if me.can_be_nur() %}    
     <div id="shopping-cart-container">
 	<div id="shopping-cart" class="alpha60" style="display:none;">
 		<span id="shopping-cart-collapse-switch" title="Click to collapse cart view" style="text-decoration:underline;float:right;">
@@ -211,7 +213,7 @@
 			</span>
 			
 			<br />
-			<a href="{{ url_cart_review }}?cart={{ cart.key.id() }}">
+			<a href="/cart/review?cart={{ cart.key.id() }}">
 				<span class="my-button" style="background-color:#000;">Review order</spa>
 			</a>
 		</div>
@@ -221,38 +223,41 @@
 	<span id="cart-item-count">{{ cart.fills|length }}</span>
 	</div>    
 	</div>
+	{% endif %}
 	
+	{% if buyorders %}
     <div id="unfilledOrderPinterest" class="css3-columns">
     {% for b in buyorders %}
-		<div class="pin shadow" itemId="{{ b.order.key.id() }}" ownerId="{{ b.order.owner.id() }}" postTime="{{ b.order.created_time }}">
+		<div class="pin shadow" itemId="{{ b.key.id() }}" ownerId="{{ b.owner.id() }}" postTime="{{ b.created_time }}">
 		
-		<img src="{{ b.order.image }}" />
+		<img src="{{ b.image }}" />
 
-		<h3 item="title">{{ b.order.name|title }}</h3>			
+		<h3 item="title">{{ b.name }}</h3>			
 		
-		<div item="subtitle" style="">{{ b.order.description }}</div>			
+		<div item="subtitle" style="">{{ b.description }}</div>			
 		<div style="text-align:right;">
-			<span item="shipping-preference">{{ b.order.owner.get().shipping_preference }}</span>
+			<span item="shipping-preference">{{ b.owner.get().shipping_preference }}</span>
 			<br />
-			<span item="payment-preference">{{ b.order.owner.get().payment_preference }}</span>
+			<span item="payment-preference">{{ b.owner.get().payment_preference }}</span>
 		</div>
  
 		<p>
-			<span class="product-stat" item="qty">{{ b.order.unfilled_qty }}</span>
+			<span class="product-stat" item="qty">{{ b.unfilled_qty }}</span>
 			<span class="product-stat-label">qty</span>
 			
-			<span class="product-stat" item="price">{{ b.order.price }}</span>
+			<span class="product-stat" item="price">{{ b.price }}</span>
 			<span class="product-stat-label">$</span>
 			
 			<span class="product-stat-by-me shadow">
-				<a href="/buyorder/owner/{{b.order.owner.id()}}/">
-					<p class="product-list-item-footer-user" name="{{b.order.owner.get().nickname}}">{{ b.order.owner.get().nickname }}</p>
+				<a href="/buyorder/owner/{{b.owner.id()}}/">
+					<p class="product-list-item-footer-user" name="{{b.owner.get().nickname}}">{{ b.owner.get().nickname }}</p>
 				</a>
 			</span>
 		</p>
 		</div>
     {% endfor %}
     </div>
+    {% endif %}
     
     <div class="overlay" style="display:none;">
     	<div class="pin-in-focus box-shadow">
@@ -260,6 +265,8 @@
     			<h1 id="infocus-title">ah.banana.slug@gmail.com</h1>
     			<h4>Posted On <span id="infocus-subtitle"></span><h4>
     		</div>
+    		
+    		{% if me.can_be_nur() %}
     		<div class="image-house">
 				<div class="pin-command-center" style="display:none;">
   				<input item="qty" type="number" id="infocus-qty" value="1" /> x $
@@ -271,6 +278,8 @@
     			<img id="infocus-image" src="" />
     			</a>
     		</div>
+    		{% endif %}
+    		
     		<div class="border-bottom">
     			<h4 id="infocus-product-name">iPad</h4>
     			<div id="infocus-product-description">sljdfldsj</div>

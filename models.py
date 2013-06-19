@@ -140,7 +140,7 @@ class Contact(ndb.Model):
 
 	def can_be_nur(self):
 		# if a Nur membership is Active
-		return (self.is_active and any([r in ['Trial','Nur','Doc','Super'] for r in self.active_roles]))
+		return (self.is_active and any([r in ['Nur','Super'] for r in self.active_roles]))
 
 	def can_be_client(self):
 		# if a Client membership is Active
@@ -219,7 +219,7 @@ class BuyOrder(MyBaseModel):
 	# closed
 	# if set, this will not show on the browse page, and won't accept fills
 	# however, existing fills are not affected
-	is_closed=ndb.BooleanProperty()
+	is_closed=ndb.BooleanProperty(default=False)
 
 	def can_delete(self):
 		# buyorder can only be deleted if there is openning cart

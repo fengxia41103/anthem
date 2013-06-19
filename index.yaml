@@ -12,6 +12,17 @@ indexes:
 
 - kind: BuyOrder
   properties:
+  - name: is_closed
+  - name: owner
+  - name: unfilled_qty
+
+- kind: BuyOrder
+  properties:
+  - name: is_closed
+  - name: unfilled_qty
+
+- kind: BuyOrder
+  properties:
   - name: owner
   - name: created_time
     direction: desc

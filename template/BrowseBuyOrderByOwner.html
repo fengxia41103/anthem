@@ -32,7 +32,7 @@
 	<div class="list-of-category-section">
 		{% for item in orders|dictsort %}
 			<h3>
-				<a href="/buyorder/owner/{{ owner.id() }}/{{ item[0] }}/">
+				<a href="/buyorder/owner/{{ owner }}/{{ item[0] }}/">
 					{{ item[0]|title }}
 				</a>
 			</h3>
@@ -50,8 +50,17 @@
 		{% endfor %}
 	
 	{% else %}
+		{{ owner }}
 		<!-- placeholder: import a NO-FOUND page -->
+		{% if me.can_be_doc() and me.key.id()==owner %}
+		<!-- you are a doc ad this is your own page -->
 		You have an empty inventory. Want to <a href="/buyorder/new" class="bubble-button">add</a> a product?
+		{% elif me.can_be_nur() %}
+		<!-- you are nur and wants to view a doc's listing -->
+		Nothing is found. Let's <a href="/buyorder/browse">Go and Browse</a>.
+		{% else %}
+		Hum?
+		{% endif %}
 	{% endif %}
 	</div>
 	
