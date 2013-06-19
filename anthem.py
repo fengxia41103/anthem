@@ -71,6 +71,7 @@ class MyBaseHandler(webapp2.RequestHandler):
 		# this is to keep Google user account in sync with internal Contact model
 		user = self.user
 		me=Contact.get_or_insert(ndb.Key('Contact',user.user_id()).string_id(),
+			parent=ndb.Key('DummyAncestor','ContactRoot'),
 			email=user.email(),
 			nickname=user.nickname(),
 			cash=0)
@@ -732,7 +733,8 @@ class ManageUserMembershipRenew(MyUserBaseHandler):
 	def post(self, role):
 		for m in self.me.memberships:
 			if m.role==role:
-				m.member_pay(1)		
+				logging.info('here')
+				m.member_pay(1)
 				break
 		self.me.put()
 		

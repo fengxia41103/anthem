@@ -73,7 +73,7 @@
 		j$('span[item="renew-membership"]').click(function(){
 			j$('select[item="membership-role"]').hide();
 			j$('span[item="membership-role"]').html(j$(this).attr('role')).show();
-			j$('#btn-renew-membership').show();
+			j$('#btn-renew-membership').attr('role',j$(this).attr('role')).show();
 			j$('#btn-save-new-membership').hide();
 			j$('#div-new-membership').show();
 		});
@@ -126,7 +126,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 					{% if m.is_active %}
 						Active
 					{% else %}
-						Expirated
+						Expired
 					{% endif %}
 				</td>
 				<td>{{ m.monthly_payment }}</td>

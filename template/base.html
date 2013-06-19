@@ -177,10 +177,12 @@
     	var data=j$.parseJSON(msg.data);
 		var html=formatChannelMessage(data['sender_name'],data['message']);	    	
     	refreshChannelMessage(html);
+    	
+    	j$('img#you-have-chat').show();
     }
     
     function onOpened(){
-    	j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
+    	//j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
     }
 	function leaseChannel(){
 		// channel has default duration of 2 hours
@@ -232,16 +234,21 @@
 				Transaction
 				</a>
 			</li>			
+			
+			{% if me.can_be_doc() %}
 			<li id="nav-banking">
 				<a href="/cart/banking">
 				Banking
 				</a>
-			</li>			
+			</li>
+			{% endif %}
+						
 			<li id="nav-user">
 				<a href="/user/contact">
 				My Profile
 				</a>
 			</li>
+			
 			<li id="nav-report">
 				<!-- default to report last 7 days -->
 				<a href="/report/buyorder/7/">
@@ -250,8 +257,12 @@
 			</li>
 		</ul>
 		</span>
+	</td><td>
+			<img id="you-have-chat" src="http://cdn5.iconfinder.com/data/icons/ie_Birdies/128/twitter_bird_5.png" style="display:none;" title="You have got chat!"/>
 	</td><td style="text-align:right;">
-		<span>{{ me.nickname }}</span>
+		<span>
+			{{ me.nickname }}
+		</span>
 		<a href="{{ url_logout }}" class="bubble-button" style="margin-right:50px;">Logout</a>
 	</td></tr>
 	</table>
