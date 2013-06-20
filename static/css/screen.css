@@ -2086,3 +2086,11 @@ blockquote{
 .computed{
 	font-style: italic;
 }
+
+.home-marketing-section{
+	width:100%;
+}
+.home-marketing-section img{
+	width:100%;
+	min-width:100%;
+}

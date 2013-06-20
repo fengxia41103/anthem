@@ -110,7 +110,9 @@ class MainPage(MyBaseHandler):
 			self.response.write(template.render(self.template_values))
 			return		
 
-		self.redirect('/buyorder/browse')
+		#self.redirect('/buyorder/browse')
+		template = JINJA_ENVIRONMENT.get_template('/template/Home.html')
+		self.response.write(template.render(self.template_values))
 
 
 class EditBuyOrder(MyBaseHandler):
