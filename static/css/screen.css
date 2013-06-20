@@ -2066,6 +2066,7 @@ div.chart-filters input {
 	padding-left: 3px;
 }
 
-.status-tray img{
+.status-tray img,span{
 	height:30px;
+	vertical-align:middle;
 }

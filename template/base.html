@@ -259,6 +259,10 @@
 		</span>
 	</td><td>
 		<div class="status-tray">
+		{% if me.is_trial() %}
+		<span>新手上路</span>
+		{% endif %}
+		
 		{% if me.can_be_doc() %}
 		<img src="http://cdn4.iconfinder.com/data/icons/SIGMA/medical/png/128/doctor.png" height="30px" title="Doc role"/>
 		{% endif %}

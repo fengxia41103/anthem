@@ -133,6 +133,10 @@ class Contact(ndb.Model):
 	# this is how much money this user has on his account
 	# payout will withdraw from this; payin will deposit to this
 	cash=ndb.FloatProperty(default=0)
+
+	def is_trial(self):
+		# if it's in Trial period
+		return (self.is_active and any([r in ['Trial'] for r in self.active_roles]))
 		
 	def can_be_doc(self):
 		# if a Doc membership is Active

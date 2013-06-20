@@ -810,6 +810,9 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 			m=Membership(role=r['role'])
 			m.member_pay(1) # this should be set by PayPal callback
 			self.me.memberships.append(m)
+			
+		# when adding new membership, remove Trial!
+		self.me.memberships=[m for m in self.me.memberships if m.role !='Trial']
 		self.me.put()
 						
 		self.response.write('0')
