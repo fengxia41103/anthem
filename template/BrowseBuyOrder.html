@@ -3,11 +3,13 @@
 {% block customJS %}
 <script type="text/javascript">
     j$(document).ready(function(){
+    	{% if me.can_be_nur() %}
 		j$(document).on('mouseenter','.pin-in-focus .image-house',function(){
 			j$(this).find('.pin-command-center').fadeIn({duration:400});
 		}).on('mouseleave','.pin-in-focus .image-house',function(){
 			j$(this).find('.pin-command-center').fadeOut({duration:400});
 		});
+		{% endif %}
 		
 	    // fill order shortcut    
     	j$(document).on('click','button[item="btn-new-buyorder-fill"]',function(){
@@ -266,19 +268,18 @@
     			<h4>Posted On <span id="infocus-subtitle"></span><h4>
     		</div>
     		
-    		{% if me.can_be_nur() %}
     		<div class="image-house">
-				<div class="pin-command-center" style="display:none;">
-  				<input item="qty" type="number" id="infocus-qty" value="1" /> x $
-  				<input item="price" type="number" id="infocus-price" value="" />
-				<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Add to cart</button>
-				</div> 
-				
+    			{% if me.can_be_nur() %}
+					<div class="pin-command-center" style="display:none;">
+  					<input item="qty" type="number" id="infocus-qty" value="1" /> x $
+  					<input item="price" type="number" id="infocus-price" value="" />
+					<button item="btn-new-buyorder-fill" itemId="" class="ariel-button">Add to cart</button>
+					</div> 
+    			{% endif %}
     			<a id="infocus-image-link" href="">
     			<img id="infocus-image" src="" />
     			</a>
     		</div>
-    		{% endif %}
     		
     		<div class="border-bottom">
     			<h4 id="infocus-product-name">iPad</h4>

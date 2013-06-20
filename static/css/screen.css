@@ -288,13 +288,14 @@ ul.tags li a{
 }
   
 .css3-columns{
-	-moz-column-count: 3;
+	width:100%;
+	-moz-column-count: 4;
   	-moz-column-gap: 10px;
   	-moz-column-fill: auto;
-  	-webkit-column-count: 3;
+  	-webkit-column-count: 4;
   	-webkit-column-gap: 10px;
   	-webkit-column-fill: auto;
-  	column-count: 3;
+  	column-count: 4;
   	column-gap: 10px;
   	column-fill: auto;
 }
@@ -369,7 +370,7 @@ ul.tags li a{
 	display:block;
 	padding: 5px;
 	position:absolute;
-	top:200px;
+	top:170px;
 	z-index:2000;
 	text-align:right;
 }
@@ -2026,16 +2027,17 @@ div.chart-filters input {
 	border-radius: 5px 0 0 5px;
 	-webkit-border-radius: 5px 0 0 5px;
 	-moz-border-radius: 5px 0 0 5px;
-	position:absolute;
+	position:fixed;
 	bottom:60px; /* same as footer height */
 	right:0;
 }
 .channel-message-writer input{
-	background: white;;
+	background: white;
 	color: #2492c4;
 	width:250px;
 	height:30px;
 	border:none;
+	border-left:5px #2492c4 solid;
 	border-top:1px #2492c4 solid;
 	padding-left:5px;
 }
