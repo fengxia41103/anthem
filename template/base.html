@@ -230,9 +230,15 @@
 				</a>
 			</li>
 			<li id="nav-cart">
+				{% if me.can_be_doc() %}
+				<a href="/cart/manage/buyer">
+				Transaction
+				</a>
+				{% else%}
 				<a href="/cart/manage/seller">
 				Transaction
 				</a>
+				{% endif %}
 			</li>			
 			
 			{% if me.can_be_doc() %}
