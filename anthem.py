@@ -228,16 +228,8 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 			queries=queries.filter(BuyOrder.owner==owner_key)
 				
 		# compose data structure for template
-		data=[]
-		for q in queries.order(-BuyOrder.created_time).fetch(100):
-			d={}
-			d['order']=q
-
-			# place holder
-			d['filled by me']=0
-			data.append(d)		
-		self.template_values['buyorders']=data		
-		
+		self.template_values['buyorders']=queries.order(-BuyOrder.created_time).fetch(100)
+				
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(self.template_values))
 
@@ -248,26 +240,27 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 			self.response.write(template.render(self.template_values))
 			return		
 
-		# limit to 10
+		# if you are doc, you are forced to view your own posts ONLY
+		# regardless what your request is
 		if not self.me.can_be_nur() and self.me.can_be_doc():
 			owner_id=self.me.key.id()
-			
+		elif not self.me.can_be_nur(): owner_id=None
+		self.template_values['owner']=owner_id
+		
+		# only live and non-0 posts
 		orders=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id),BuyOrder.unfilled_qty>0,BuyOrder.is_closed==False))
 		
-		self.template_values['owner']=owner_id
-
 		# group them by "queues"
 		queue={}
 		for o in orders:
-			logging.info(o)
-			
 			# category as dict key
 			for q in o.queues:
 				if queue.has_key(q): queue[q].append(o)
 				else: queue[q]=[o]
 		
 		self.template_values['cats']=sorted(queue.keys())
-		self.template_values['orders']=queue
+		#self.template_values['orders']=queue
+		self.template_values['orders']=orders
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrderByOwner.html')
 		self.response.write(template.render(self.template_values))
 		
@@ -338,10 +331,8 @@ class BrowseBuyOrder(MyBaseHandler):
 		# compose data structure for template
 		if queries:
 			queries=queries.fetch(100)
-			logging.info(queries)
 			
-		self.template_values['buyorders']=queries
-		
+		self.template_values['buyorders']=queries		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(self.template_values))
 		

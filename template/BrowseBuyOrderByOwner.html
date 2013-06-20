@@ -15,42 +15,71 @@
 
 {% block main %}
 	{% if owner %}
-    <h1 class="ariel-blue">Inventory</h1>
-   	<p class="ariel-blue ariel-p">
-    Browse orders grouped by categories and click on a category tag below as navigation shortcut.
-    </p>
-
-
-	<div class="border-bottom">
-		<ul class="tags">
-		{% for k in cats %}
-			<li><a href="#tab-{{ loop.index }}">{{ k|title }}</a></li>			
-		{% endfor %}
-		<ul>
-	</div>
+	<!-- if we get to this page with a owner_id, we want to browse this owner's posts -->
+    	<h1 class="ariel-blue">Inventory</h1>
+   		<p class="ariel-blue ariel-p">
+    	Manage your active products and view their categories that system has assigned to them.
+    	</p>
 	
-	<div class="list-of-category-section">
-		{% for item in orders|dictsort %}
-			<h3>
-				<a href="/buyorder/owner/{{ owner }}/{{ item[0] }}/">
-					{{ item[0]|title }}
-				</a>
-			</h3>
-			<div id="tab-{{ loop.index }}" class="list-of-photo">
-				<ul>
-				{% for v in item[1] %}
-				<li>
-				<a href="/buyorder/browse/{{ v.key.id() }}/">
-					<img src="{{ v['image'] }}"/>
-				</a>
-				</li>
-				{% endfor %}
-				</ul>
-			</div>
-		{% endfor %}
 	
+		<div class="border-bottom">
+		<blockquote>
+			<h3>Experimental!</h3>
+		System automatically identifies categories that fit your products. In this effort it will also make
+		some foolish choices and make you laugh. We are continuing to improve its intelligence. Please bear with us
+		at this time.
+		</blockquote>
+			<ul class="tags">
+			{% for k in cats %}
+				<li><a href="/buyorder/owner/{{ owner }}/{{ k }}/">{{ k|title }}</a></li>			
+			{% endfor %}
+			<ul>
+		</div>
+		
+		<table class="table-row-border">
+		<thead>
+			<tr><td>
+				</td><td>Product
+				</td><td>Price
+				</td><td>WTB Qty
+				</td><td class="computed">Filled Qty
+				</td><td class="computed">Approved Qty
+				</td><td class="computed">Unfilled Qty
+				</td><td class="computed">Category
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% for o in orders %}
+			<tr><td>
+					<a href="/buyorder/browse/{{ o.key.id() }}/">
+						<img src="{{ o.image }}" style="height:50px;padding:10px;max-width:50px;" class="box-shadow"/>
+					</a>
+				</td><td>
+					{{ o.name }}
+				</td><td>
+					{{ o.price }}
+				</td><td>
+					{{ o.qty }}
+				</td><td class="computed">
+					{{ o.filled_qty }}
+				</td><td class="computed">
+					{{ o.approved_qty }}
+				</td><td class="computed">
+					{{ o.unfilled_qty }}
+				</td><td class="computed">
+					<ul class="tags">
+					{% for q in o.queues|sort %}
+						<li><a href="/buyorder/owner/{{ owner }}/{{ q }}/">{{ q|title }}</a></li>			
+					{% endfor %}
+					</ul>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		</table>
+		
 	{% else %}
-		{{ owner }}
 		<!-- placeholder: import a NO-FOUND page -->
 		{% if me.can_be_doc() and me.key.id()==owner %}
 		<!-- you are a doc ad this is your own page -->
@@ -61,7 +90,5 @@
 		{% else %}
 		Hum?
 		{% endif %}
-	{% endif %}
-	</div>
-	
+	{% endif %}	
 {% endblock %}

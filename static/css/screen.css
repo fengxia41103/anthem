@@ -2070,3 +2070,17 @@ div.chart-filters input {
 	height:30px;
 	vertical-align:middle;
 }
+
+blockquote{
+	background-color: #e5ecf9;
+	border-left:5px #36c solid;
+	padding: 20px 10px;
+	max-width:100%;
+	width:80%;
+	display:block;
+	margin: 10px auto;
+}
+
+.computed{
+	font-style: italic;
+}
