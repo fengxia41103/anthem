@@ -421,7 +421,15 @@ class ApproveCart(MyBaseHandler):
 			cart.audit_me(self.me.key,'Status',cart.status,'Rejected')
 			cart.status='Rejected'
 			# TODO: send email to all parties here
+		
+		elif action.lower()=='seller reconcile':
+			cart.audit_me(self.me.key,'Seller Reconciled', cart.seller_reconciled,'True')
+			cart.seller_reconciled=True
 			
+			# if buyer reconciled also, close this cart
+			if (cart.buyer_reconciled):
+				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
+				cart.status='Closed'
 		else:
 			# TODO: give an assert now
 			raise Exception('Unknown path')
@@ -557,7 +565,7 @@ class BankingCart(MyBaseHandler):
 		self.template_values['sellers']=set([c.terminal_seller for c in payable_carts])
 		
 		# receivable carts
-		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0)
+		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0).fetch()
 		if self.request.GET.has_key('client'):
 			client_id=self.request.GET['client']
 			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
@@ -580,7 +588,7 @@ class BankingCart(MyBaseHandler):
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
 				assert cart
-				slip=AccountingSlip()
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'AccountingRoot'))
 				slip.amount=float(d['amount'])
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_seller
@@ -591,7 +599,7 @@ class BankingCart(MyBaseHandler):
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
 				assert cart
-				slip=AccountingSlip()
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'AccountingRoot'))
 				slip.amount=float(d['amount'])
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_buyer
@@ -698,6 +706,11 @@ class ShippingCartProcess(MyBaseHandler):
 			# auditing trail will record timestamp
 			cart.audit_me(self.me.key,'Buyer Reconciled',cart.buyer_reconciled,True)
 			cart.buyer_reconciled=True
+
+			# if buyer reconciled also, close this cart
+			if (cart.seller_reconciled):
+				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
+				cart.status='Closed'
 			
 		cart.put()	
 			
@@ -877,19 +890,6 @@ class ReportMySeller(MyBaseHandler):
 			payable[s]=sum([a.payable for a in sellers[s]])
 		self.template_values['payable']=payable
 		self.template_values['payable_chart_data']=json.dumps([(s.get().nickname, payable[s]) for s in payable])
-		
-		# this represents profit
-		# Q: who is your profitable supplier by sheer number?
-		profit={}
-		for s in sellers:
-			profit[s]=sum([a.profit for a in sellers[s]])
-		self.template_values['profit']=profit
-		
-		# this represents profit margin
-		margin={}
-		for s in sellers:
-			margin[s]=profit[s]/payable[s]
-		self.template_values['margin']=margin
 		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportMySeller.html')

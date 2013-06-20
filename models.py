@@ -368,6 +368,12 @@ class BuyOrderCart(MyBaseModel):
 		return (self.shipping_status=='In Route'  and self.broker==user_key) or (self.shipping_status=='Delivery Confirmed' and 
 		self.broker==user_key)
 
+	def can_seller_reconcile(self,user_key):
+		# when payout>0, so seller get some kind of payment
+		# this assumes that a cart can keep both broker and seller happy even
+		# when its payable_balance>0
+		return float(self.payout)>0
+		
 #######################################
 #
 # Communication models

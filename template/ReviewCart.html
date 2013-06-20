@@ -322,6 +322,11 @@
 				<button class="my-button" item="approval-process">Reject</button>
 			{% endif %}
 			
+			<!-- seller reconcile -->
+			{% if cart.can_seller_reconcile(me.key) %}
+				<button class="my-button" item="approval-process">Seller Reconcile</button>			
+			{% endif %}
+
 			<!-- shipping status buttons -->
 			{% if cart.can_enter_shipping_in_route(me.key) %}
 			<div class="my-button">
@@ -341,6 +346,7 @@
 			{% if cart.can_dispute_shipping(me.key) %}
 				<button class="my-button" item="shipping-process">Dispute Shipping</button>			
 			{% endif %}
+
 		</div>
 	
 		{#

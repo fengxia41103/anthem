@@ -186,6 +186,11 @@
 							<button class="my-button" item="approval-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Reject</button>
 						{% endif %}
 			
+						{% if c.can_seller_reconcile(me.key) %}
+							<button class="my-button" item="approval-process" ownerId="{{ c.owner.id() }}" cartId="{{ c.key.id() }}">Seller 
+							Reconcile</button>
+						{% endif %}
+
 						<!-- shipping status buttons -->
 						{% if c.can_enter_shipping_in_route(me.key) %}
 						<div class="my-button">
