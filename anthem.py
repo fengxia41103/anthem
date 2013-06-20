@@ -51,9 +51,6 @@ class ComplexEncoder(json.JSONEncoder):
 		else:
 			return json.JSONEncoder.default(self, obj)
 
-class MainPage(webapp2.RequestHandler):
-	def get(self):
-		self.redirect('/buyorder/browse')
 		
 class MyBaseHandler(webapp2.RequestHandler):
 	def __init__(self, request=None, response=None):
@@ -106,8 +103,23 @@ class MyBaseHandler(webapp2.RequestHandler):
 			my_cart.put()
 		return my_cart
 
+class MainPage(MyBaseHandler):
+	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
+		self.redirect('/buyorder/browse')
+
+
 class EditBuyOrder(MyBaseHandler):
 	def get(self, order_id):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		order=BuyOrder.get_by_id(int(order_id))
 		assert order
 		
@@ -136,7 +148,7 @@ class DeleteBuyOrder(MyBaseHandler):
 				
 class PublishNewBuyOrder(MyBaseHandler):
 	def get(self):
-		if not self.me.can_be_doc():
+		if not self.me.is_active:
 			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
 			self.response.write(template.render(self.template_values))
 			return		
@@ -193,6 +205,11 @@ class PublishNewBuyOrder(MyBaseHandler):
 
 class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 	def get(self,owner_id,cat):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# load buyorder browse page
 		self.template_values['url']=uri_for('buyorder-browse')		
 
@@ -226,6 +243,11 @@ class BrowseBuyOrderByOwnerByCat(MyBaseHandler):
 
 class BrowseBuyOrderByOwner(MyBaseHandler):
 	def get(self,owner_id):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# limit to 10
 		if not self.me.can_be_nur() and self.me.can_be_doc():
 			owner_id=self.me.key.id()
@@ -256,6 +278,11 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 
 class BrowseBuyOrderById(MyBaseHandler):
 	def get(self,order_id):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		self.template_values['order']=order=BuyOrder.get_by_id(int(order_id))
 		assert order
 		
@@ -264,6 +291,11 @@ class BrowseBuyOrderById(MyBaseHandler):
 
 class BrowseBuyOrder(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# filter by owner id
 		try:
 			owner_id=self.request.GET['owner']
@@ -409,6 +441,11 @@ class ApproveCart(MyBaseHandler):
 		
 class ReviewCart(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		cart_id=int(self.request.GET['cart'])
 
 		try:
@@ -510,6 +547,11 @@ class ReviewCart(MyBaseHandler):
 
 class BankingCart(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		self.template_values['url']=uri_for('cart-banking')
 		self.template_values['review_url']=uri_for('cart-review')		
 		
@@ -581,6 +623,11 @@ class BankingCart(MyBaseHandler):
 	
 class ManageCartAsSeller(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		self.template_values['review_url']=uri_for('cart-review')		
 		
 		# get all carts that belong to this user
@@ -593,6 +640,11 @@ class ManageCartAsSeller(MyBaseHandler):
 
 class ManageCartAsBuyer(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		self.template_values['review_url']=uri_for('cart-review')		
 		
 		# get all carts that this user is the broker
@@ -606,6 +658,11 @@ class ManageCartAsBuyer(MyBaseHandler):
 		
 class ManageBuyOrder(MyBaseHandler):
 	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# get all carts that belong to this user
 		self.template_values['carts']=carts=BuyOrderCart.query(ancestor=self.me.key)
 		self.template_values['review_url']=uri_for('cart-review')		
@@ -777,6 +834,11 @@ class ManageUserContactPreference(MyBaseHandler):
 
 class ReportMyBuyer(MyBaseHandler):
 	def get(self,in_days):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# we are to determine who is a good buyer from me
 
 		# get all my carts
@@ -790,6 +852,11 @@ class ReportMyBuyer(MyBaseHandler):
 		
 class ReportMySeller(MyBaseHandler):
 	def get(self, in_days):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		self.template_values['filter_days']=in_days
 		self.template_values['end']=datetime.date.today()
 		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
@@ -836,6 +903,11 @@ class ReportMySeller(MyBaseHandler):
 		
 class ReportBuyOrderPopular(MyBaseHandler):
 	def get(self,in_days):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
 		# get all carts that I'm the seller
 		# including open ones within the last [in_days]
 		# NOTE: must use float for comparison, otherwise it will return None
