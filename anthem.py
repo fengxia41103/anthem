@@ -555,11 +555,10 @@ class BankingCart(MyBaseHandler):
 
 		self.template_values['url']=uri_for('cart-banking')
 		self.template_values['review_url']=uri_for('cart-review')		
-		
-		carts=BuyOrderCart.query(ancestor=self.me.key)
-		
+	
 		# payable carts
-		payable_carts=carts.filter(BuyOrderCart.payable_balance>0)
+		payable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0.0))
+		
 		if self.request.GET.has_key('seller'):
 			seller_id=self.request.GET['seller']
 			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
@@ -567,7 +566,7 @@ class BankingCart(MyBaseHandler):
 		self.template_values['sellers']=set([c.terminal_seller for c in payable_carts])
 		
 		# receivable carts
-		receivable_carts=carts.filter(BuyOrderCart.receivable_balance>0).fetch()
+		receivable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0.0))
 		if self.request.GET.has_key('client'):
 			client_id=self.request.GET['client']
 			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
@@ -583,42 +582,65 @@ class BankingCart(MyBaseHandler):
 		
 		action=self.request.POST['action']
 		data=json.loads(self.request.POST['data'])
-		payable_bundle=[]
-		receivable_bundle=[]
-		
+		cart_bundle=[]
+				
 		if action=='payable':
-			for d in data:
-				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
-				assert cart
-				slip=AccountingSlip()
-				slip.amount=float(d['amount'])
+			# convert ID to INT, because datastore uses INT, not string!
+			payables={int(d['id']):d['amount'] for d in data}			
+			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0))
+			cart_dict={c.key.id():(c,payables[c.key.id()]) for c in carts if c.key.id() in payables}
+			
+			for id,val in cart_dict.iteritems():
+				cart,pay=val
+				
+				# create a slip
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
+				slip.amount=float(pay)
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_seller
 				slip.money_flow='a-2-b'
 				slip.last_modified_by=self.me.key
-				payable_bundle.append(slip)
+				slip.owner=self.me.key
+				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
+				
+				# create an audit record
+				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
+				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
+				
+				# add to cart
+				# cart only wants the slip key!
+				cart.payout_slips.append(slip.key)
+				cart_bundle.append(cart)
 		elif action=='receivable':
-			for d in data:
-				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
-				assert cart
-				slip=AccountingSlip()
-				slip.amount=float(d['amount'])
+			# convert ID to INT, because datastore uses INT, not string!
+			receivables={int(d['id']):d['amount'] for d in data}			
+			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0))
+			cart_dict={c.key.id():(c,receivables[c.key.id()]) for c in carts if (c.key.id() in receivables)}
+			
+			for id,val in cart_dict.iteritems():
+				cart,pay=val
+				# create a slip
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
+				slip.amount=float(pay)
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_buyer
 				slip.money_flow='b-2-a'
 				slip.last_modified_by=self.me.key
-				receivable_bundle.append(slip)
+				slip.owner=self.me.key
+				slip.put() # has to save here!
+
+				# create an audit record
+				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
+				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
+						
+				# add to cart
+				# cart only wants the slip key!
+				cart.payin_slips.append(slip.key)
+				cart_bundle.append(cart)
 		
 		# write slips to data store		
-		ndb.put_multi(payable_bundle+receivable_bundle)
-		
-		# update cart
-		for slip in payable_bundle:
-			cart.payout_slips.append(slip.key)
-		for slip in receivable_bundle:
-			cart.payin_slips.append(slip.key)
-		cart.put()
-		
+		ndb.put_multi(cart_bundle)
+
 		# return status
 		self.response.write(status)
 	

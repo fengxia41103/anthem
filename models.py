@@ -157,7 +157,7 @@ class Contact(ndb.Model):
 #######################################
 class MyBaseModel(ndb.Model):
 	# two time stamps
-	created_time=ndb.DateTimeProperty(auto_now_add=True)
+	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
 	# object owner tied to a Contact
@@ -184,10 +184,9 @@ class MyBaseModel(ndb.Model):
 class AccountingSlip(MyBaseModel):
 	party_a=ndb.KeyProperty(kind='Contact')
 	party_b=ndb.KeyProperty(kind='Contact')
-	#method=ndb.KeyProperty(kind='Billing') # transaction method
 	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a']) # who gives the amount to whom
 	amount=ndb.FloatProperty()
-
+	
 
 #######################################
 #

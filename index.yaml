@@ -48,6 +48,16 @@ indexes:
 - kind: BuyOrderCart
   properties:
   - name: broker
+  - name: payable_balance
+
+- kind: BuyOrderCart
+  properties:
+  - name: broker
+  - name: receivable_balance
+
+- kind: BuyOrderCart
+  properties:
+  - name: broker
   - name: status
 
 - kind: BuyOrderCart

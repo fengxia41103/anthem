@@ -252,7 +252,7 @@ We will tell you profit & loss of each transaction so that you can monitor the h
 				</thead>
 				<tbody>
 				{% for c in payable_carts %}
-				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}">Cart# {{ c.key.id() }}</a></td>
+				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}&owner={{ c.owner.id() }}">Cart# {{ c.key.id() }}</a></td>
 					<td>{{ c.terminal_seller.get().nickname }}</td>
 					<td><span itemId="{{ c.key.id() }}" item="payable-max">{{ c.payable_balance }}</span></td>
 					<td>
@@ -316,7 +316,7 @@ We will tell you profit & loss of each transaction so that you can monitor the h
 				</thead>
 				<tbody>
 				{% for c in receivable_carts %}
-				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}">Cart# {{ c.key.id() }}</a></td>
+				<tr><td><a href="{{ review_url }}?cart={{c.key.id()}}&owner={{ c.owner.id() }}">Cart# {{ c.key.id() }}</a></td>
 					<td>{{ c.terminal_seller.get().nickname }}</td>
 					<td><span itemId="{{ c.key.id() }}" item="receivable-max">{{ c.payable_balance }}</span></td>
 					<td>

@@ -593,7 +593,7 @@
 			<div class="quick-pane" id="sec-payment">
 			<h4>Payments</h4>
 			<!-- seller only view -->
-			{% if cart.terminal_seller==me.key %}
+			{% if cart.terminal_seller==me.key or cart.broker==me.key %}
 				{% if cart.payout_slips %}
 					<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
 					<caption class="table-caption">Pay For This Deal</caption>
