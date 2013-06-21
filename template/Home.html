@@ -1,28 +1,23 @@
-{% extends "/template/base.html" %}
+<!DOCTYPE html>
+<html>
 
-{% block main %}
+<head>
+	<meta charset="utf-8">
+    <title>Anthem Market Place</title>
+	<meta name="author" content="Feng X.">
+	<link rel="stylesheet" type="text/css" href="/static/css/reset-min.css">
+	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
+</head>
+<body>
 	<!-- printers -->
 	<div class="home-marketing-section">
-		<img src="http://www.digitaltrends.com/wp-content/uploads/2011/10/HP_Pro_8500A_Plus.jpg"/>
-	</div>
-
-	<!-- i-product -->
-	<div class="home-marketing-section">
-		<img src="http://cdn.thetechjournal.com/wp-content/uploads/2012/11/apple-products.jpg"/>
-	</div>
-
-	<!-- mileage -->
-	<div class="home-marketing-section">
-		<img src=" 
-		http://clipartist.net/RSS/openclipart.org/2012/May/travel_map-1979px.png
-		"/>
-	</div>
-
-	<!-- gift card, coupons -->
-	<div class="home-marketing-section">
-		<img src=" 
-		http://assisted-living.benchmarkseniorliving.com/wp-content/uploads/2012/10/iStock_000009799796Medium.jpg
-		"/>
+		<div style="width:20%;position:absolute;right:0;font-size:3.0em;color:#888;z-index:99;">
+			<h1>TRADE & BUY</h1>
+			<p>
+			Post Products and Make Deals
+			</p>
+		</div>
+		<img src="/static/img/wrinkled_paper-wallpaper-1920x1080.jpg" style="position:absolute;top:0;"/>
 	</div>
 
 	<!-- cosmetics -->
@@ -31,4 +26,43 @@
 		/static/img/girls_generation-wallpaper-1920x1200.jpg
 		"/>
 	</div>
-{% endblock %}
+
+	<!-- i-product -->
+	<div class="home-marketing-section">
+		<div style="width:60%;position:absolute;left:10%;font-size:2.0em;color:#C88;">
+			<h1>BROWSE & SEARCH</h1>
+			<p>
+			Find Hot Items Quick Easy
+			</p>
+		</div>
+		<img src="http://cdn.thetechjournal.com/wp-content/uploads/2012/11/apple-products.jpg"/>
+	</div>
+
+	<!-- mileage -->
+	<div class="home-marketing-section">
+		<div style="width:50%;position:absolute;left:0;font-size:3.0em;color:#8c8;">
+			<h1>IN CONTROL</h1>
+			<p>
+			Every Step From A To B
+			</p>
+		</div>
+		<img src=" 
+		http://clipartist.net/RSS/openclipart.org/2012/May/travel_map-1979px.png
+		" style="position:absolute;right:0;"/>
+	</div>
+
+	<!-- gift card, coupons -->
+	<div class="home-marketing-section">
+		<div class="home-marketing-text-section" style="width:40%;position:absolute;right:0;font-size:3.0em;color:#1c8;">
+			<h1></h1>
+			<p>
+			
+			</p>
+		</div>
+		<img src=" 
+		http://assisted-living.benchmarkseniorliving.com/wp-content/uploads/2012/10/iStock_000009799796Medium.jpg
+		" style="position:absolute;left:0;"/>
+	</div>
+
+</body>
+</html>

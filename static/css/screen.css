@@ -23,6 +23,9 @@ input, select
    	-moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
 }
+a{
+	color:inherit;
+}
 
 /* Main layout */
 .header{
@@ -2089,8 +2092,20 @@ blockquote{
 
 .home-marketing-section{
 	width:100%;
+	display:block;
+	min-height:700px;
 }
 .home-marketing-section img{
+	max-width:100%;
 	width:100%;
-	min-width:100%;
+}
+
+.home-marketing-text-section{
+	/*background-image: url('/static/img/white-background.png');*/
+	background-color:white;
+	padding: 50px;
+	height:500px;
+	text-align:center;
+	vertical-align:middle;
+	z-index:99;
 }
