@@ -114,12 +114,19 @@
 						'/channel/route',
 						data,
 						function(result){
-							//j$().toastmessage('showNoticeToast','Sent');
-							var html=formatChannelMessage('me',message);
-    						refreshChannelMessage(html);
-    						
-    						// clear input box
-    						j$('input[name="channel-message"]').val('');
+							switch (result){
+								case '-1':
+									j$().toastmessage('showNoticeToast','User is offline. Please try later.');
+									break;
+								default:
+									//j$().toastmessage('showNoticeToast','Sent');
+									var html=formatChannelMessage('me',message);
+    								refreshChannelMessage(html);
+    								
+    								// clear input box
+    								j$('input[name="channel-message"]').val('');
+									break;								
+							}
 						}
 					);
 				}

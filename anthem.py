@@ -590,7 +590,7 @@ class BankingCart(MyBaseHandler):
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
 				assert cart
-				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'AccountingRoot'))
+				slip=AccountingSlip()
 				slip.amount=float(d['amount'])
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_seller
@@ -601,7 +601,7 @@ class BankingCart(MyBaseHandler):
 			for d in data:
 				cart=BuyOrderCart.get_by_id(int(d['id']),parent=self.me.key)
 				assert cart
-				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'AccountingRoot'))
+				slip=AccountingSlip()
 				slip.amount=float(d['amount'])
 				slip.party_a=self.me.key
 				slip.party_b=cart.terminal_buyer
@@ -973,6 +973,10 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 		# each page has a random channel
 		receiver_channels=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(ndb.AND(MyChannelToken.contact_nickname==receiver_name,MyChannelToken.is_connected==True))
 		assert receiver_channels
+		if receiver_channels.count()==0:
+			# receiver has no open channel --> offline
+			self.response.write('-1')
+			return
 		
 		# iterate through all live channels this receiver
 		# is listenning to, and send the message

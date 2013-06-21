@@ -1923,7 +1923,9 @@ table.two-col-table textarea{
 }
 
 div.chart-filters{
-	float:right;
+	height:30px;
+	margin-bottom:10px;
+	width:100%;
 }
 
 div.chart-filters ul{
@@ -1951,7 +1953,6 @@ div.chart-filters li a.selected{
 div.chart-filters li:hover{
 	border-bottom: 2px #4AC948 dotted;
 	cursor:pointer;
-	background-color:black;
 }
 
 

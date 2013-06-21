@@ -37,7 +37,7 @@
                         formatter: function() {
                         	// round to 1st decimal point
                            	// return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
-                            return '<b>'+ this.point.name +'</b><br /> '+ Math.round(this.percentage) +' %';
+                            return '<b>'+ this.point.name +'</b><br /> '+ this.y+' @ '+Math.round(this.percentage) +' %';
                         }
                     }
                 }
@@ -45,7 +45,22 @@
             series: [{
                 type: 'pie',
                 name: 'Deal Share',
-                data: payable_data
+                data: payable_data,
+                point:{
+                	events:{
+                    	select:function(event){
+                    		var selected=this.name;
+							j$.each(j$('div.quick-pane'),function(index,item){
+								var name=j$(item).attr('item');
+								if (name==selected) j$(item).show();
+								else j$(item).hide();
+							});
+                    	},
+                    	unselect:function(event){
+                    		j$('div.quick-pane').show();
+                    	}
+                	}
+                }
             }]
         });
 
@@ -81,6 +96,10 @@ Seller report helps you find out from whom you have been purchasing, and how the
 In addition, you can give your buyers feedbacks and rate them based on your experience.
 </p>
 
+	
+<div>
+	<div id="container" ></div>
+
 <div class="chart-filters">
 <ul>
 	<li>
@@ -112,20 +131,13 @@ In addition, you can give your buyers feedbacks and rate them based on your expe
 </div>
 
 	
-<div>
-		
-	<table width="95%">
-		<tr><td width="60%" valign="top">
-			<div id="container" style=""></div>
-			</td><td width="35%">
-	
 	{% for seller, list in carts|groupby('terminal_seller') %}
-	<div class="quick-pane">
+	<div class="quick-pane" item="{{ seller.get().nickname }}">
 		<h4>
 		{{ seller.get().nickname }}
 		</h4>
 	
-		<table class="two-col-table table-row-border">
+		<table class="table-row-border">
 			<thead>
 				<tr><td></td><td>Deal Size ($)</td><td>Status</td>
 			</thead>
@@ -152,8 +164,6 @@ In addition, you can give your buyers feedbacks and rate them based on your expe
 		</div>
 	</div>
 	{% endfor %}
-		</td></tr>
-	</table>
 	
 </div>
 {% endblock %}
