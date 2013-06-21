@@ -21,6 +21,12 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'])
 
+class MainPage(webapp2.RequestHandler):
+	def get(self):
+		#self.redirect('/buyorder/browse')
+		template = JINJA_ENVIRONMENT.get_template('/template/Home.html')
+		self.response.write(template.render())
+
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
 	def get(self, resource):
 		# resource is actually a blobkey
@@ -102,18 +108,6 @@ class MyBaseHandler(webapp2.RequestHandler):
 			my_cart.shipping_cost=0
 			my_cart.put()
 		return my_cart
-
-class MainPage(MyBaseHandler):
-	def get(self):
-		if not self.me.is_active:
-			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
-			self.response.write(template.render(self.template_values))
-			return		
-
-		#self.redirect('/buyorder/browse')
-		template = JINJA_ENVIRONMENT.get_template('/template/Home.html')
-		self.response.write(template.render(self.template_values))
-
 
 class EditBuyOrder(MyBaseHandler):
 	def get(self, order_id):

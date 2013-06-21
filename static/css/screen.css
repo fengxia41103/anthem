@@ -2110,3 +2110,24 @@ blockquote{
 	vertical-align:middle;
 	z-index:99;
 }
+.get-started-button{
+    font:bold 13px/100% Arial, Helvetica, sans-serif; 	
+	text-decoration:none;
+	width: 100px;
+	padding: 10px;
+	border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-moz-border-radius: 15px;
+	background: #0EBFE9;
+	color: white;
+	text-align:center;
+	margin-top:50px;
+	margin-bottom:0px;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+}
+.get-started-button:hover{
+	cursor:pointer;
+	background:#f0bf00;
+}

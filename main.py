@@ -47,7 +47,6 @@ routes = [
 	Route('/cart/manage/seller', handler='anthem.ManageCartAsSeller',name='cart-manage-as-seller'),  
 	Route('/cart/manage/buyer', handler='anthem.ManageCartAsBuyer',name='cart-manage-as-buyer'),  
 
-
 	# user controllers
 	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
