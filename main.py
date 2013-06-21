@@ -58,7 +58,8 @@ routes = [
 	# report controllers
 	Route('/report/myseller/<in_days:\d+>/',handler='anthem.ReportMySeller',name='report-myseller'),	
 	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	
-
+	Route('/report/myincome/<in_days:\d+>/',handler='anthem.ReportMyIncome',name='report-myincome'),	
+	
 	# channel controller
 	Route('/_ah/channel/connected/',handler='anthem.ChannelConnected',name='channel-connected'),
 	Route('/_ah/channel/disconnected/',handler='anthem.ChannelDisconnected',name='channel-disconnected'),

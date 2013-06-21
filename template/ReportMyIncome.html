@@ -1,0 +1,153 @@
+{% extends "/template/ReportBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		j$('#filter-days').change(function(){
+			var start = new Date(j$(this).val());
+			var end = new Date(); // today
+			var diff = new Date(end - start);
+			
+			if (diff<0){
+				j$().toastmessage('showErrorToast','You can not pick a date in the future. Try again.');
+			}else{		
+				var days = Math.floor(diff/1000/60/60/24);
+				window.location.href='/report/myincome/'+days+'/';
+			}
+		});
+		
+		var data=j$.parseJSON('{{ data }}');
+        j$('#container').highcharts({
+            chart: {
+                type: 'line',
+                marginBottom: 50,
+                marginRight: 100
+
+            },
+            title: {
+                text: 'Account Balance Over Time'
+            },
+            subtitle: {
+            	text: 'From {{ start }} to {{ end }}'
+            },
+            xAxis: {
+                categories: []
+            },
+            yAxis: {
+                title: {
+                    text: 'Account Balance ($)'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: ''
+            },
+            legend: {
+            	enabled:false
+            },
+            series: [{
+                name: 'Account Balance',
+                data: data
+            }]
+        });	
+        	
+		//level 1 navigation
+		j$('#nav-report').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-report-myincome').addClass('level-2-navigation-selected');
+	});
+</script>
+{% endblock %}
+
+{% block main %}
+<h1>Income Report</h1>
+
+<p>
+Your current account balance is: {{ me.cash }}
+</p>
+	
+<div>
+	<div id="container" ></div>
+
+<div class="chart-filters">
+<ul>
+	<li>
+		{% if filter_days=='7' %}
+			<a href="/report/myincome/7/" class="selected">7 Days</a>
+		{% else %}
+			<a href="/report/myincome/7/">7 Days</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='30' %}
+			<a href="/report/myincome/30/" class="selected">Month</a>
+		{% else %}
+			<a href="/report/myincome/30/">Month</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='365' %}
+			<a href="/report/myincome/365/" class="selected">Year</a>
+		{% else %}
+			<a href="/report/myincome/365/">Year</a>
+		{% endif %}
+	</li>
+	<li>
+		<input type="date" id="filter-days" value="" max="today">
+	</li>
+</ul>
+
+</div>
+	<div class="quick-pane">
+		<table class="table-row-border">
+			<thead>
+				<tr><td></td><td>When</td><td>Registered By</td><td>Amount</td></tr>
+			</thead>
+			<tbody>
+				{% for s in slips %}	
+					<tr><td>
+							Slip# {{ s.key.id() }}
+						</td><td>
+							{{ s.created_time }}
+						</td><td>
+							{{ s.owner.get().nickname }}
+						</td><td>
+							{% if s.party_a == me.key %}
+								{% if s.money_flow=='a-2-b' %}
+									<span class="red">({{ s.amount }})</span>
+								{% else %}
+									{{ s.amount }}
+								{% endif %}
+							{% else %}
+								{% if s.money_flow=='a-2-b' %}
+									gain
+								{% else %}
+									<span class="red">({{ s.amount }})</span>
+								{% endif %}
+							{% endif %}
+							
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<div style="text-align:right;margin-top:20px;">
+			Total Gain/Loss Over This Period: 
+			<span class="border-top-red" style="border-bottom: 3px double red;padding-bottom:5px;">
+				{% if ending-beginning > 0 %}
+					{{ ending-beginning }}
+				{% else %}
+					<span style="color:red;">( {{ ending-beginning }} )</span>
+				{% endif %}
+			</span>
+		</div>
+		
+	</div>
+</div>
+{% endblock %}

@@ -129,9 +129,12 @@ class Contact(ndb.Model):
 	# from other site to ours
 	reputation_score=ndb.IntegerProperty(default=0)
 	
-	# banking balance
+	# bank ending balance
 	# this is how much money this user has on his account
 	# payout will withdraw from this; payin will deposit to this
+	# ending - beginning = sum(transactions)
+	# so by getting sum of transactions and know this ending balance,
+	# we can derive beginning balance also.
 	cash=ndb.FloatProperty(default=0)
 
 	def is_trial(self):

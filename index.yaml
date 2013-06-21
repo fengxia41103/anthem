@@ -10,6 +10,19 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: AccountingSlip
+  ancestor: yes
+  properties:
+  - name: party_a
+  - name: age
+
+- kind: AccountingSlip
+  ancestor: yes
+  properties:
+  - name: party_a
+  - name: age
+    direction: desc
+
 - kind: BuyOrder
   properties:
   - name: is_closed

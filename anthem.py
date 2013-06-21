@@ -21,11 +21,25 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
 	extensions=['jinja2.ext.autoescape'])
 
+
+####################################################
+#
+# Static Page Controllers
+#
+####################################################
+
 class MainPage(webapp2.RequestHandler):
 	def get(self):
 		#self.redirect('/buyorder/browse')
 		template = JINJA_ENVIRONMENT.get_template('/template/Home.html')
 		self.response.write(template.render())
+
+		
+####################################################
+#
+# Base Controllers
+#
+####################################################
 
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
 	def get(self, resource):
@@ -57,7 +71,6 @@ class ComplexEncoder(json.JSONEncoder):
 		else:
 			return json.JSONEncoder.default(self, obj)
 
-		
 class MyBaseHandler(webapp2.RequestHandler):
 	def __init__(self, request=None, response=None):
 		webapp2.RequestHandler.__init__(self,request,response) # extend the base class
@@ -108,6 +121,12 @@ class MyBaseHandler(webapp2.RequestHandler):
 			my_cart.shipping_cost=0
 			my_cart.put()
 		return my_cart
+
+####################################################
+#
+# BuyOrder Controllers
+#
+####################################################
 
 class EditBuyOrder(MyBaseHandler):
 	def get(self, order_id):
@@ -386,6 +405,12 @@ class BrowseBuyOrder(MyBaseHandler):
 		
 		self.response.write(json.dumps(self.cart.to_dict(),cls=ComplexEncoder))
 
+####################################################
+#
+# Cart Controllers
+#
+####################################################
+
 class ApproveCart(MyBaseHandler):
 	def post(self,owner_id,cart_id):
 		# wow! getting entity directly from key
@@ -604,6 +629,7 @@ class BankingCart(MyBaseHandler):
 				# add to cart
 				# cart only wants the slip key!
 				cart.payout_slips.append(slip.key)
+				cart.cash-=float(pay)
 				cart_bundle.append(cart)
 		elif action=='receivable':
 			# convert ID to INT, because datastore uses INT, not string!
@@ -630,6 +656,7 @@ class BankingCart(MyBaseHandler):
 				# add to cart
 				# cart only wants the slip key!
 				cart.payin_slips.append(slip.key)
+				cart.cash+=float(pay)
 				cart_bundle.append(cart)
 		
 		# write slips to data store		
@@ -673,29 +700,12 @@ class ManageCartAsBuyer(MyBaseHandler):
 		self.response.write(template.render(self.template_values))
 	
 		
-class ManageBuyOrder(MyBaseHandler):
-	def get(self):
-		if not self.me.is_active:
-			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
-			self.response.write(template.render(self.template_values))
-			return		
+####################################################
+#
+# Shipping Process Controllers
+#
+####################################################
 
-		# get all carts that belong to this user
-		self.template_values['carts']=carts=BuyOrderCart.query(ancestor=self.me.key)
-		self.template_values['review_url']=uri_for('cart-review')		
-		self.template_values['browse_url']=uri_for('buyorder-browse')		
-		
-		# get new BuyOrders that are available to me		
-		if self.me.can_be_nur():
-			orders=BuyOrder.query().fetch(100)
-		if self.me.can_be_doc():
-			orders+=BuyOrder.query(BuyOrder.owner==me.key)
-		self.template_values['orders']=orders
-		
-		# render
-		template = JINJA_ENVIRONMENT.get_template('/template/ManageBuyOrder.html')
-		self.response.write(template.render(self.template_values))
-	
 class ShippingCartProcess(MyBaseHandler):
 	def post(self,owner_id,cart_id):
 		cart=ndb.Key('Contact',owner_id,'BuyOrderCart',int(cart_id)).get()
@@ -780,6 +790,12 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		cart.put()	
 		self.response.write('0')
 		
+####################################################
+#
+# User/Membership Controllers
+#
+####################################################
+
 class MyUserBaseHandler(MyBaseHandler):
 	def __init__(self, request=None, response=None):
 		MyBaseHandler.__init__(self,request,response) # extend the base class
@@ -857,6 +873,69 @@ class ManageUserContactPreference(MyBaseHandler):
 		self.me.put()
 		self.response.write('0')
 
+####################################################
+#
+# Report Controllers
+#
+####################################################
+
+class ReportMyIncome(MyBaseHandler):
+	def get(self,in_days):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+		
+		self.template_values['filter_days']=in_days
+		self.template_values['end']=datetime.date.today()
+		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
+		
+		# get all my slips
+		# slips party "a" is always the one who initiated it
+		# you can also use the "owner" key, it's the same
+		if self.me.can_be_doc():
+			# if you are doc, you view both in and out
+			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_a==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
+		elif self.me.can_be_nur():
+			# if you are nur, you only view out, and also you are party b
+			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_b==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
+			
+		# ending balance
+		ending=self.me.cash
+		
+		# beginning balance
+		transactions=[]
+		for s in slips:
+			if s.party_a==self.me.key:
+				if s.money_flow=='a-2-b': # I'm A and money is to B
+					# money go out
+					transactions.append(-1*s.amount)
+				else:
+					# money come in
+					transactions.append(s.amount)
+			elif s.party_b==self.me.key: # flip logic from above
+				if s.money_flow=='a-2-b': # I'm B and money from A
+					# money come in
+					transactions.append(s.amount)
+				else:
+					# money go out
+					transactions.append(-1*s.amount)
+		beginning=ending-sum(transactions)
+		
+		data=[beginning]
+		for t in transactions:
+			# aggregated income growth
+			data.append(data[-1]+t)
+		data.append(ending)
+		self.template_values['beginning']=beginning
+		self.template_values['ending']=ending
+		self.template_values['data']=json.dumps(data)
+		
+		# render
+		self.template_values['slips']=slips
+		template = JINJA_ENVIRONMENT.get_template('/template/ReportMyIncome.html')
+		self.response.write(template.render(self.template_values))
+
 class ReportMyBuyer(MyBaseHandler):
 	def get(self,in_days):
 		if not self.me.is_active:
@@ -875,12 +954,6 @@ class ReportMyBuyer(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportMyBuyer.html')
 		self.response.write(template.render(self.template_values))
 		
-####################################################
-#
-# Report controllers
-#
-####################################################
-
 class ReportMySeller(MyBaseHandler):
 	def get(self, in_days):
 		if not self.me.is_active:
@@ -981,6 +1054,8 @@ class ChannelToken(webapp2.RequestHandler):
 		name=self.request.get('name')
 		user_id=self.request.get('user_id')
 		random_id=user_id+id_generator()
+		
+		# TODO: limit trial user leasing
 		random_token = channel.create_channel(random_id,CHAT_LEASE_IN_MINUTE)
 
 		channel_token=MyChannelToken(parent=ndb.Key(DummyAncestor,'ChannelAncestor'))
@@ -1024,3 +1099,4 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 			# NOTE: send_message uses channel_id, not TOKEN!!
 			channel.send_message(c.channel_id, json.dumps(data))
 			
+
