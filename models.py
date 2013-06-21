@@ -185,11 +185,24 @@ class MyBaseModel(ndb.Model):
 #
 #######################################
 class AccountingSlip(MyBaseModel):
+	# the object slip was created for
+	deal_key=ndb.KeyProperty(kind='BuyOrderCart')
+	
+	# two parties of this transaction
 	party_a=ndb.KeyProperty(kind='Contact')
 	party_b=ndb.KeyProperty(kind='Contact')
-	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a']) # who gives the amount to whom
+	
+	# who gives the amount to whom	
+	money_flow=ndb.StringProperty(choices=['a-2-b','b-2-a'])
+	
+	# amount
 	amount=ndb.FloatProperty()
 	
+	# since this is inherited from MyBaseModel
+	# you get "audit_me" for free!
+	# remember to save related information using
+	# auditor so we essentially saving a state
+	# when money changing hands
 
 #######################################
 #

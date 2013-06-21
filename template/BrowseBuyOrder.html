@@ -91,7 +91,7 @@
 		// cart table
 		var data=[];
 		{% for f in cart.fills %}
-			data.push(["{{f.order.get().name|title}}",{{f.qty}},{{f.price}}]);
+			data.push(['{{f.order.get().name|title}}',{{f.qty}},{{f.price}}]);
 		{% endfor %}
 		j$('#this-cart').dataTable({
 			"aaData":data,
@@ -208,16 +208,19 @@
 		<table id="this-cart" class="ariel-table">
 		</table>
 		
-		<div style="float:right;">
+		<div style="float:right;margin-top:20px;text-align:right;">
+			<div>
 			<label class="">Total</label>
 			<span class="border-top-red" id="this-cart-total">
 				{{ cart.payable }}
 			</span>
+			</div>
 			
-			<br />
+			<div style="margin-top:10px;">
 			<a href="/cart/review?cart={{ cart.key.id() }}">
-				<span class="my-button" style="background-color:#000;">Review order</spa>
+				Review order <font face="Symbol">&#187;</font>
 			</a>
+			</div>
 		</div>
 		 
 	</div>

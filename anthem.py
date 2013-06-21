@@ -186,7 +186,8 @@ class PublishNewBuyOrder(MyBaseHandler):
 		qty=int(self.request.POST['qty'])
 		price=float(self.request.POST['price'])
 		image=self.request.POST['url'].strip()
-
+		order_id=self.request.get('order_id').strip()
+		
 		# manage contact -- who is the client, optional
 		buyer=None
 
@@ -204,9 +205,13 @@ class PublishNewBuyOrder(MyBaseHandler):
 				buyer.memberships.append(m)
 				buyer.put()
 				
-		# create a new buy order and add to store
-		order=BuyOrder()
-		order.owner=self.me.key
+		if not order_id:
+			# create a new buy order and add to store
+			order=BuyOrder()
+			order.owner=self.me.key
+		else:
+			self.template_values['order']=order=BuyOrder.get_by_id(int(order_id))
+			
 		order.last_modified_by=self.me.key
 		if buyer: # buyer info is optional at post
 			order.terminal_buyer=buyer.key
@@ -487,7 +492,8 @@ class ReviewCart(MyBaseHandler):
 			
 			# to save label file using BlobStore
 			# owner of the cart is the terminal_seller Contact
-			self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s/%s/' % (cart.owner.id(),cart.key.id()))
+			if cart.can_change_shipping(self.me.key):
+				self.template_values['shipping_form_url']=upload_url=blobstore.create_upload_url('/cart/shipping/%s/%s/' % (cart.owner.id(),cart.key.id()))
 			
 			# serve label file if any
 			if cart.shipping_label:
@@ -601,7 +607,7 @@ class BankingCart(MyBaseHandler):
 		
 		action=self.request.POST['action']
 		data=json.loads(self.request.POST['data'])
-		cart_bundle=[]
+		bundle=[]
 				
 		if action=='payable':
 			# convert ID to INT, because datastore uses INT, not string!
@@ -629,8 +635,18 @@ class BankingCart(MyBaseHandler):
 				# add to cart
 				# cart only wants the slip key!
 				cart.payout_slips.append(slip.key)
-				cart.cash-=float(pay)
-				cart_bundle.append(cart)
+				
+				# payouts, deduct this amount from my contact
+				self.me.cash-=float(pay)
+				self.me.put()
+				
+				seller=cart.terminal_seller.get()
+				seller.cash+=float(pay)
+				seller.put()
+				
+				# we will update cart later
+				bundle.append(cart)
+				
 		elif action=='receivable':
 			# convert ID to INT, because datastore uses INT, not string!
 			receivables={int(d['id']):d['amount'] for d in data}			
@@ -656,12 +672,21 @@ class BankingCart(MyBaseHandler):
 				# add to cart
 				# cart only wants the slip key!
 				cart.payin_slips.append(slip.key)
-				cart.cash+=float(pay)
-				cart_bundle.append(cart)
+				
+				# update contact account balance
+				self.me.cash+=float(pay)
+				self.me.put()
+				
+				if (cart.terminal_buyer):
+					buyer=cart.terminal_buyer.get()
+					buyer.cash-=float(pay)
+					buyer.put()			
+				
+				# add cart to bundel
+				bundle.append(cart)
+			
+		ndb.put_multi(bundle)
 		
-		# write slips to data store		
-		ndb.put_multi(cart_bundle)
-
 		# return status
 		self.response.write(status)
 	
@@ -897,7 +922,7 @@ class ReportMyIncome(MyBaseHandler):
 			# if you are doc, you view both in and out
 			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_a==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
 		elif self.me.can_be_nur():
-			# if you are nur, you only view out, and also you are party b
+			# if you are nur, you are party b
 			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_b==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
 			
 		# ending balance

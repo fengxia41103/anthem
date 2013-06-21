@@ -711,6 +711,7 @@ table#fill-list{
 	margin: 10px auto;
 	padding: 5px 20px;
 	text-transform: uppercase;
+	vertical-align:middle;
 }
 
 .my-button:hover {
@@ -2129,5 +2130,5 @@ blockquote{
 }
 .get-started-button:hover{
 	cursor:pointer;
-	background:#f0bf00;
+	background:orange;
 }
