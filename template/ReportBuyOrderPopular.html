@@ -3,7 +3,80 @@
 {% block customJS %}
 <script type="text/javascript">
 	j$(document).ready(function(){
-	
+		var payable_data=j$.parseJSON('{{ payable_chart_data }}');
+		
+        j$('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: 'Product Sales'
+            },
+            subtitle: {
+            	text: 'From {{ start }} to {{ end }}'
+            },
+            tooltip: {
+        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+            	percentageDecimals: 1,
+                formatter: function() {
+                    // round to 1st decimal point
+                    // return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                    return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage) +' %';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function() {
+                        	// round to 1st decimal point
+                           	// return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                            return '<b>'+ this.point.name +'</b><br /> '+ this.y+' @ '+Math.round(this.percentage) +' %';
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Deal Share',
+                data: payable_data,
+                point:{
+                	events:{
+                    	select:function(event){
+                    		var selected=this.name;
+							j$.each(j$('div.quick-pane'),function(index,item){
+								var name=j$(item).attr('item');
+								if (name==selected) j$(item).show();
+								else j$(item).hide();
+							});
+                    	},
+                    	unselect:function(event){
+                    		j$('div.quick-pane').show();
+                    	}
+                	}
+                }
+            }]
+        });
+
+		j$('#filter-days').change(function(){
+			var start = new Date(j$(this).val());
+			var end = new Date(); // today
+			var diff = new Date(end - start);
+			
+			if (diff<0){
+				j$().toastmessage('showErrorToast','You can not pick a date in the future. Try again.');
+			}else{		
+				var days = Math.floor(diff/1000/60/60/24);
+				window.location.href='/report/buyorder/'+days+'/';
+			}
+		});
+		
 		//level 1 navigation
 		j$('#nav-report').addClass('level-1-navigation-selected');
 		
@@ -15,21 +88,78 @@
 {% endblock %}
 
 {% block main %}
+<h1>Product Report</h1>
 
+<p>
+Ever wonder which product is selling and which is not? This report finds your best sellers so you can stay on top your bottom line.
+</p>
+
+	
+<div>
+	<div id="container" ></div>
+
+<div class="chart-filters">
 <ul>
-{% for year, year_group in carts|groupby('created_time.year') %}
-	{% for month, list in year_group|groupby('created_time.month') %}
 	<li>
-		<h3>{{ month }}/{{ year }}</h3>
-		
-		<ul>
-		{% for c in list|sort(attribute='age') %}
-			<li>Cart# {{ c.key.id() }} &mdash; {{ c.age }}</li>
-		{% endfor %}
-		</ul>
+		{% if filter_days=='7' %}
+			<a href="/report/buyorder/7/" class="selected">7 Days</a>
+		{% else %}
+			<a href="/report/buyorder/7/">7 Days</a>
+		{% endif %}
 	</li>
-	{% endfor %}
-{% endfor %}
-
+	<li>
+		{% if filter_days=='30' %}
+			<a href="/report/buyorder/30/" class="selected">Month</a>
+		{% else %}
+			<a href="/report/buyorder/30/">Month</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='365' %}
+			<a href="/report/buyorder/365/" class="selected">Year</a>
+		{% else %}
+			<a href="/report/buyorder/365/">Year</a>
+		{% endif %}
+	</li>
+	<li>
+		<input type="date" id="filter-days" value="" max="today">
+	</li>
 </ul>
+
+</div>
+
+	
+	{% for order, list in fills|groupby('order') %}
+	<div class="quick-pane" item="{{ order.get().name }}">
+		<a href="/buyorder/browse/{{ order.id() }}">
+			<h4>
+			{{ order.get().name }}
+			</h4>
+		</a>
+		<table class="table-row-border">
+			<thead>
+				<tr><td>Price</td><td>Qty</td><td>Total($)</td>
+			</thead>
+			<tbody>
+			
+			{% for c in list %}
+				<tr><td>
+						{{ c.price }}
+					</td><td>
+						{{ c.qty }}
+					</td><td>
+						{{ c.payable }}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		<div style="text-align:right;margin-top:20px;">
+			Total: 
+			<span class="border-top-red" style="border-bottom: 3px double red;">{{ payable[order] }}</span>
+		</div>
+	</div>
+	{% endfor %}
+	
+</div>
 {% endblock %}

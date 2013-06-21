@@ -859,6 +859,12 @@ class ReportMyBuyer(MyBaseHandler):
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportMyBuyer.html')
 		self.response.write(template.render(self.template_values))
 		
+####################################################
+#
+# Report controllers
+#
+####################################################
+
 class ReportMySeller(MyBaseHandler):
 	def get(self, in_days):
 		if not self.me.is_active:
@@ -904,12 +910,27 @@ class ReportBuyOrderPopular(MyBaseHandler):
 			self.response.write(template.render(self.template_values))
 			return		
 
+		self.template_values['filter_days']=in_days
+		self.template_values['end']=datetime.date.today()
+		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
+		
 		# get all carts that I'm the seller
 		# including open ones within the last [in_days]
 		# NOTE: must use float for comparison, otherwise it will return None
-		carts=BuyOrderCart.query(BuyOrderCart.terminal_seller==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
+		carts=BuyOrderCart.query(BuyOrderCart.broker==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
+		self.template_values['carts']=carts
 
-
+		payable={}
+		fills=[]
+		for c in carts:
+			fills+=c.fills
+			for f in c.fills:
+				if f.order in payable: payable[f.order] += f.payable
+				else: payable[f.order]=f.payable
+		self.template_values['payable']=payable
+		self.template_values['payable_chart_data']=json.dumps([(s.get().name, payable[s]) for s in payable])
+		self.template_values['fills']=fills
+		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
 		self.response.write(template.render(self.template_values))

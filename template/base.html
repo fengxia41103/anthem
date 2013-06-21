@@ -264,12 +264,21 @@
 				</a>
 			</li>
 			
+			{% if me.can_be_doc() %}
+			<li id="nav-report">
+				<!-- default to report last 7 days -->
+				<a href="/report/myseller/7/">
+				Report
+				</a>
+			</li>
+			{% else %}
 			<li id="nav-report">
 				<!-- default to report last 7 days -->
 				<a href="/report/buyorder/7/">
 				Report
 				</a>
 			</li>
+			{% endif %}
 		</ul>
 		</span>
 	</td><td>
