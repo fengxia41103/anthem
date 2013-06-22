@@ -318,7 +318,7 @@ ul.tags li a{
 	display: inline-block; 
 	margin: 0 2px 15px; 
 	padding: 15px; 
-	border: 1px solid #FAFAFA; 
+	/*border: 1px solid #FAFAFA;*/ 
 	/*box-shadow: 0 1px 1px rgba(34, 25, 25, 0.4); */
 	background: #FEFEFE; 
 	background-image: linear-gradient(45deg, #FFF, #F9F9F9); 
@@ -327,6 +327,8 @@ ul.tags li a{
 
 .pin img{
 	width:100%;
+	min-width:200px;
+	max-width:250px;
 	padding-bottom: 5px;
 	border-bottom: 1px silver solid;
 	display:block;
@@ -1973,7 +1975,7 @@ div.chart-filters input {
 .wrapper {
 	min-height: 90%;
 	height: auto !important;
-	height: 100%;
+	height: 95%;
 	margin: 0 auto -60px; /* the bottom margin is the negative value of the footer's height */
 }
 .footer, .push {

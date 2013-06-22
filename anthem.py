@@ -1072,6 +1072,8 @@ class ReportBuyOrderPopular(MyBaseHandler):
 class ChannelConnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
+		logging.info('Connecting: '+id);
+
 		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
 		assert channel_token	
 		
@@ -1081,6 +1083,8 @@ class ChannelConnected(webapp2.RequestHandler):
 class ChannelDisconnected(webapp2.RequestHandler):
 	def post(self):
 		id=self.request.get('from')
+		logging.info('Disconnecting: '+id);
+		
 		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
 		assert channel_token	
 		
@@ -1124,6 +1128,7 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 		# each page has a random channel
 		receiver_channels=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(ndb.AND(MyChannelToken.contact_nickname==receiver_name,MyChannelToken.is_connected==True))
 		assert receiver_channels
+		
 		if receiver_channels.count()==0:
 			# receiver has no open channel --> offline
 			self.response.write('-1')
