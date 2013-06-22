@@ -366,6 +366,7 @@ items to give you a starting point for your listing.
 						</blockquote>
 						{% endif %}
 						<textarea class="ss-textarea">
+						Examples:
 						<ul>
 							<li>物品新旧要求</li>
 							<li>买卖双方谁承担邮寄损失</li>
@@ -411,7 +412,11 @@ items to give you a starting point for your listing.
 		<div class="show-more">Show more</div>
 		
 		<!-- hidden input to hold actual image url -->
-		<input name="url" value="/static/img/default.png" style="display:none;"/>
+		{% if order %}
+			<input name="url" value="{{ order.image }}" style="display:none;"/>
+		{% else %}
+			<input name="url" value="/static/img/default.png" style="display:none;"/>
+		{% endif %}
 		
 		<!- navigation -->
 		<div style="text-align:right;margin-top:30px;">
