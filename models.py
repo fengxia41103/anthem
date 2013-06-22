@@ -213,7 +213,7 @@ class BuyOrder(MyBaseModel):
 	terminal_buyer=ndb.KeyProperty(kind='Contact') # optional
 	name=ndb.StringProperty(required=True)
 	description=ndb.TextProperty(default='')
-	image=ndb.StringProperty(required=True)
+	image=ndb.StringProperty(default='/static/img/default.png')
 	qty=ndb.IntegerProperty(required=True)
 	price=ndb.FloatProperty(required=True)
 	payable=ndb.ComputedProperty(lambda self: self.qty*self.price)
@@ -243,7 +243,13 @@ class BuyOrder(MyBaseModel):
 	def can_delete(self):
 		# buyorder can only be deleted if there is openning cart
 		# meaning no user is exposed to this yet
-		return self.filled_qty==0
+		return self.filled_qty==0 and not self.is_closed
+			
+	def can_close(self):
+		# buyorder can be closed by its author
+		# ongoing carts will continue in process
+		# but this post will not be browsable anymore
+		return True 
 			
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference

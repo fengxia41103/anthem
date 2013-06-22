@@ -77,6 +77,11 @@
 					| 
 					<span class="command-link" itemId="{{ order.key.id() }}" id="btn-delete">Delete</span>
 				{% endif %}
+
+				{% if order.can_close() %}
+					| 
+					<span class="command-link" itemId="{{ order.key.id() }}" id="btn-close">Close</span>
+				{% endif %}
 				
             {% elif cart.broker %}
             	{% if cart.broker == order.owner %}

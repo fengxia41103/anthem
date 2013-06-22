@@ -146,6 +146,26 @@
 		});
     }
     
+    function updateReviewInfo(){
+     	// populate review info upon user viewing this tab
+     	// the review data will be later submitted to create an instance
+    	j$('#review-client-name').html(j$('#input-client-name').val());
+		j$('#review-product-name').html(j$('#input-product-name').val());    		
+    	j$('#review-price').html(j$('#input-price').val());
+    	j$('#review-qty').html(j$('#input-qty').val());
+    	
+    	var total=parseFloat(j$('#input-qty').val())*parseFloat(j$('#input-price').val());
+    	j$('#review-order-total').html(total);
+		
+		// tinyMCE editor content
+     	var content=tinyMCE.activeEditor.getContent({format : 'raw'});
+     	//var content=tinyMCE.activeEditor.getContent();
+		j$('#review-product-description').html(content);
+		
+		// MUST: this is the actual INPUT field that will be submitted in form
+		j$('#input-product-description').html(content);
+    }
+    
     j$(document).ready(function(){		
     	j$('#input-product-name').on('change',function(){
     		if (j$(this).val().length>=500){
@@ -201,10 +221,6 @@
     	
     	// link inputs to review sections
     	
-    	j$('#btn-apply-user-input-image').on('click',function(){
-    		j$('#user-input-image').attr('src',j$(this).siblings('input').val());
-    	});  
-    	
     	j$('.ariel-checkbox-regular').on('click',function(){
     		j$(this).toggleClass('ariel-checkbox-checked');
     	});  	    	
@@ -220,9 +236,21 @@
     	}).ajaxForm(options,function() { 
     		alert("Thank you for your comment!"); 
     	});
-    	
+
     	// initialize tabs
     	j$('#tabs-min').tabs();
+    	
+		j$('#switch-to-step-2').click(function(){
+			// Activate the 2nd panel
+			j$( "#tabs-min" ).tabs( "option", "active", 1 );
+		});
+
+		j$('#switch-to-step-3').click(function(){
+			// Activate the third panel
+			j$( "#tabs-min" ).tabs( "option", "active", 2 );
+			updateReviewInfo();		
+		});
+
     	
     	// initialize textarea
 		tinymce.init({
@@ -247,23 +275,7 @@
      	});
      	
      	j$('#view-review').click(function(){
-     		// populate review info upon user viewing this tab
-     		// the review data will be later submitted to create an instance
-    		j$('#review-client-name').html(j$('#input-client-name').val());
-			j$('#review-product-name').html(j$('#input-product-name').val());    		
-    		j$('#review-price').html(j$('#input-price').val());
-    		j$('#review-qty').html(j$('#input-qty').val());
-    		
-    		var total=parseFloat(j$('#input-qty').val())*parseFloat(j$('#input-price').val());
-    		j$('#review-order-total').html(total);
-			
-			// tinyMCE editor content
-     		var content=tinyMCE.activeEditor.getContent({format : 'raw'});
-     		//var content=tinyMCE.activeEditor.getContent();
-			j$('#review-product-description').html(content);
-			
-			// MUST: this is the actual INPUT field that will be submitted in form
-			j$('#input-product-description').html(content);
+     		updateReviewInfo();
      	});
 
 		// if editing, set image selected
@@ -284,7 +296,6 @@
 			}
 		});
 		{% endif %}
-
 
 		// level 1 navigatino
 		j$('#nav-order').addClass('level-1-navigation-selected');
@@ -349,12 +360,17 @@ items to give you a starting point for your listing.
 					{% if order %}
 						<textarea class="ss-textarea">{{ order.description }}</textarea>
 					{% else %}
+						{% if me.shipping_preference|count == 0 or me.payment_preference|count==0 %}
+						<blockquote>
+							Set up a default <a href="/user/contact/preference" class="command-link" >shipping preference and payment preference</a> that will be applied to all your posts.
+						</blockquote>
+						{% endif %}
 						<textarea class="ss-textarea">
-						<dl>
-							<dt>物品新旧要求</dt>
-							<dt>买卖双方谁承担邮寄损失</dt>
-							<dt>其他补充说明</dt>						
-						</dl>
+						<ul>
+							<li>物品新旧要求</li>
+							<li>买卖双方谁承担邮寄损失</li>
+							<li>其他补充说明</li>						
+						</ul>
 						</textarea>
 					{% endif %}
 					<textarea style="display:none;" name="description" id="input-product-description"></textarea>			
@@ -366,16 +382,21 @@ items to give you a starting point for your listing.
 				<br />
 				{% if order %}
 					{% if order.terminal_buyer %}
-						<input name="client" type="email" id="input-client-name" value="{{ order.terminal_buyer.get().nickname }}"/>
+						<input name="client" type="text" id="input-client-name" value="@{{ order.terminal_buyer.get().nickname }}"/>
 					{% else %}
-						<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+						<input name="client" type="text" id="input-client-name" placeholder="eg. @anthem.marketplace"/>
 					{% endif %}
 				{% else %}
-					<input name="client" type="email" id="input-client-name" placeholder="eg. john@example.com"/>
+					<input name="client" type="text" id="input-client-name" placeholder="eg. @anthem.marketplace"/>
 				{% endif %}
 				</td>
 			</tr>
 		</table>
+
+		<!- navigation -->
+		<div style="text-align:right;margin-top:30px;">
+			<span class="ariel-button" id="switch-to-step-2">Next<font face="Symbol">&#187;</font></span>
+		</div>
 	</div>
 	
 	<div id="step-2">
@@ -384,37 +405,17 @@ items to give you a starting point for your listing.
 		</p>
 		
 		<div class="image-select-pane" >
-		<div class="css3-columns-4">
+			<div class="css3-columns-4"></div>
 		</div>
 		
-		<div class="show-more">
-		Show more
-		</div>
+		<div class="show-more">Show more</div>
 		
-		<p class="ariel-p">
-		None of these matches yours? Find your own picture and copy and paste url of your product below.
-		</p>
+		<!-- hidden input to hold actual image url -->
+		<input name="url" value="/static/img/default.png" style="display:none;"/>
 		
-		<table class="ariel-table">
-		<tr><td>
-		Picture link
-		</td><td>
-		<input type="url" name="url" class="url" placeholder="http://..."/>
-
-		<span class="ariel-button" id="btn-apply-user-input-image">Use</span>
-		</td></tr>
-		</table>
-		<div class="ariel-pinterest-item" style="width:25%;margin-right:auto;margin-left:auto;display:block;">
-			{% if order %}
-				<img id="user-input-image" src="{{ order.image }}" />
-			{% else %}
-				<img id="user-input-image" src="" />
-			{% endif %}
-			<p>
-				<span class="ariel-checkbox">&nbsp;</span>
-				Yes, use this one
-			</p>
-		</div>
+		<!- navigation -->
+		<div style="text-align:right;margin-top:30px;">
+			<span class="ariel-button" id="switch-to-step-3">Skip<font face="Symbol">&#187;</font></span>
 		</div>
 	</div>
 
@@ -423,9 +424,9 @@ items to give you a starting point for your listing.
 			<table id="review-new-buy-order-table">
 			<tr><td valign="middle" class="box-shadow">
 				{% if order %}
-					<img id="review-product-image" src="{{ order.image }}" style="width:150px;"/>
+					<img id="review-product-image" src="{{ order.image }}" style="max-width:150px;width:100%;"/>
 				{% else %}
-					<img id="review-product-image" src="" style="width:150px;"/>
+					<img id="review-product-image" src="/static/img/default.png" style="width:100%;"/>
 				{% endif %}
 			</td><td>
 			
@@ -481,7 +482,7 @@ items to give you a starting point for your listing.
 				</td></tr>
 			</table>
 			</td></tr></table>
-		</div>
+		</div> <!-- end of image selecte pane div -->
 		
 		<div class="image-select-pane" style="border:none;">
 			
@@ -500,7 +501,7 @@ items to give you a starting point for your listing.
 			{% endif %}
 			</div>
 		</div>		
-	</div>
+	</div><!-- end of tab 3 -->
 </div>
 
 
