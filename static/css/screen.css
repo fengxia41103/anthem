@@ -1502,7 +1502,8 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .ariel-pinterest-item img{
-	height:200px; 
+	max-height:200px;
+	height:auto; 
 	width:auto;
 	max-width:90%;
 	margin-right:auto;

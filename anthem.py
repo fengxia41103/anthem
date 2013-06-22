@@ -183,8 +183,15 @@ class PublishNewBuyOrder(MyBaseHandler):
 		client_email=self.request.POST['client'].strip()
 		product=self.request.POST['product'].strip()
 		description=self.request.POST['description'].strip()
-		qty=int(self.request.POST['qty'])
-		price=float(self.request.POST['price'])
+		
+		# to safeguard inputs
+		try:
+			qty=int(self.request.POST['qty'])
+			price=float(self.request.POST['price'])
+		except:
+			self.response.write('-1')
+			return
+			
 		image=self.request.POST['url'].strip()
 		order_id=self.request.get('order_id').strip()
 		

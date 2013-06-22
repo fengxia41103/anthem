@@ -23,19 +23,17 @@
 		
 		switch (responseText){
 			case -1:
-				j$().toastmessage('showErrorToast', 'Client is not found in the system. Please double check the name and try again.');
-				break;
-			case -2:
-				j$().toastmessage('showErrorToast', 'Duplicate client names have been found in the system. Please double check the name and try again.');
+				j$().toastmessage('showErrorToast', 'Invalid data! Please double check and try again.');
 				break;
 			case 0:
-				j$().toastmessage('showSuccessToast', 'Congratulations, your post has been published.');
+				j$().toastmessage('showSuccessToast', 'Congratulations, your request has been published.');
 				
 				// reset inputs
 				j$('div#step-1').find('input').val('');
      			tinyMCE.activeEditor.setContent('');
 				j$('div#step-2').find('input').val('');
 				j$('.css3-columns-4').html('');
+
 				break;
 			default:
 				break;
@@ -68,7 +66,7 @@
     			return false;
     		}
  		{% endif %}
- 		   	
+
 	    // validation
 	    var user=j$.trim(j$('#review-client-name').html());
 	    var name=j$.trim(j$('#review-product-name').html());
@@ -77,6 +75,7 @@
 	    var price=j$.trim(j$('#review-price').html());
 	    var image=j$('#review-product-image').attr('src');
 
+		// required fields
 	    if (name==''){
 	    	j$().toastmessage('showErrorToast', 'Product name is required!');
 			return false;
@@ -420,7 +419,7 @@ items to give you a starting point for your listing.
 		
 		<!- navigation -->
 		<div style="text-align:right;margin-top:30px;">
-			<span class="ariel-button" id="switch-to-step-3">Skip<font face="Symbol">&#187;</font></span>
+			<span class="ariel-button" id="switch-to-step-3">Next<font face="Symbol">&#187;</font></span>
 		</div>
 	</div>
 
