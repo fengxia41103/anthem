@@ -185,8 +185,8 @@ class MyBaseModel(ndb.Model):
 #
 #######################################
 class AccountingSlip(MyBaseModel):
-	# the object slip was created for
-	deal_key=ndb.KeyProperty(kind='BuyOrderCart')
+	# the cart this slip was created for
+	cart_key=ndb.KeyProperty(kind='BuyOrderCart')
 	
 	# two parties of this transaction
 	party_a=ndb.KeyProperty(kind='Contact')
@@ -380,15 +380,23 @@ class BuyOrderCart(MyBaseModel):
 		# what to dispute?
 		# 1. seller says it's shipped, but broker doesn't see it in tracking
 		# 2. buyer confirmed delivery, but unsatisfied during reconciliation, like finding a broken packge
-		return (self.shipping_status=='In Route'  and self.broker==user_key) or (self.shipping_status=='Delivery Confirmed' and 
-		self.broker==user_key)
+		return (self.shipping_status=='In Route'  and self.broker==user_key) or (self.shipping_status=='Delivery Confirmed' and self.broker==user_key)
 
 	def can_seller_reconcile(self,user_key):
 		# when payout>0, so seller get some kind of payment
 		# this assumes that a cart can keep both broker and seller happy even
 		# when its payable_balance>0
 		return float(self.payout)>0
+
+	def can_delete_payout(self,user_key):
+		# when can a user delete payout bankslip?
+		# must before seller reconciliation, again, check and banalce
+		# since the slip is registered by broker
+		# so the only reconciliation threshold seller has is payable=payouts
+		# thus, once seller says he is satisfied, broker can not change payout anymore!
+		return self.status not in ['Closed','Open','Rejected'] and not self.seller_reconciled
 		
+				
 #######################################
 #
 # Communication models

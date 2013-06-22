@@ -55,6 +55,9 @@ routes = [
 	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 	
+	# banking controllers
+	Route('/bankslip/delete/<slip_id:\d+>/', handler='anthem.DeleteBankSlip',name='bankslip-delete'),
+
 	# report controllers
 	Route('/report/myseller/<in_days:\d+>/',handler='anthem.ReportMySeller',name='report-myseller'),	
 	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	

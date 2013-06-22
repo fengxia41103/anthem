@@ -278,11 +278,6 @@ ul.tags li a{
 }
 
 /* pinterest style */
-@media all and (min-width: 960px) {
-	.css3-columns {
-		column-count: 6;
-	}
-}
 
 .shadow {
   	-moz-box-shadow:    0 0 5px #c0c0c0;
@@ -2094,19 +2089,20 @@ blockquote{
 
 .home-marketing-section{
 	width:100%;
+	height:100%;
 	display:block;
-	min-height:700px;
 }
 .home-marketing-section img{
 	max-width:100%;
 	width:100%;
+	height:100%;
 }
 
 .home-marketing-text-section{
 	/*background-image: url('/static/img/white-background.png');*/
 	background-color:white;
 	padding: 50px;
-	height:500px;
+	height:100%;
 	text-align:center;
 	vertical-align:middle;
 	z-index:99;

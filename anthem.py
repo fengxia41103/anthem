@@ -509,7 +509,12 @@ class ReviewCart(MyBaseHandler):
 	
 	def post(self):
 		cart_id=int(self.request.POST['cart'])
-		cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
+
+		try:
+			owner_id=self.request.get('owner')
+			cart=BuyOrderCart.get_by_id(cart_id,parent=ndb.Key('Contact',owner_id))
+		except:
+			cart=BuyOrderCart.get_by_id(cart_id,parent=self.me.key)
 		assert cart
 		status='0'
 		
@@ -626,6 +631,7 @@ class BankingCart(MyBaseHandler):
 				slip.money_flow='a-2-b'
 				slip.last_modified_by=self.me.key
 				slip.owner=self.me.key
+				slip.cart_key=cart.key
 				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
 				
 				# create an audit record
@@ -663,6 +669,7 @@ class BankingCart(MyBaseHandler):
 				slip.money_flow='b-2-a'
 				slip.last_modified_by=self.me.key
 				slip.owner=self.me.key
+				slip.cart_key=cart.key
 				slip.put() # has to save here!
 
 				# create an audit record
@@ -1124,4 +1131,20 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 			# NOTE: send_message uses channel_id, not TOKEN!!
 			channel.send_message(c.channel_id, json.dumps(data))
 			
+####################################################
+#
+# Banking Controllers
+#
+####################################################
 
+class DeleteBankSlip(MyBaseHandler):
+	def post(self, slip_id):
+		slip=AccountingSlip.get_by_id(int(slip_id),parent=ndb.Key('DummyAncestor','BankingRoot'))
+		assert slip
+		
+		cart=slip.cart_key.get()
+		cart.payout_slips=[c for c in cart.payout_slips if c != slip.key]		
+		cart.payin_slips=[c for c in cart.payin_slips if c != slip.key]
+		cart.put()
+		
+		self.response.write('0')

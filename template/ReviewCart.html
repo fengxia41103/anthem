@@ -86,6 +86,7 @@
     	{% if cart.can_change_fill(me.key) %}
     		j$('input[type="number"]').prop('disabled', false);
     	{% endif %}
+    	j$('input[item="client-price"]').prop('disabled',false);
     	
     	// cart has been approved
     	// not allowing changing qty,price anymore
@@ -128,7 +129,7 @@
 			var newVal=j$(this).val();
 			
 			j$.post(
-				'{{ url }}?cart={{ cart.key.id() }}',
+				'{{ url }}?cart={{ cart.key.id() }}&owner={{ cart.terminal_seller.id() }}',
 				{'cart':{{cart.key.id()}},'action':'update client price','id':id,'kind':'BuyOrderFill','price':newVal},
 				function(result){
 					switch(result){
@@ -295,6 +296,19 @@
     	  	return e.which !== 13;
     	}).ajaxForm(options,function() { 
     		j$().toastmessage('showNoticeToast',"Shipment information has been saved"); 
+    	});
+    	
+    	// delete payout
+    	j$(document).on('click','span[item="delete-payout"]',function(){
+    		var id=j$(this).attr('itemId');
+    		
+    		j$.post(
+    			'/bankslip/delete/'+id+'/',
+    			function(result){
+    				j$().toastmessage('showSuccessToast','Payment deleted');
+    				j$(this).parents('tr:first').remove();
+    			}
+    		);
     	});
     });
 </script>
@@ -601,6 +615,9 @@
 						<tr><td>Transaction Created On</td>
 							<td>Amount</td>
 							<td>Recorded By</td>
+							{% if cart.can_delete_payout(me.key) %}
+							<td></td>
+							{% endif %}
 						</tr>
 					</thead>
 					<tbody>		
@@ -608,6 +625,13 @@
 						<tr><td>{{ s.get().created_time }}</td>
 							<td>{{ s.get().amount }}</td>
 							<td>{{ s.get().last_modified_by.get().nickname }}</td>
+							{% if cart.can_delete_payout(me.key) %}
+							<td>
+								<span item="delete-payout" itemId="{{ s.id() }}" class="command-link">
+								Delete
+								</span>
+							</td>
+							{% endif %}
 						</tr>
 					{% endfor %}
 					</tbody>
