@@ -1069,79 +1069,58 @@ class ReportBuyOrderPopular(MyBaseHandler):
 #
 ####################################################
 
-class ChannelConnected(webapp2.RequestHandler):
-	def post(self):
-		id=self.request.get('from')
-		logging.info('Connecting: '+id);
+# this may break if multiple application instance is used
+# which means two message can end up on two unrelated servers
+# thus not visible to each other. If this happens, we need to resolve
+# to use datastore for persistence.
+message_queue={}
 
-		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
-		assert channel_token	
-		
-		channel_token.is_connected=True
-		channel_token.put()
-		
-class ChannelDisconnected(webapp2.RequestHandler):
-	def post(self):
-		id=self.request.get('from')
-		logging.info('Disconnecting: '+id);
-		
-		channel_token=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(MyChannelToken.channel_id==id).get()
-		assert channel_token	
-		
-		channel_token.key.delete()
-
-		
-class ChannelToken(webapp2.RequestHandler):
-	def post(self):
-		# randomize token
-		name=self.request.get('name')
-		user_id=self.request.get('user_id')
-		random_id=user_id+id_generator()
-		
-		# TODO: limit trial user leasing
-		random_token = channel.create_channel(random_id,CHAT_LEASE_IN_MINUTE)
-
-		channel_token=MyChannelToken(parent=ndb.Key(DummyAncestor,'ChannelAncestor'))
-		channel_token.populate(
-			created_time=datetime.datetime.today(),
-			contact_nickname=name,
-			token=random_token,
-			channel_id=random_id
-		)
-		channel_token.put()
-		self.response.write(json.dumps({'token':random_token,'channel_id':random_id}))	
-
-class ChannelRouteMessage(webapp2.RequestHandler):
+class ChannelSendMessage(webapp2.RequestHandler):
 	def post(self):
 		sender_name=self.request.get('sender')
 		
-		# this will mimic @tweeter style
-		# eg. user temp@ff.com --> @temp@ff.com
-		# this is particular true if all users have been registered with Google first
-		receiver_name=self.request.get('receiver')
-		
 		# strip off first '@'
+		receiver_name=self.request.get('receiver')
 		receiver_name=receiver_name[1:]
 		
-		# look kup live channel this client has
-		# this is to handle client openning up multiple pages
-		# each page has a random channel
-		receiver_channels=MyChannelToken.query(ancestor=ndb.Key(DummyAncestor,'ChannelAncestor')).filter(ndb.AND(MyChannelToken.contact_nickname==receiver_name,MyChannelToken.is_connected==True))
-		assert receiver_channels
+		msg=self.request.get('message')
+		if receiver_name not in message_queue:
+			message_queue[receiver_name]=[{'sender':sender_name, 'message':msg}]
+		else:
+			message_queue[receiver_name].append({'sender':sender_name, 'message':msg})
 		
-		if receiver_channels.count()==0:
-			# receiver has no open channel --> offline
+		# save to datastore
+		chat_msg=ChatMessage(parent=ndb.Key(DummyAncestor,'ChatRoot'),sender_name=sender_name,receiver_name=receiver_name,message=msg)
+		chat_msg.put()
+		
+		# status
+		self.response.write('0')
+		
+class ChannelReadMessage(webapp2.RequestHandler):
+	def post(self):
+		receiver_name=self.request.get('receiver')
+		
+		# let's try in-memory queue
+		#if message_queue.has_key(receiver_name):
+		#	msg=message_queue[receiver_name]
+			# clear queue
+		#	message_queue[receiver_name]=[]
+			
+			# send
+		#	self.response.write(json.dumps(msg))
+		#else:
+		#	self.response.write('-1')
+		
+		# fetch 10 at a time
+		stored_msg=ChatMessage.query(ancestor=ndb.Key(DummyAncestor,'ChatRoot')).filter(ChatMessage.receiver_name==receiver_name).fetch(10)
+		if len(stored_msg)==0:
 			self.response.write('-1')
-			return
-		
-		# iterate through all live channels this receiver
-		# is listenning to, and send the message
-		msg=self.request.get('message')				
-		data={'sender_name':sender_name,
-				'message':msg}
-		for c in receiver_channels:
-			# NOTE: send_message uses channel_id, not TOKEN!!
-			channel.send_message(c.channel_id, json.dumps(data))
+		else:
+			msg=[{'sender':s.sender_name,'message':s.message} for s in stored_msg]
+			ndb.delete_multi_async([s.key for s in stored_msg])
+			
+			# send to client
+			self.response.write(json.dumps(msg))
 			
 ####################################################
 #

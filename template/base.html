@@ -8,12 +8,9 @@
 	<link rel="stylesheet" type="text/css" href="/static/css/reset-min.css">
 
 	<!-- Channel API, must be the first one! -->
-	<script type="text/javascript" src="/_ah/channel/jsapi"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-	<!--LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/dot-luv/jquery-ui.min.css" TYPE="text/css" MEDIA=screen-->
 	<LINK REL=StyleSheet HREF="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" TYPE="text/css" MEDIA=screen>
-	<script src="https://maps.google.com/maps/api/js?sensor=true" type="text/javascript"></script>
 
 	<!-- JS to turn a form into AJAX call -->
 	<script src="/static/formjs/jquery.form.js"></script> 
@@ -83,7 +80,31 @@
  		}
  	}
  	
+	function pollChatMessage(){
+		j$.post(
+			'/channel/read/message',
+			{'receiver':'{{ me.nickname }}'},
+			function(result){
+				switch(result){
+					case '-1':
+						//j$().toastmessage('showNoticeToast','You have no message');
+						break;
+					default:
+						var msg=j$.parseJSON(result);
+						if (msg.length>0) j$('#you-have-chat').toggle( "pulsate" );
+						for (var i=0;i<msg.length;i++){						
+							refreshChannelMessage(formatChannelMessage(msg[i]['sender'],msg[i]['message']));
+						}
+						break;
+				}// end of switch
+			}
+		);
+	}
+	 	
 	j$(document).ready(function(){
+		// set up chat polling
+		setInterval(pollChatMessage,10000);
+		
 		j$('input[type="date"]').datepicker();
 
 		// channel write message
@@ -103,15 +124,11 @@
     				// clear input box
     				j$('input[name="channel-message"]').val('');
 				}else{
-					// Chat only cares about names, not IDs
-					// since we maintain channel token on the server side
-					// we can look up by contact name
-					var data={'sender':'{{ me.nickname }}',
-						'receiver':receiver_name,
-						'message':message
-						}
+					var data={'sender': '{{ me.nickname }}',
+							'receiver': receiver_name,
+							'message':message};
 					j$.post(
-						'/channel/route',
+						'/channel/send/message',
 						data,
 						function(result){
 							switch (result){
@@ -127,8 +144,10 @@
     								j$('input[name="channel-message"]').val('');
 									break;								
 							}
+						
 						}
 					);
+							
 				}
             }else{
         		var count=j$(this).val().length;
@@ -162,65 +181,6 @@
 
 {% autoescape true %}
 <body>
-
-<script type="text/javascript">    
-    /* https://developers.google.com/appengine/docs/python/channel/javascript */
-    var token;
-    var channel_id;
-    
-    // MUST ACCALAIM THESE GLOBAL VARIABLES!
-    var channel;
-    var socket;
-    
-    function onError(err){
-    	j$().toastmessage('showErrorToast','Error code: '+err.code+'<br /> '+err.description);
-    }
-    
-    function onClose(){
-    	j$().toastmessage('showNoticeToast','Chat closed! Refresh this page and try again.');
-    }
-    
-    function onMessage(msg){
-    	var data=j$.parseJSON(msg.data);
-		var html=formatChannelMessage(data['sender_name'],data['message']);	    	
-    	refreshChannelMessage(html);
-    	
-    	j$('img#you-have-chat').show();
-    }
-    
-    function onOpened(){
-    	//j$().toastmessage('showSuccessToast','Welcome {{ me.nickname }}');
-    }
-	function leaseChannel(){
-		// channel has default duration of 2 hours
-		// so define a function to handle renew
-		// token will be randomized on the server side
-			
-    	j$.post(
-    		'/channel/token',
-    		{'name':'{{ me.nickname }}',
-    		 'user_id':'{{ me.key.id() }}'
-    		},
-    		function(result){
-    			var data=j$.parseJSON(result);
-    			token=data['token'];
-				channel_id=data['channel_id'];
-				    			
-				// some global initialization
-	    		channel = new goog.appengine.Channel(data['token'].trim());
-	    		socket = channel.open();
-	    		socket.onopen = onOpened;
-	    		socket.onmessage = onMessage;
- 	   			socket.onerror = onError;
-	    		socket.onclose = onClose;
-    		}
-    	);
-	}
-	    
-    j$(document).ready(function(){
-    	leaseChannel();
-    });
-</script>
 
 {% block header%}
 
@@ -296,7 +256,7 @@
 		{% endif %}
 	
 		<!-- chat icon -->
-		<img id="you-have-chat" src="http://cdn5.iconfinder.com/data/icons/ie_Birdies/128/twitter_bird_5.png" style="display:none;" title="You have got chat!"/>
+		<img id="you-have-chat" src="http://cdn5.iconfinder.com/data/icons/ie_Birdies/128/twitter_bird_5.png" title="You have got chat!"/>
 		
 		</div>
 	</td><td style="text-align:right;">

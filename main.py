@@ -68,6 +68,8 @@ routes = [
 	Route('/_ah/channel/disconnected/',handler='anthem.ChannelDisconnected',name='channel-disconnected'),
 	Route('/channel/token',handler='anthem.ChannelToken',name='channel-token'),	
 	Route('/channel/route',handler='anthem.ChannelRouteMessage',name='channel-route-message'),	
+	Route('/channel/send/message',handler='anthem.ChannelSendMessage',name='channel-send-message'),	
+	Route('/channel/read/message',handler='anthem.ChannelReadMessage',name='channel-read-message'),	
 
 	# if everything falls out
 	Route('/', handler='anthem.MainPage'),  
