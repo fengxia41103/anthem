@@ -103,7 +103,7 @@
 	 	
 	j$(document).ready(function(){
 		// set up chat polling
-		setInterval(pollChatMessage,10000);
+		var chat_message_poller;
 		
 		j$('input[type="date"]').datepicker();
 
@@ -162,8 +162,16 @@
 				'easing':'easeOutSine'
 			});
 			j$(this).hide();
+			
+			// start poller
+			chat_message_poller=setInterval(pollChatMessage,10000);
+
 		});
 		j$('#channel-collapse-switch').click(function(){
+			// cancel polling
+			clearInterval(chat_message_poller);
+			chat_message_poller=0;
+			
 			j$('#channel-container').hide();
 			j$('#channel-visible-switch').fadeIn(400);
 		});
