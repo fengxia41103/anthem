@@ -1101,26 +1101,32 @@ class ChannelReadMessage(webapp2.RequestHandler):
 		receiver_name=self.request.get('receiver')
 		
 		# let's try in-memory queue
-		#if message_queue.has_key(receiver_name):
-		#	msg=message_queue[receiver_name]
+		if message_queue.has_key(receiver_name):
+			msg=message_queue[receiver_name]
 			# clear queue
-		#	message_queue[receiver_name]=[]
+			message_queue[receiver_name]=[]
 			
 			# send
-		#	self.response.write(json.dumps(msg))
-		#else:
-		#	self.response.write('-1')
+			self.response.write(json.dumps(msg))
+		else:
+			self.response.write('-1')
+		
+		# use datastore 
+		# the problem is that if record is not deleted within the next poll,
+		# it will be queried again and send again!
+		# so somehow we need to indicate this record is sent already.
+		# but even using a flag, what to guarantee that put() will finish before the next poll?
 		
 		# fetch 10 at a time
-		stored_msg=ChatMessage.query(ancestor=ndb.Key(DummyAncestor,'ChatRoot')).filter(ChatMessage.receiver_name==receiver_name).fetch(10)
-		if len(stored_msg)==0:
-			self.response.write('-1')
-		else:
-			msg=[{'sender':s.sender_name,'message':s.message} for s in stored_msg]
-			ndb.delete_multi_async([s.key for s in stored_msg])
+		#stored_msg=ChatMessage.query(ancestor=ndb.Key(DummyAncestor,'ChatRoot')).filter(ChatMessage.receiver_name==receiver_name).fetch(10)
+		#if len(stored_msg)==0:
+		#	self.response.write('-1')
+		#else:
+		#	msg=[{'sender':s.sender_name,'message':s.message} for s in stored_msg]
+		#	ndb.delete_multi_async([s.key for s in stored_msg])
 			
 			# send to client
-			self.response.write(json.dumps(msg))
+		#	self.response.write(json.dumps(msg))
 			
 ####################################################
 #
