@@ -23,6 +23,13 @@ indexes:
   - name: age
     direction: desc
 
+- kind: AccountingSlip
+  ancestor: yes
+  properties:
+  - name: party_b
+  - name: age
+    direction: desc
+
 - kind: BuyOrder
   properties:
   - name: is_closed

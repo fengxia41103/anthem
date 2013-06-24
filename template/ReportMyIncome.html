@@ -126,7 +126,7 @@ Your current account balance is: {{ me.cash }}
 								{% endif %}
 							{% else %}
 								{% if s.money_flow=='a-2-b' %}
-									gain
+									{{ s.amount }}
 								{% else %}
 									<span class="red">({{ s.amount }})</span>
 								{% endif %}

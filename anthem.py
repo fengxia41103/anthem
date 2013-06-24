@@ -968,7 +968,7 @@ class ReportMyIncome(MyBaseHandler):
 		# you can also use the "owner" key, it's the same
 		if self.me.can_be_doc():
 			# if you are doc, you view both in and out
-			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_a==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
+			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(ndb.OR(AccountingSlip.party_a==self.me.key,AccountingSlip.party_b==self.me.key),AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
 		elif self.me.can_be_nur():
 			# if you are nur, you are party b
 			slips=AccountingSlip.query(ancestor=ndb.Key(DummyAncestor,'BankingRoot')).filter(ndb.AND(AccountingSlip.party_b==self.me.key,AccountingSlip.age<=float(in_days)*24*3600)).order(-AccountingSlip.age)
