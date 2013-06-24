@@ -450,5 +450,18 @@ class ChatMessage(ndb.Model):
 	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
 	is_expired=ndb.ComputedProperty(lambda self: int(self.age)>7200)
 
+class ChatChannel(ndb.Model):
+	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	client_id=ndb.StringProperty(required=True)
+	contact_id=ndb.StringProperty(required=True)
+	contact_name=ndb.StringProperty(required=True)
+	token=ndb.StringProperty(required=True)
+	in_use=ndb.BooleanProperty(default=False)
+
+	# age since inception, in seconds
+	# http://docs.python.org/2/library/datetime.html#datetime.timedelta.total_seconds
+	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
 	
+	# expiration: 2 hour inteval
+	is_expired=ndb.ComputedProperty(lambda self: float(self.age)>7200)		
 	

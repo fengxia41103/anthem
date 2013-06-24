@@ -1130,6 +1130,7 @@ class ReportBuyOrderPopular(MyBaseHandler):
 message_queue={}
 
 def send_chat(sender,receiver,message):
+		# save to queue
 		if receiver not in message_queue:
 			message_queue[receiver]=[{'sender':sender, 'message':message}]
 		else:
@@ -1188,7 +1189,129 @@ class ChannelReadMessage(webapp2.RequestHandler):
 			
 			# send to client
 		#	self.response.write(json.dumps(msg))
+
+# free app max list length will be 100
+# so iteration shouldn't be too bad
+# client_id: {'contact_id':user, 'contact_name': nickname, 'token':token, 'in_use':False, 'created_time':created_time)
+chat_channel_pool={}
+
+class ChannelConnected(webapp2.RequestHandler):
+	def post(self):
+		client_id=self.request.get('from')
+		queries=ChatChannel.query(ChatChannel.client_id==client_id)
+		if queries.count()==0: return
+		
+		assert queries.count()==1
+		saved_channel=queries.get()
+		
+		# check channel age
+		# max 2-hour
+		if saved_channel.is_expired: 
+			saved_channel.key.delete()
 			
+			# tell client this channel has expired
+			self.response.write('-1')
+			return
+			
+		# set channel to in_use
+		saved_channel.in_use=True
+		saved_channel.put()	
+		
+		logging.info('Connected: '+client_id)
+						
+class ChannelDisconnected(webapp2.RequestHandler):
+	def post(self):
+		client_id=self.request.get('from')
+		logging.info('Disconnecting request: ' +client_id)
+		
+		queries=ChatChannel.query(ChatChannel.client_id==client_id)
+		if queries.count()==0: return
+
+		assert queries.count()==1
+		saved_channel=queries.get()
+
+		# check channel age
+		# max 2-hour
+		if saved_channel.is_expired: 
+			saved_channel.key.delete()
+			
+			# tell client this channel has expired
+			self.response.write('-1')
+			return
+			
+		# set channel to in_use
+		saved_channel.in_use=False
+		save_channel.put()	
+		
+		logging.info('Disconnected: '+client_id)
+		
+class ChannelToken(webapp2.RequestHandler):
+	# This is the token pool management controller.
+	# client page will POST to request a token to use
+	# we will look up the pool for usable channel, if nothing, we'll create a new one.
+	# Further, a client_id can have max 2 open channels -- this essentially limits
+	# how many browser tabs a user can open while still have a usable chat on that page.
+	def post(self):
+		# who is requesting?
+		contact_id=self.request.get('contact_id')
+		contact_name=self.request.get('contact_name')
+		
+		# let's find a channel for this user
+		token=None
+		opened_channel_count=0
+		
+		all_saved_channel=ChatChannel.query()
+		queries=all_saved_channel.filter(ChatChannel.contact_id==contact_id)
+		for c in queries:
+			if c.in_use is False:
+				# unused channel, validate its age
+				if c.is_expired:
+					c.key.delete()
+				else: 
+					token=c.token
+					break # we found a valid token to use
+			else: opened_channel_count +=1
+				
+		# no reusable channel for this contact_id
+		if token is None:
+			if all_saved_channel.count()>=100:
+				# we have hit the max quota, tell user he can not chat, sorry
+				self.response.write('-2')
+			elif opened_channel_count <2:
+				# create a new one
+				# has quota, create one and add to the pool
+				random_id=contact_id+id_generator()
+				random_token = channel.create_channel(random_id)
+				 
+				# add to pool
+				c=ChatChannel(client_id=random_id, contact_id=contact_id,contact_name=contact_name,token=random_token)
+				c.put()
+				 
+				# tell client token
+				self.response.write(random_token)
+			
+			else: # user has 2 open channel already, deny new request
+				self.response.write('-1')
+		else:
+			self.response.write(token)
+				
+class ChannelRouteMessage(webapp2.RequestHandler):
+	def post(self):
+		sender=self.request.get('sender').strip()
+		receiver=self.request.get('receiver').strip()[1:]
+		message=self.request.get('message').strip()
+		
+		# look up live receiver channel by name
+		queries=ChatChannel.query(ChatChannel.contact_name==receiver, ChatChannel.in_use==True)
+		
+		if queries.count()>0:
+			for c in queries:
+				# receiver live channel found
+				channel.send_message(c.client_id,json.dumps({'sender':sender,'message':message}))
+		else:
+			# user offline
+			self.response.write('-1')
+
 ####################################################
 #
 # Banking Controllers
