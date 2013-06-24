@@ -437,6 +437,10 @@ class ApproveCart(MyBaseHandler):
 		if action.lower()=='submit for approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'In Approval')
 			cart.status='In Approval'
+			
+			# TODO: send email to all parties here
+			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> by %s needs APPROVAL!' %(cart.key.id(),cart.key.id(),cart.terminal_seller.get().nickname))
+			
 		elif action.lower()=='approve' and cart.status=='In Approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'Ready for Processing')
 			cart.status='Ready for Processing'
@@ -449,20 +453,29 @@ class ApproveCart(MyBaseHandler):
 			ndb.put_multi(batch)
 			
 			# TODO: send email to all parties here
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Your cart %s</a> has been APPROVED!' %(cart.key.id(),cart.key.id()))
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'Rejected')
 			cart.status='Rejected'
+
 			# TODO: send email to all parties here
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Your cart %s</a> has been REJECTED!' %(cart.key.id(),cart.key.id()))
 		
 		elif action.lower()=='seller reconcile':
 			cart.audit_me(self.me.key,'Seller Reconciled', cart.seller_reconciled,'True')
 			cart.seller_reconciled=True
 			
+			# TODO: send email to all parties here
+			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Seller of <a href="/cart/review?cart=%s">Cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
+
 			# if buyer reconciled also, close this cart
 			if (cart.buyer_reconciled):
 				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
 				cart.status='Closed'
+				
+				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
 		else:
 			# TODO: give an assert now
 			raise Exception('Unknown path')
@@ -640,6 +653,9 @@ class BankingCart(MyBaseHandler):
 				slip.owner=self.me.key
 				slip.cart_key=cart.key
 				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
+
+				# notify
+				send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has added a PAYMENT!' %(cart.key.id(),cart.key.id()))
 				
 				# create an audit record
 				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
@@ -657,6 +673,9 @@ class BankingCart(MyBaseHandler):
 				seller.cash+=float(pay)
 				seller.put()
 				
+				# notify
+				send_chat('System',cart.terminal_seller.get().nickname,'%s has added to your cash account!' %(str(pay)))
+
 				# we will update cart later
 				bundle.append(cart)
 				
@@ -755,10 +774,16 @@ class ShippingCartProcess(MyBaseHandler):
 		# however, on UI, the input is only available when cart can be In Route
 		if self.request.POST.has_key('shipping date'):
 			# update shipping date
-			new_date=datetime.datetime.strptime(self.request.POST['shipping date'],'%Y-%m-%d').date()
+			try:
+				new_date=datetime.datetime.strptime(self.request.POST['shipping date'],'%Y-%m-%d').date()
+			except:
+				new_date=datetime.datetime.strptime(self.request.POST['shipping date'],'%m/%d/%Y').date()
 			cart.audit_me(self.me.key,'Shipping Date',cart.shipping_date,new_date)
 			cart.shipping_date=new_date
-		
+
+			# TODO: email all parties
+			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> has been SHIPPED!' %(cart.key.id(),cart.key.id()))
+		    
 		cart.audit_me(self.me.key,'Shipping Status',cart.shipping_status,self.request.POST['action'])
 		cart.shipping_status=self.request.POST['action']
 		if cart.shipping_status == 'In Dispute':
@@ -773,6 +798,8 @@ class ShippingCartProcess(MyBaseHandler):
 			# auditing trail will record timestamp
 			cart.audit_me(self.me.key,'Buyer Reconciled',cart.buyer_reconciled,True)
 			cart.buyer_reconciled=True
+			
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
 
 			# if buyer reconciled also, close this cart
 			if (cart.seller_reconciled):
@@ -827,6 +854,10 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		cart.shipping_status='Shipment Created'
 		cart.status='In Shipment'
 		cart.put()	
+
+		# notify seller
+		send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is ready for SHIPPIING!' %(cart.key.id(),cart.key.id()))
+
 		self.response.write('0')
 		
 ####################################################
@@ -883,7 +914,10 @@ class ManageUserMembershipNew(MyUserBaseHandler):
 		
 		# create a member request and inactive membership
 		for r in data:
-			start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
+			try:
+				start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
+			except:
+				start_date=datetime.datetime.strptime(r['start date'],'%m/%d/%Y').date()
 			m=Membership(role=r['role'])
 			m.member_pay(1) # this should be set by PayPal callback
 			self.me.memberships.append(m)
@@ -1095,6 +1129,16 @@ class ReportBuyOrderPopular(MyBaseHandler):
 # to use datastore for persistence.
 message_queue={}
 
+def send_chat(sender,receiver,message):
+		if receiver not in message_queue:
+			message_queue[receiver]=[{'sender':sender, 'message':message}]
+		else:
+			message_queue[receiver].append({'sender':sender, 'message':message})
+		
+		# save to datastore
+		#chat_msg=ChatMessage(parent=ndb.Key(DummyAncestor,'ChatRoot'),sender_name=sender_name,receiver_name=receiver_name,message=msg)
+		#chat_msg.put()
+
 class ChannelSendMessage(webapp2.RequestHandler):
 	def post(self):
 		sender_name=self.request.get('sender')
@@ -1104,14 +1148,7 @@ class ChannelSendMessage(webapp2.RequestHandler):
 		receiver_name=receiver_name[1:]
 		
 		msg=self.request.get('message')
-		if receiver_name not in message_queue:
-			message_queue[receiver_name]=[{'sender':sender_name, 'message':msg}]
-		else:
-			message_queue[receiver_name].append({'sender':sender_name, 'message':msg})
-		
-		# save to datastore
-		chat_msg=ChatMessage(parent=ndb.Key(DummyAncestor,'ChatRoot'),sender_name=sender_name,receiver_name=receiver_name,message=msg)
-		chat_msg.put()
+		send_chat(sender_name,receiver_name,msg)
 		
 		# status
 		self.response.write('0')
@@ -1123,7 +1160,11 @@ class ChannelReadMessage(webapp2.RequestHandler):
 		# let's try in-memory queue
 		if message_queue.has_key(receiver_name):
 			msg=message_queue[receiver_name]
+		
 			# clear queue
+			# this is risky, however, that there is no guarantee
+			# all msg will be delivered, thus deleting the entire queue
+			# can cause some msg to be lost
 			message_queue[receiver_name]=[]
 			
 			# send
