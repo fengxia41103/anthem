@@ -1241,7 +1241,7 @@ class ChannelDisconnected(webapp2.RequestHandler):
 			
 		# set channel to in_use
 		saved_channel.in_use=False
-		save_channel.put()	
+		saved_channel.put()	
 		
 		logging.info('Disconnected: '+client_id)
 		
