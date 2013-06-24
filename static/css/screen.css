@@ -89,7 +89,7 @@ table#site-layout td{
 	list-style-type:none;
 	float:left;
 	padding: 5px 10px;
-	margin-right:40px;
+	margin-right:25px;
 }
 .level-1-navigation li:hover{
 	border:3px #eee dotted;
