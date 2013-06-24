@@ -59,6 +59,7 @@ routes = [
 	Route('/bankslip/delete/<slip_id:\d+>/', handler='anthem.DeleteBankSlip',name='bankslip-delete'),
 
 	# report controllers
+	Route('/report/mybuyer/<in_days:\d+>/',handler='anthem.ReportMyBuyer',name='report-mybuyer'),	
 	Route('/report/myseller/<in_days:\d+>/',handler='anthem.ReportMySeller',name='report-myseller'),	
 	Route('/report/buyorder/<in_days:\d+>/',handler='anthem.ReportBuyOrderPopular',name='report-buyorder-popular'),	
 	Route('/report/myincome/<in_days:\d+>/',handler='anthem.ReportMyIncome',name='report-myincome'),	

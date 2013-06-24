@@ -1655,7 +1655,7 @@ button[item="submit-for-approval-btn"]:hover{
 }
 
 .sf-table tr:last-child td{
-	border:none;
+	border-bottom:none;
 }
 .sf-table td:nth-child(2n) {
 	text-align:left;

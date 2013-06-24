@@ -1,0 +1,169 @@
+{% extends "/template/ReportBase.html" %}
+
+{% block customJS %}
+<script type="text/javascript">
+	j$(document).ready(function(){
+		var payable_data=j$.parseJSON('{{ payable_chart_data }}');
+		
+        j$('#container').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: 'Buyer Deal Share'
+            },
+            subtitle: {
+            	text: 'From {{ start }} to {{ end }}'
+            },
+            tooltip: {
+        	    pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+            	percentageDecimals: 1,
+                formatter: function() {
+                    // round to 1st decimal point
+                    // return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                    return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage) +' %';
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function() {
+                        	// round to 1st decimal point
+                           	// return '<b>'+ this.point.name +'</b>: '+ Math.round(this.percentage*10)/10 +' %';
+                            return '<b>'+ this.point.name +'</b><br /> '+ this.y+' @ '+Math.round(this.percentage) +' %';
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Deal Share',
+                data: payable_data,
+                point:{
+                	events:{
+                    	select:function(event){
+                    		var selected=this.name;
+							j$.each(j$('div.quick-pane'),function(index,item){
+								var name=j$(item).attr('item');
+								if (name==selected) j$(item).show();
+								else j$(item).hide();
+							});
+                    	},
+                    	unselect:function(event){
+                    		j$('div.quick-pane').show();
+                    	}
+                	}
+                }
+            }]
+        });
+
+		j$('#filter-days').change(function(){
+			var start = new Date(j$(this).val());
+			var end = new Date(); // today
+			var diff = new Date(end - start);
+			
+			if (diff<0){
+				j$().toastmessage('showErrorToast','You can not pick a date in the future. Try again.');
+			}else{		
+				var days = Math.floor(diff/1000/60/60/24);
+				window.location.href='/report/myseller/'+days+'/';
+			}
+		});
+		
+		//level 1 navigation
+		j$('#nav-report').addClass('level-1-navigation-selected');
+		
+		// level 2 navigation
+		j$('.level-2-navigation').show();
+		j$('#nav-report-mybuyer').addClass('level-2-navigation-selected');
+	});
+</script>
+{% endblock %}
+
+{% block main %}
+<h1>Dealer Report</h1>
+
+
+<p>
+With whom have you been making deals and how much busines you have done with them?
+Also, we'd like to know your experience with these dealers, so don't forget to give a feedback on past deals.
+</p>
+
+	
+<div>
+	<div id="container" ></div>
+
+<div class="chart-filters">
+<ul>
+	<li>
+		{% if filter_days=='7' %}
+			<a href="/report/mybuyer/7/" class="selected">7 Days</a>
+		{% else %}
+			<a href="/report/mybuyer/7/">7 Days</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='30' %}
+			<a href="/report/mybuyer/30/" class="selected">Month</a>
+		{% else %}
+			<a href="/report/mybuyer/30/">Month</a>
+		{% endif %}
+	</li>
+	<li>
+		{% if filter_days=='365' %}
+			<a href="/report/mybuyer/365/" class="selected">Year</a>
+		{% else %}
+			<a href="/report/mybuyer/365/">Year</a>
+		{% endif %}
+	</li>
+	<li>
+		<input type="date" id="filter-days" value="" max="today">
+	</li>
+</ul>
+
+</div>
+
+	
+	{% for seller, list in carts|groupby('broker') %}
+	<div class="quick-pane" item="{{ seller.get().nickname }}">
+		<h4>
+		{{ seller.get().nickname }}
+		</h4>
+	
+		<table class="table-row-border">
+			<thead>
+				<tr><td></td><td>Deal Size ($)</td><td>Status</td>
+			</thead>
+			<tbody>
+			
+			<!-- list cart by age reverse most recent on top -->
+			{% for c in list|sort(reverse=True,attribute='age') %}
+				<tr><td>
+					<a href="/cart/review?cart={{ c.key.id() }}&owner={{ c.terminal_seller.id() }}">
+						Cart# {{ c.key.id() }}
+					</a>
+					</td><td>
+						{{ c.payable }}
+					</td><td>
+						{{ c.status }}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		<div style="text-align:right;margin-top:20px;">
+			Total: 
+			<span class="border-top-red" style="border-bottom: 3px double red;">{{ payable[seller] }}</span>
+		</div>
+	</div>
+	{% endfor %}
+	
+</div>
+{% endblock %}

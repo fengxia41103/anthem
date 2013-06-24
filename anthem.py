@@ -976,19 +976,39 @@ class ReportMyIncome(MyBaseHandler):
 		self.response.write(template.render(self.template_values))
 
 class ReportMyBuyer(MyBaseHandler):
-	def get(self,in_days):
+	def get(self, in_days):
 		if not self.me.is_active:
 			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
 			self.response.write(template.render(self.template_values))
 			return		
 
-		# we are to determine who is a good buyer from me
-
-		# get all my carts
-		carts=BuyOrderCart.query(ancestor=self.me.key).filter(BuyOrderCart.age<=float(in_days)*24*3600)
-		carts=[c for c in carts if c.key!=self.cart.key]
+		self.template_values['filter_days']=in_days
+		self.template_values['end']=datetime.date.today()
+		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
+		
+		# we are to determine who is a good buyer (Doc) to do business with
+		
+		# get all shopping carts that I'm a seller  -- Nur within the last [in_days]
+		# NOTE: do not include OPEN cart because open cart broker=None
+		carts=BuyOrderCart.query(BuyOrderCart.terminal_seller==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
+		carts=[c for c in carts if c.broker]
 		self.template_values['carts']=carts
-	
+		
+		# group by broker
+		brokers={}
+		for c in carts:
+			s=c.broker
+			if s not in brokers: brokers[s]=[c]
+			else: brokers[s].append(c)
+			
+		# this represents size of a deal
+		# Q: who is your large supplier?
+		payable={}
+		for s in brokers:
+			payable[s]=sum([a.payable for a in brokers[s]])
+		self.template_values['payable']=payable
+		self.template_values['payable_chart_data']=json.dumps([(s.get().nickname, payable[s]) for s in payable])
+		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportMyBuyer.html')
 		self.response.write(template.render(self.template_values))
@@ -1042,7 +1062,7 @@ class ReportBuyOrderPopular(MyBaseHandler):
 		self.template_values['end']=datetime.date.today()
 		self.template_values['start']=datetime.date.today()+datetime.timedelta(-1*int(in_days))
 		
-		# get all carts that I'm the seller
+		# get all carts that I'm the buyer
 		# including open ones within the last [in_days]
 		# NOTE: must use float for comparison, otherwise it will return None
 		carts=BuyOrderCart.query(BuyOrderCart.broker==self.me.key,BuyOrderCart.age<=float(in_days)*24*3600)
