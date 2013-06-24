@@ -1131,15 +1131,26 @@ message_queue={}
 
 def send_chat(sender,receiver,message):
 		# save to queue
-		if receiver not in message_queue:
-			message_queue[receiver]=[{'sender':sender, 'message':message}]
-		else:
-			message_queue[receiver].append({'sender':sender, 'message':message})
+		#if receiver not in message_queue:
+		#	message_queue[receiver]=[{'sender':sender, 'message':message}]
+		#else:
+		#	message_queue[receiver].append({'sender':sender, 'message':message})
 		
 		# save to datastore
 		#chat_msg=ChatMessage(parent=ndb.Key(DummyAncestor,'ChatRoot'),sender_name=sender_name,receiver_name=receiver_name,message=msg)
 		#chat_msg.put()
 
+		# look up live receiver channel by name
+		queries=ChatChannel.query(ChatChannel.contact_name==receiver, ChatChannel.in_use==True)
+		
+		if queries.count()>0:
+			for c in queries:
+				# receiver live channel found
+				channel.send_message(c.client_id,json.dumps({'sender':sender,'message':message}))
+			return queries.count()
+		else:
+			return 0
+			
 class ChannelSendMessage(webapp2.RequestHandler):
 	def post(self):
 		sender_name=self.request.get('sender')
@@ -1222,7 +1233,6 @@ class ChannelConnected(webapp2.RequestHandler):
 class ChannelDisconnected(webapp2.RequestHandler):
 	def post(self):
 		client_id=self.request.get('from')
-		logging.info('Disconnecting request: ' +client_id)
 		
 		queries=ChatChannel.query(ChatChannel.client_id==client_id)
 		if queries.count()==0: return
@@ -1288,11 +1298,13 @@ class ChannelToken(webapp2.RequestHandler):
 				c.put()
 				 
 				# tell client token
+				logging.info('Issuing new token: '+random_token)
 				self.response.write(random_token)
 			
 			else: # user has 2 open channel already, deny new request
 				self.response.write('-1')
 		else:
+			logging.info('Reuse token: '+token)
 			self.response.write(token)
 				
 class ChannelRouteMessage(webapp2.RequestHandler):
@@ -1301,15 +1313,8 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 		receiver=self.request.get('receiver').strip()[1:]
 		message=self.request.get('message').strip()
 		
-		# look up live receiver channel by name
-		queries=ChatChannel.query(ChatChannel.contact_name==receiver, ChatChannel.in_use==True)
-		
-		if queries.count()>0:
-			for c in queries:
-				# receiver live channel found
-				channel.send_message(c.client_id,json.dumps({'sender':sender,'message':message}))
-		else:
-			# user offline
+		# user offline
+		if send_chat(sender,receiver,message)==0:
 			self.response.write('-1')
 
 ####################################################

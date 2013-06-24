@@ -12,6 +12,10 @@
 		// some global initialization
 		var j$=jQuery.noConflict();
 	</script>
+
+	<link rel="stylesheet" type="text/css" href="/static/css/reset-min.css">
+	<LINK REL=StyleShyeet HREF="/static/css/navigation.css" TYPE="text/css" MEDIA=screen>
+	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
 </head>
 
 {% autoescape true %}
@@ -162,7 +166,6 @@
 {% endblock %}
 
  
-	<link rel="stylesheet" type="text/css" href="/static/css/reset-min.css">
 
 	<!-- Channel API, must be the first one! -->
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -194,8 +197,6 @@
 	<!-- highcharts -->
 	<script src="http://code.highcharts.com/highcharts.js"></script>
 	
-	<LINK REL=StyleShyeet HREF="/static/css/navigation.css" TYPE="text/css" MEDIA=screen>
-	<LINK REL=StyleSheet HREF="/static/css/screen.css" TYPE="text/css" MEDIA=screen>
 		
 	<script type="text/javascript">
 	// some global initialization
@@ -271,10 +272,10 @@
 		console.log('channel error');		
 	}
 	function onMessage(msg){
-		console.log('channel msg received');	
 		var data=j$.parseJSON(msg.data);
 		var html=formatChannelMessage(data['sender'],data['message']);	    	
 		refreshChannelMessage(html);
+		j$('#you-have-chat').show('pulstate');
 	}
 
 	function applyChatToken(){
@@ -297,7 +298,7 @@
 						socket.onopen = onOpened;
 						socket.onmessage = onMessage;
 						socket.onerror = onError;
-						socket.onclose = onClose;						
+						socket.onclose = onClose;
 						break;
 				}// end of switch
 			}
