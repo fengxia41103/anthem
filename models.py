@@ -447,7 +447,7 @@ class ChatMessage(ndb.Model):
 	# on client side, once the lease is up, client has to refresh page to get
 	# a new token instead of using the same channel token, thus setting age threshold
 	# to 2-hour is sufficient 
-	age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.created_time).total_seconds())
+	age=ndb.ComputedProperty(lambda self: (datetime.datetime.now()-self.created_time).total_seconds())
 	is_expired=ndb.ComputedProperty(lambda self: int(self.age)>7200)
 
 class ChatChannel(ndb.Model):
