@@ -93,7 +93,7 @@ table.pretty tbody td {
 }
 		
 table.pretty tbody tr.odd td { 
-	background: #66a9bd;
+	/*background: #66a9bd;*/
 }
 
 /* Footer cells */	
