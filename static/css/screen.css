@@ -327,8 +327,6 @@ ul.tags li a{
 
 .pin img{
 	width:100%;
-	min-width:200px;
-	max-width:250px;
 	padding-bottom: 5px;
 	border-bottom: 1px silver solid;
 	display:block;

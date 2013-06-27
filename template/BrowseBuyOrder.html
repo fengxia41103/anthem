@@ -176,6 +176,44 @@
 			);
 		});
 
+		// list view
+		{% if buyorders %}
+		var data=[];
+		{% for b in buyorders %}
+			data.push([
+				'<a href="/buyorder/browse?owner={{b.owner.id()}}"><p class="product-list-item-footer-user" name="{{b.owner.get().nickname}}">{{ 
+				b.owner.get().nickname }}</p></a>',
+				'{{ b.name }}',
+				'{{ b.description }}<br />{{b.owner.get().shipping_preference}}<br />{{b.owner.get().payment_preference}}',
+				'{{ b.unfilled_qty }}',
+				'{{ b.price }}'
+			]);
+		{% endfor %}
+		j$('#buyorder-list-view').dataTable( {
+		         "aaData": data,
+		         "aoColumns":[
+		         	{ "sTitle": "Buyer" },
+		         	{ "sTitle": "Product" },
+		         	{ "sTitle": "Description" },
+		         	{ "sTitle": "Qty" },		         	
+		         	{ "sTitle": "Price" }
+		         ]
+		 }); 
+		 j$('#buyorder-list-view_wrapper').hide();
+		{% endif %}
+
+		// view switcher
+		j$('#switch-list-view').click(function(){
+			j$('#unfilledOrderPinterest').fadeOut(100,function(){
+				j$('#buyorder-list-view_wrapper').show();
+			});
+		});
+		j$('#switch-matrix-view').click(function(){
+			j$('#buyorder-list-view_wrapper').fadeOut(100,function(){
+				j$('#unfilledOrderPinterest').show();
+			});
+		});
+		
 		// level 1 navigation
 		j$('#nav-order').addClass('level-1-navigation-selected');
 				
@@ -231,6 +269,13 @@
 	{% endif %}
 	
 	{% if buyorders %}
+	<div>
+		<img src="http://cdn3.iconfinder.com/data/icons/line/36/list_alt-128.png" style="width:30px;height:30px;margin-right:20px;" 
+		id="switch-list-view"/>
+		<img src="http://cdn5.iconfinder.com/data/icons/cosmo-mobile/40/categories-128.png" style="width:30px;height:30px;" 
+		id="switch-matrix-view"/>
+	</div>
+	
     <div id="unfilledOrderPinterest" class="css3-columns">
     {% for b in buyorders %}
 		<div class="pin shadow" itemId="{{ b.key.id() }}" ownerId="{{ b.owner.id() }}" postTime="{{ b.created_time }}">
@@ -262,6 +307,8 @@
 		</div>
     {% endfor %}
     </div>
+	
+	<table id="buyorder-list-view"></table>    
     {% endif %}
     
     <div class="overlay" style="display:none;">
