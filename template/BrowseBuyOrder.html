@@ -35,7 +35,7 @@
 							dataLabels: {
 								enabled: true,
 								formatter: function(){
-									return '<a href="/buyorder/browse?ownerId='+this.series.userOptions.ownerId+'">'+this.series.name+'</a>';
+									return '<a href="/buyorder/browse?owner='+this.series.userOptions.ownerId+'">'+this.series.name+'</a>';
 								}
 							},
 							enableMouseTracking: false
@@ -372,7 +372,6 @@
     </div>
 	
 		<table id="buyorder-list-view"></table>    
-	
 		<div id="buyer-risk-profile" style="display:none;"></div>
     {% endif %}
     
