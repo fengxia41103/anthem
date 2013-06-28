@@ -606,10 +606,13 @@
 					
 			<div class="quick-pane" id="sec-payment">
 			<h4>Payments</h4>
+			<table class="two-col-table">
+			<tr>
 			<!-- seller only view -->
 			{% if cart.terminal_seller==me.key or cart.broker==me.key %}
 				{% if cart.payout_slips %}
-					<table class="table-row-border" style="width:49%;float:left;margin-right:5px;">
+				<td>
+					<table class="table-row-border" style="">
 					<caption class="table-caption">Pay For This Deal</caption>
 					<thead>
 						<tr><td>Transaction Created On</td>
@@ -636,13 +639,15 @@
 					{% endfor %}
 					</tbody>
 					</table>
+				</td>
 				{% endif %}
 			{% endif %}
 	
 			<!-- doc only view -->		
 			{% if cart.broker==me.key %}
 				{% if cart.payin_slips %}
-					<table class="table-row-border" style="width:49%;">
+				<td>
+					<table class="table-row-border" style="">
 					<caption class="table-caption">Earn From This Deal</caption>
 					<thead>
 						<tr><td>Transaction Created On</td>
@@ -660,7 +665,9 @@
 					</tbody>
 					</table>
 				{% endif %}
+				</td>
 			{% endif %}
+			</tr></table>
 			</div>
 		{%endif %}
 				
