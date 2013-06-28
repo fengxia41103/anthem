@@ -94,7 +94,13 @@ table.pretty tbody td {
 		
 table.pretty tbody tr.odd td { 
 	/*background: #66a9bd;*/
+	border-bottom:1px #ccc solid;
 }
+table.pretty tbody tr.even td { 
+	/*background: #66a9bd;*/
+	border-bottom:1px #ccc solid;
+}
+
 
 /* Footer cells */	
 table.pretty tfoot th {

@@ -392,7 +392,7 @@ class BuyOrderCart(MyBaseModel):
 		# when payout>0, so seller get some kind of payment
 		# this assumes that a cart can keep both broker and seller happy even
 		# when its payable_balance>0
-		return float(self.payout)>0
+		return float(self.payout)>0 and not self.seller_reconciled
 
 	def can_delete_payout(self,user_key):
 		# when can a user delete payout bankslip?
@@ -400,7 +400,7 @@ class BuyOrderCart(MyBaseModel):
 		# since the slip is registered by broker
 		# so the only reconciliation threshold seller has is payable=payouts
 		# thus, once seller says he is satisfied, broker can not change payout anymore!
-		return self.status not in ['Closed','Open','Rejected'] and not self.seller_reconciled
+		return self.status not in ['Closed','Open','Rejected'] and not self.seller_reconciled and self.broker==user_key
 		
 				
 #######################################
