@@ -596,132 +596,6 @@ class ReviewCart(MyBaseHandler):
 			cart.put()
 			self.response.write(status)
 
-class BankingCart(MyBaseHandler):
-	def get(self):
-		if not self.me.is_active:
-			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
-			self.response.write(template.render(self.template_values))
-			return		
-
-		self.template_values['url']=uri_for('cart-banking')
-		self.template_values['review_url']=uri_for('cart-review')		
-	
-		# payable carts
-		payable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0.0))
-		
-		if self.request.GET.has_key('seller'):
-			seller_id=self.request.GET['seller']
-			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
-		self.template_values['payable_carts']=payable_carts
-		self.template_values['sellers']=set([c.terminal_seller for c in payable_carts])
-		
-		# receivable carts
-		receivable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0.0))
-		if self.request.GET.has_key('client'):
-			client_id=self.request.GET['client']
-			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
-		self.template_values['receivable_carts']=receivable_carts
-		self.template_values['clients']=set([c.terminal_buyer for c in receivable_carts if c.terminal_buyer])
-		
-		# render
-		template = JINJA_ENVIRONMENT.get_template('/template/BankingCart.html')
-		self.response.write(template.render(self.template_values))
-	
-	def post(self):
-		status='0'
-		
-		action=self.request.POST['action']
-		data=json.loads(self.request.POST['data'])
-		bundle=[]
-				
-		if action=='payable':
-			# convert ID to INT, because datastore uses INT, not string!
-			payables={int(d['id']):d['amount'] for d in data}			
-			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0))
-			cart_dict={c.key.id():(c,payables[c.key.id()]) for c in carts if c.key.id() in payables}
-			
-			for id,val in cart_dict.iteritems():
-				cart,pay=val
-				
-				# create a slip
-				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
-				slip.amount=float(pay)
-				slip.party_a=self.me.key
-				slip.party_b=cart.terminal_seller
-				slip.money_flow='a-2-b'
-				slip.last_modified_by=self.me.key
-				slip.owner=self.me.key
-				slip.cart_key=cart.key
-				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
-
-				# notify
-				send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has added a PAYMENT!' %(cart.key.id(),cart.key.id()))
-				
-				# create an audit record
-				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
-				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
-				
-				# add to cart
-				# cart only wants the slip key!
-				cart.payout_slips.append(slip.key)
-				
-				# payouts, deduct this amount from my contact
-				self.me.cash-=float(pay)
-				self.me.put()
-				
-				seller=cart.terminal_seller.get()
-				seller.cash+=float(pay)
-				seller.put()
-				
-				# notify
-				send_chat('System',cart.terminal_seller.get().nickname,'%s has added to your cash account!' %(str(pay)))
-
-				# we will update cart later
-				bundle.append(cart)
-				
-		elif action=='receivable':
-			# convert ID to INT, because datastore uses INT, not string!
-			receivables={int(d['id']):d['amount'] for d in data}			
-			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0))
-			cart_dict={c.key.id():(c,receivables[c.key.id()]) for c in carts if (c.key.id() in receivables)}
-			
-			for id,val in cart_dict.iteritems():
-				cart,pay=val
-				# create a slip
-				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
-				slip.amount=float(pay)
-				slip.party_a=self.me.key
-				slip.party_b=cart.terminal_buyer
-				slip.money_flow='b-2-a'
-				slip.last_modified_by=self.me.key
-				slip.owner=self.me.key
-				slip.cart_key=cart.key
-				slip.put() # has to save here!
-
-				# create an audit record
-				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
-				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
-						
-				# add to cart
-				# cart only wants the slip key!
-				cart.payin_slips.append(slip.key)
-				
-				# update contact account balance
-				self.me.cash+=float(pay)
-				self.me.put()
-				
-				if (cart.terminal_buyer):
-					buyer=cart.terminal_buyer.get()
-					buyer.cash-=float(pay)
-					buyer.put()			
-				
-				# add cart to bundel
-				bundle.append(cart)
-			
-		ndb.put_multi(bundle)
-		
-		# return status
-		self.response.write(status)
 	
 class ManageCartAsSeller(MyBaseHandler):
 	def get(self):
@@ -1327,10 +1201,154 @@ class DeleteBankSlip(MyBaseHandler):
 	def post(self, slip_id):
 		slip=AccountingSlip.get_by_id(int(slip_id),parent=ndb.Key('DummyAncestor','BankingRoot'))
 		assert slip
-		
+
+		# update cart		
 		cart=slip.cart_key.get()
 		cart.payout_slips=[c for c in cart.payout_slips if c != slip.key]		
 		cart.payin_slips=[c for c in cart.payin_slips if c != slip.key]
 		cart.put()
 		
+		# update contact cash account
+		# this is the reverse of when slip was created
+		# remember, cart broker is always party_a!
+		party_a=slip.party_a.get()
+		party_b=slip.party_b.get()
+		if slip.money_flow == 'a-2-b':
+			# this was a payout
+			party_a.cash+=slip.amount
+			party_b.cash-=slip.amount
+		elif slip.money_flow=='b-2-a':
+			# this was a payin
+			party_a.cash-=slip.amount
+			party_b.cash+=slip.amount
+		
+		party_a.put()
+		party_b.put()
 		self.response.write('0')
+
+class BankingCart(MyBaseHandler):
+	def get(self):
+		if not self.me.is_active:
+			template = JINJA_ENVIRONMENT.get_template('/template/Membership_New.html')
+			self.response.write(template.render(self.template_values))
+			return		
+
+		self.template_values['url']=uri_for('cart-banking')
+		self.template_values['review_url']=uri_for('cart-review')		
+	
+		# payable carts
+		payable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0.0))
+		
+		if self.request.GET.has_key('seller'):
+			seller_id=self.request.GET['seller']
+			payable_carts=payable_carts.filter(BuyOrderCart.terminal_seller==ndb.Key('Contact',seller_id))
+		self.template_values['payable_carts']=payable_carts
+		self.template_values['sellers']=set([c.terminal_seller for c in payable_carts])
+		
+		# receivable carts
+		receivable_carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0.0))
+		if self.request.GET.has_key('client'):
+			client_id=self.request.GET['client']
+			receivable_carts=receivable_carts.filter(BuyOrderCart.terminal_buyer==ndb.Key('Contact',client_id))				
+		self.template_values['receivable_carts']=receivable_carts
+		self.template_values['clients']=set([c.terminal_buyer for c in receivable_carts if c.terminal_buyer])
+		
+		# render
+		template = JINJA_ENVIRONMENT.get_template('/template/BankingCart.html')
+		self.response.write(template.render(self.template_values))
+	
+	def post(self):
+		status='0'
+		
+		action=self.request.POST['action']
+		data=json.loads(self.request.POST['data'])
+		bundle=[]
+				
+		if action=='payable':
+			# convert ID to INT, because datastore uses INT, not string!
+			payables={int(d['id']):d['amount'] for d in data}			
+			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.payable_balance>0))
+			cart_dict={c.key.id():(c,payables[c.key.id()]) for c in carts if c.key.id() in payables}
+			
+			for id,val in cart_dict.iteritems():
+				cart,pay=val
+				
+				# create a slip
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
+				slip.amount=float(pay)
+				slip.party_a=self.me.key
+				slip.party_b=cart.terminal_seller
+				slip.money_flow='a-2-b'
+				slip.last_modified_by=self.me.key
+				slip.owner=self.me.key
+				slip.cart_key=cart.key
+				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
+
+				# notify
+				send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has added a PAYMENT!' %(cart.key.id(),cart.key.id()))
+				
+				# create an audit record
+				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
+				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
+				
+				# add to cart
+				# cart only wants the slip key!
+				cart.payout_slips.append(slip.key)
+				
+				# payouts, deduct this amount from my contact
+				self.me.cash-=float(pay)
+				self.me.put()
+				
+				seller=cart.terminal_seller.get()
+				seller.cash+=float(pay)
+				seller.put()
+				
+				# notify
+				send_chat('System',cart.terminal_seller.get().nickname,'%s has added to your cash account!' %(str(pay)))
+
+				# we will update cart later
+				bundle.append(cart)
+				
+		elif action=='receivable':
+			# convert ID to INT, because datastore uses INT, not string!
+			receivables={int(d['id']):d['amount'] for d in data}			
+			carts=BuyOrderCart.query(ndb.AND(BuyOrderCart.broker==self.me.key,BuyOrderCart.receivable_balance>0))
+			cart_dict={c.key.id():(c,receivables[c.key.id()]) for c in carts if (c.key.id() in receivables)}
+			
+			for id,val in cart_dict.iteritems():
+				cart,pay=val
+				# create a slip
+				slip=AccountingSlip(parent=ndb.Key(DummyAncestor,'BankingRoot'))
+				slip.amount=float(pay)
+				slip.party_a=self.me.key
+				slip.party_b=cart.terminal_buyer
+				slip.money_flow='b-2-a'
+				slip.last_modified_by=self.me.key
+				slip.owner=self.me.key
+				slip.cart_key=cart.key
+				slip.put() # has to save here!
+
+				# create an audit record
+				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
+				slip.audit_me(self.me.key,'Shipping Status',cart.shipping_status,'')
+						
+				# add to cart
+				# cart only wants the slip key!
+				cart.payin_slips.append(slip.key)
+				
+				# update contact account balance
+				self.me.cash+=float(pay)
+				self.me.put()
+				
+				if (cart.terminal_buyer):
+					buyer=cart.terminal_buyer.get()
+					buyer.cash-=float(pay)
+					buyer.put()			
+				
+				# add cart to bundel
+				bundle.append(cart)
+			
+		ndb.put_multi(bundle)
+		
+		# return status
+		self.response.write(status)
