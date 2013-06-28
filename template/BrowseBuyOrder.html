@@ -2,6 +2,54 @@
 
 {% block customJS %}
 <script type="text/javascript">
+	{% if me.can_be_nur() %}
+	function userRiskProfile(){
+		j$.post(
+			'/user/riskprofile',
+			function(result){
+				var data=j$.parseJSON(result);
+				
+				j$('#buyer-risk-profile').highcharts({
+					chart: {
+						type: 'bubble',
+						zoomType: 'xy'
+					},	
+					title: {
+						text: '医生 Risk Profile'
+					},
+					xAxis:{
+						title:{
+							text:'Monetary Value Of Outstanding Deals'
+						}
+					},
+					yAxis:{
+						title:{
+							text:'Number Of Outstanding Deals'
+						}
+					},
+					legend:{
+						enabled: true
+					},
+					plotOptions: {
+						bubble: {
+							dataLabels: {
+								enabled: true,
+								formatter: function(){
+									return '<a href="/buyorder/browse?ownerId='+this.series.userOptions.ownerId+'">'+this.series.name+'</a>';
+								}
+							},
+							enableMouseTracking: false
+						}
+					},					
+					tooltip:{
+						enabled: false
+					},
+					series: data
+				});// end of highchart				
+		});
+	}
+	{% endif %}
+	
     j$(document).ready(function(){
     	{% if me.can_be_nur() %}
 		j$(document).on('mouseenter','.pin-in-focus .image-house',function(){
@@ -200,26 +248,37 @@
 		         ]
 		 }); 
 		 j$('#buyorder-list-view_wrapper').hide();
+		
+			{% if me.can_be_nur() %}
+		 		userRiskProfile();
+		 	{% endif %}
 		{% endif %}
 
 		// view switcher
 		j$('#switch-list-view').click(function(){
-			j$('#unfilledOrderPinterest').fadeOut(100,function(){
-				j$('#buyorder-list-view_wrapper').show();
-			});
+			j$('#unfilledOrderPinterest').hide();
+			j$('#buyorder-list-view_wrapper').show();
+			j$('#buyer-risk-profile').hide();
 		});
 		j$('#switch-matrix-view').click(function(){
-			j$('#buyorder-list-view_wrapper').fadeOut(100,function(){
-				j$('#unfilledOrderPinterest').show();
-			});
+			j$('#unfilledOrderPinterest').show();
+			j$('#buyer-risk-profile').hide();
+			j$('#buyorder-list-view_wrapper').hide();
 		});
-		
+		j$('#switch-buyer-risk-profile').click(function(){
+			j$('#unfilledOrderPinterest').hide();
+			j$('#buyer-risk-profile').show();
+			j$('#buyorder-list-view_wrapper').hide();
+		});
+
 		// level 1 navigation
 		j$('#nav-order').addClass('level-1-navigation-selected');
 				
 		// level 2 navigation
 		j$('.level-2-navigation').show();
 		j$('#nav-buyorder-browse').addClass('level-2-navigation-selected');
+
+				
     });    	
 </script>
 {% endblock %}
@@ -270,10 +329,14 @@
 	
 	{% if buyorders %}
 	<div>
-		<img src="http://cdn3.iconfinder.com/data/icons/line/36/list_alt-128.png" style="width:30px;height:30px;margin-right:20px;" 
-		id="switch-list-view"/>
-		<img src="http://cdn5.iconfinder.com/data/icons/cosmo-mobile/40/categories-128.png" style="width:30px;height:30px;" 
+		<img src="http://cdn3.iconfinder.com/data/icons/eightyshades/512/43_Grid-128.png" style="width:30px;height:30px;margin-right:20px;" 
 		id="switch-matrix-view"/>
+		<img src="http://cdn2.iconfinder.com/data/icons/picol-vector/32/list-128.png" style="width:30px;height:30px;margin-right:20px;" 
+		id="switch-list-view"/>
+		{% if me.can_be_nur() %}
+		<img src="http://cdn4.iconfinder.com/data/icons/brightmix/128/monotone_graph_chart.png" style="width:30px;height:30px;" 
+		id="switch-buyer-risk-profile"/>
+		{% endif %}
 	</div>
 	
     <div id="unfilledOrderPinterest" class="css3-columns">
@@ -308,7 +371,9 @@
     {% endfor %}
     </div>
 	
-	<table id="buyorder-list-view"></table>    
+		<table id="buyorder-list-view"></table>    
+	
+		<div id="buyer-risk-profile" style="display:none;"></div>
     {% endif %}
     
     <div class="overlay" style="display:none;">

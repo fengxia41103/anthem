@@ -820,6 +820,31 @@ class ManageUserContactPreference(MyBaseHandler):
 		self.me.put()
 		self.response.write('0')
 
+class ViewUserRiskProfile(MyBaseHandler):
+	def post(self):
+		# get all outstanding buyorders
+		orders=BuyOrder.query(ndb.AND(BuyOrder.is_closed==False,BuyOrder.unfilled_qty>0))
+		
+		# group by owner/broker
+		group_by_owner={}
+		for o in orders:
+			if o.owner not in group_by_owner:
+				group_by_owner[o.owner]=[o]
+			else:
+				group_by_owner[o.owner].append(o)
+		
+		# get chart data
+		data=[]
+		for owner,orders in group_by_owner.iteritems():
+			total_payable=sum([o.payable for o in orders])
+			data.append({
+				'name':owner.get().nickname,
+				'ownerId':owner.id(),
+				'data':[[total_payable,len(orders),owner.get().reputation_score+100]]
+			})
+		self.response.write(json.dumps(data))
+		
+	
 ####################################################
 #
 # Report Controllers
@@ -990,6 +1015,7 @@ class ReportBuyOrderPopular(MyBaseHandler):
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ReportBuyOrderPopular.html')
 		self.response.write(template.render(self.template_values))
+
 
 ####################################################
 #

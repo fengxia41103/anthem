@@ -54,6 +54,7 @@ routes = [
 	Route('/user/membership/renew/<role:\w+>/',handler='anthem.ManageUserMembershipRenew',name='user-membership-renew'),	
 	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
+	Route('/user/riskprofile',handler='anthem.ViewUserRiskProfile',name='user-risk-profile'),	
 	
 	# banking controllers
 	Route('/bankslip/delete/<slip_id:\d+>/', handler='anthem.DeleteBankSlip',name='bankslip-delete'),
