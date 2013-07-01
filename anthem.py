@@ -822,7 +822,7 @@ class GoogleWalletToken(MyBaseHandler):
   			"exp" : int(time.time() + 3600),
   			"iat" : int(time.time()),
   			"request" :{
-				"name" : "%s Membership" % requesting_role,
+				"name" : "%s Membership for %s" % (requesting_role,self.me.nickname),
   				"description" : "%s membership subscriptions" % requesting_role,
 				"price" : MONTHLY_MEMBERSHIP_FEE[requesting_role],
   				"currencyCode" : "USD",
@@ -846,40 +846,61 @@ class GoogleWalletToken(MyBaseHandler):
 		
 class GoogleWalletPostBack(MyBaseHandler):
 	def post(self):
-		result=json.load(self.request.get('jwt'))
-		contact_id=result['request']['sellerData']
-		order_id=result['response']['orderId']
-		try:
-			# there is status code
-			# cancellation
-			status_code=result['response']['statusCode']
-			if status_code == 'SUBSCRIPTION_CANCELED':
-				GoogleWalletSubscriptionOrder.cancel_membership_by_wallet(order_id)
-		except:
-			# look up Contact
-			contact=Contact.get_by_id(contact_id)
-			assert contact
-			
-			# updat Contact memberships
-			role=result['request']['name']
-			role=role[:3] # strip off " Membership"
-			
-			# update Contact
-			self.me.signup_membership(role,order_id)
+		encoded_jwt = self.request.get('jwt')
+		if encoded_jwt is not None:
+  			result = jwt.decode(str(encoded_jwt), GOOGLE_SELLER_SECRET)
+  		
+		# validate the payment request and respond back to Google
+  		if result['iss'] == 'Google' and result['aud'] == GOOGLE_SELLER_ID:
+  			if ('response' in result and
+  				'orderId' in result['response'] and
+  				'request' in result):
+				
+				order_id = result['response']['orderId']
+  				request_info = result['request']
+				contact_id=result['request']['sellerData']
 
-			# no status code, normal transaction
-			# create a separate order record
-			google_order=GoogleWalletSubscriptionOrder(parent=ndb.Key('DummyAncestor','WalletRoot'),
-				role=role, 
-				order_id=order_id,
-				order_detail=result,
-				contact_key=self.me)
-			google_order.put_async()			
-			
-			# https://developers.google.com/commerce/wallet/digital/docs/postback
-			self.response.write(order_id)
-			
+		  		# respond back to complete payment
+		  		self.response.set_status('200')
+  				self.response.out.write(order_id)
+  				return
+  		
+				# look up Contact
+				contact=Contact.get_by_id(contact_id)
+				assert contact
+				
+				# updat Contact memberships
+				role=result['request']['name']
+				role=role[:3] # strip off " Membership"
+				
+				# update Contact
+				self.me.signup_membership(role,order_id)
 	
+				# no status code, normal transaction
+				# create a separate order record
+				google_order=GoogleWalletSubscriptionOrder(parent=ndb.Key('DummyAncestor','WalletRoot'),
+					role=role, 
+					order_id=order_id,
+					order_detail=result,
+					contact_key=self.me)
+				google_order.put_async()			
+				
+  				# respond back to complete payment
+  				self.response.out.write(order_id)
+
+			
+			# check if this was a subscription cancellation postback
+			if ('response' in result and
+				'orderId' in result['response'] and
+				'statusCode' in result['response']):
+  				
+  				order_id=result['response']['orderId']
+  				status_code =  result['response']['statusCode']
+				if status_code == 'SUBSCRIPTION_CANCELED':
+					# there is status code
+					# cancellation
+					GoogleWalletSubscriptionOrder.cancel_membership_by_wallet(order_id)
+			
 ####################################################
 #
 # Report Controllers

@@ -66,7 +66,8 @@ CHAT_LEASE_IN_MINUTE=60
 # Seller Identifier:	14174749540741466082
 # Seller Secret:	TbGjq3UzUd4Mln6MIb3V9A
 # POST back url: http://anthem-market-place.appspot.com/wallet/postback
-GOOGLE_SELLER_ID='14174749540741466082'
+#GOOGLE_SELLER_ID='14174749540741466082' #production
+GOOGLE_SELLER_ID='14174749540741466082' #sandbox
 GOOGLE_SELLER_SECRET='GPrFWBaoNSEls-n2k0hsyw' # sandbox
 #GOOGLE_SELLER_SECRET='TbGjq3UzUd4Mln6MIb3V9A' # production
 

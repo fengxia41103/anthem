@@ -4,10 +4,14 @@
 <script type="text/javascript">
 //Success handler
 	var signupSuccessHandler = function(purchaseAction){
+		console.log(purchaseAction);
+		
 		var orderId=purchaseAction['response']['orderId'];
 		j$().toastmessage('showNoticeToast','Thank you for your subscription! Your order number is '+orderId);
     }	
 	var signupFailureHandler = function(purchaseAction){
+		console.log(purchaseAction);
+
 		var error=purchaseAction['response']['errorType'];
 		switch (error){
 			case 'MERCHANT_ERROR':
