@@ -138,7 +138,7 @@ class Contact(ndb.Model):
 		
 		# remove Trial if new_membership !=Trial
 		if role != 'Trial':
-			self.me.memberships=[m for m in self.me.memberships if m.role !='Trial']		
+			self.memberships=[m for m in self.memberships if m.role !='Trial']		
 		self.put()
 	
 	def cancel_membership(self,role):

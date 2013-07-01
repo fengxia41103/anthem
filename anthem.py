@@ -844,7 +844,7 @@ class GoogleWalletToken(MyBaseHandler):
 			GOOGLE_SELLER_SECRET)
 		self.response.write(jwt_token)
 		
-class GoogleWalletPostBack(MyBaseHandler):
+class GoogleWalletPostback(webapp2.RequestHandler):
 	def post(self):
 		encoded_jwt = self.request.get('jwt')
 		if encoded_jwt is not None:
@@ -860,11 +860,6 @@ class GoogleWalletPostBack(MyBaseHandler):
   				request_info = result['request']
 				contact_id=result['request']['sellerData']
 
-		  		# respond back to complete payment
-		  		self.response.set_status('200')
-  				self.response.out.write(order_id)
-  				return
-  		
 				# look up Contact
 				contact=Contact.get_by_id(contact_id)
 				assert contact
@@ -874,15 +869,15 @@ class GoogleWalletPostBack(MyBaseHandler):
 				role=role[:3] # strip off " Membership"
 				
 				# update Contact
-				self.me.signup_membership(role,order_id)
+				contact.signup_membership(role,order_id)
 	
 				# no status code, normal transaction
 				# create a separate order record
 				google_order=GoogleWalletSubscriptionOrder(parent=ndb.Key('DummyAncestor','WalletRoot'),
 					role=role, 
 					order_id=order_id,
-					order_detail=result,
-					contact_key=self.me)
+					order_detail=json.dumps(result),
+					contact_key=contact.key)
 				google_order.put_async()			
 				
   				# respond back to complete payment

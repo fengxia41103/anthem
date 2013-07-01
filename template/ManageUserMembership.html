@@ -4,14 +4,10 @@
 <script type="text/javascript">
 //Success handler
 	var signupSuccessHandler = function(purchaseAction){
-		console.log(purchaseAction);
-		
 		var orderId=purchaseAction['response']['orderId'];
 		j$().toastmessage('showNoticeToast','Thank you for your subscription! Your order number is '+orderId);
     }	
 	var signupFailureHandler = function(purchaseAction){
-		console.log(purchaseAction);
-
 		var error=purchaseAction['response']['errorType'];
 		switch (error){
 			case 'MERCHANT_ERROR':
@@ -126,6 +122,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 	<table class="table-row-border">
 	<thead>	<tr><td>Role</td>
 				<td>Status</td>
+				<td>Payment ID</td>
 				<td></td>
 			</tr>
 	</thead>
@@ -140,6 +137,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 						Expired
 					{% endif %}
 				</td>
+				<td>{{ m.order_id }}</td>
 				<td>
 					{% if m.is_active and m.role=='Trial' %}
 					{% elif m.is_active %}
