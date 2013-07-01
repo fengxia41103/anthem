@@ -27,51 +27,6 @@
     }	
 
 	j$(document).ready(function(){
-		// overlay
-		j$('div.overlay').click(function(e){
-			var pos=j$('div.pin-in-focus').offset();
-			var width=j$('div.pin-in-focus').outerWidth();
-			var height=j$('div.pin-in-focus').outerHeight();
-			var out=false;
-			if ((e.pageX<pos.left) || (e.pageX>(pos.left+width))){
-				out=true;
-			}
-			if ((e.pageY<pos.top) || (e.pageY>(pos.top+height))){
-				out=true;
-			}
-			
-			// NOTE: click on SELECT will not close overlay
-			if (out==true && !j$(e.target).is('select')){
-				j$(this).fadeOut(200);
-			}
-		});
-		
-		// membership start date always default to today!
-		
-		// this is a manual solution for now before we implement PayPal callback
-		j$('#btn-save-new-membership').click(function(){
-			data=[];
-			j$.each(j$('#table-new-membership tbody tr'),function(index,val){
-				var role=j$(val).find('select[item="membership-role"]').val();
-				var startDate=j$(val).find('span[item="membership-start-date"]').html();
-				data.push({'role':role,'start date':startDate});		
-			});
-			
-			j$.post(
-				'/user/membership/new',
-				JSON.stringify(data), // this is important!
-				function(result){
-					switch(result){
-						case '-1':
-							j$().toastmessage('showErroToast','You can not add roles that you already have. If yours has expired, renew it.');
-							break;
-						case '0':
-							j$().toastmessage('showSuccessToast','Thank you! Your new membership will be activated as soon as we have processed your request.');
-							break; 
-					}	
-				}
-			);
-		});
 		
 		// cancel membership
 		j$('span[item="cancel-membership"]').click(function(){
@@ -122,7 +77,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 	<table class="table-row-border">
 	<thead>	<tr><td>Role</td>
 				<td>Status</td>
-				<td>Payment ID</td>
+				<td>Transaction ID</td>
 				<td></td>
 			</tr>
 	</thead>
@@ -163,50 +118,4 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 	</table>
 </div>
 
-<div class="overlay" style="display:none;" id="div-new-membership">
-	<div class="pin-in-focus box-shadow">
-	
-		<div class="border-bottom">
-			<h1>New Membership</h1>
-		</div>
-	
-		<div>
-			{#
-			<span class="command-link" id="add-new-membership" style="float:right;">Add</span>
-			#}
-			
-			<input type="submit" value="Save" id="btn-save-new-membership" class="my-button"/>
-			<input type="submit" value="Renew" id="btn-renew-membership" class="my-button"/>
-				
-			<table class="sf-table two-col-table" id="table-new-membership">
-			<thead><tr><td>Role</td><td>Start Date</td></tr></thead>
-			<tbody>
-				<tr><td>
-					<select item="membership-role">
-					
-						{% for role in membership_options %}
-							<option value="{{ role }}">{{ role }}</option>
-						{% endfor %}
-					</select>
-					<span item="membership-role"></span>
-					</td>
-					<td>
-						<span item="membership-start-date"></span>
-					</td>
-				</tr>
-			</tbody>		
-			</table>
-		</div>
-		
-		<!-- paypal button -->		
-		<div style="float:right;">
-			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-			<input type="hidden" name="cmd" value="_s-xclick">
-			<input type="hidden" name="hosted_button_id" value="MDHCW45BKX2TJ">
-			<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_subscribeCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-			<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-			</form>
-		</div>
-	</div>
-</div>
 {% endblock %}
