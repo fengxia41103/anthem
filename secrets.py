@@ -54,10 +54,19 @@ AUTH_CONFIG = {
 }
 
 # Membership
-MONTHLY_MEMBERSHIP_FEE={'Nur':20,'Doc':10,'Client':10,'Super':100,'Trial':0}
+MONTHLY_MEMBERSHIP_FEE={'Nur':0.01,'Doc':0.01,'Client':0.01,'Super':100,'Trial':0.01}
 
 # Shipping methods
 SHIPPING_METHOD=['UPS','FedEx','DHL','USPS','Other']
 
 # Chat lease in minutes
 CHAT_LEASE_IN_MINUTE=60
+
+# Google wallet merchant
+# Seller Identifier:	14174749540741466082
+# Seller Secret:	TbGjq3UzUd4Mln6MIb3V9A
+# POST back url: http://anthem-market-place.appspot.com/wallet/postback
+GOOGLE_SELLER_ID='14174749540741466082'
+GOOGLE_SELLER_SECRET='GPrFWBaoNSEls-n2k0hsyw' # sandbox
+#GOOGLE_SELLER_SECRET='TbGjq3UzUd4Mln6MIb3V9A' # production
+

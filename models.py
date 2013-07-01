@@ -15,80 +15,44 @@ class DummyAncestor(ndb.Model):
 
 #######################################
 #
+# Auditing models
+#
+#######################################
+class MyAudit(ndb.Model):
+	# when
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
+	# by whome
+	owner=ndb.KeyProperty(kind='Contact')
+	# field name
+	field_name=ndb.StringProperty(required=True)
+	# old value
+	old_value=ndb.GenericProperty()
+	# new value
+	new_value=ndb.GenericProperty()
+
+#######################################
+#
 # User management models
 #
 #######################################
+	
 class Membership(ndb.Model):
 	# StructuredProperty within a Contact
 	created_time=ndb.DateTimeProperty(auto_now_add=True)
 	
-	# membership payments
+	# membership payment
+	role=ndb.StringProperty(required=True,choices=MONTHLY_MEMBERSHIP_FEE.keys())
 	monthly_payment=ndb.ComputedProperty(lambda self: MONTHLY_MEMBERSHIP_FEE[self.role])
-	last_payment_amount=ndb.FloatProperty()
-	last_payment_received_date=ndb.DateProperty()
 	
-	# must be float since cancellation can result in a partial month
-	last_payment_cover_month=ndb.FloatProperty()
-	payment_to_date=ndb.FloatProperty(default=0) # accumulative
-	
-	# membership service role
-	role=ndb.StringProperty(default='Nur',choices=MONTHLY_MEMBERSHIP_FEE.keys())
-	
-	# as of writing, ComputedProperty does not support Date, 5/30/2013	
-	expiration_date=ndb.DateProperty()
+	# subscription date
+	subscription_date=datetime.date.today()
+
+	# order ID, from wallet callback
+	order_id=ndb.StringProperty(required=True)
 	
 	# auto detect whether memship can be active based on last_payment information
-	is_active=ndb.ComputedProperty(lambda self: datetime.date.today()<=self.expiration_date)
-
-	def member_pay(self,num_of_month,amount=None):
-		# if amount specified, use the amount
-		# otherwise, use a calculation
-		if amount:
-			# this essential is an override
-			# eg. promotion of a special term or rate
-			self.last_payment_amount=amount
-		else:
-			self.last_payment_amount=num_of_month*self.monthly_payment
-			
-		self.last_payment_received_date=datetime.date.today()
-		self.last_payment_cover_month=num_of_month
-		self.payment_to_date+=self.last_payment_amount
-		
-		# calculated from last_payment_cover_month
-		# int() will have an effect of giving out extra time for free
-		# this is ok since UI will pass in integer values anway.
-		if num_of_month:
-			self.expiration_date=self.last_payment_received_date+relativedelta( months = +int(self.last_payment_cover_month))
-		else:
-			# if num_of_month==0, we are actually setting up this member for the first time 
-			# but want to keep it inactive, so we set expiration_date to Yesterday, ha.
-			self.expiration_date=self.last_payment_received_date+relativedelta(days=-1)
-			
-	def member_cancel(self):
-		# if member decides to cancel prior to its natural expiration
-		# we will calculate a refund if any
-		# and the self.last_payment_cover_month will be NEGATIVE!
-		# so we can use this as an indicator for cancellation
-		remaining=relativedelta(datetime.date.today(),self.expiration_date)
-		in_month=remaining.years*12+remaining.months
-		refund=self.last_payment_amount*(in_month/self.last_payment_cover_month)
-		
-		# this will set is_active=False, which equals to deactivating this memebership!
-		self.last_payment_cover_month -=in_month
-		self.last_payment_received_date=datetime.date.today()
-		self.payment_to_date-=refund
-		self.expiration_date=datetime.date.today() - datetime.timedelta(days=1)
-						
-class Billing(ndb.Model):
-	# StructuredProperty within a Contact
-	name_on_account=ndb.StringProperty() # billing person's name, this can be different from the user who uses this payment
-	address=ndb.StringProperty() # billing address
-	media=ndb.StringProperty(default='Manual',choices=['MasterCard','Visa','AMEX','Discover','PayPal','Manual'])
-	account_number=ndb.StringProperty() # account #, credit card #, and so on
-	expiration_date=ndb.DateProperty() # user manual setup
-	secret=ndb.StringProperty() # key code, whatever else
-	is_default=ndb.BooleanProperty()
-
+	is_active=ndb.BooleanProperty(default=False)
+				
 class Contact(ndb.Model):
 	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
@@ -99,10 +63,6 @@ class Contact(ndb.Model):
 	memberships=ndb.StructuredProperty(Membership,repeated=True)
 	active_roles=ndb.ComputedProperty(lambda self: [m.role for m in self.memberships if m.is_active],repeated=True)
 	is_active=ndb.ComputedProperty(lambda self: any([m.is_active for m in self.memberships]))
-	
-	# a Contact can have multiple billing methods
-	# we only need one working to proceed a charge
-	billing_methods=ndb.StructuredProperty(Billing,repeated=True)
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty(indexed=False,default='')
@@ -153,6 +113,73 @@ class Contact(ndb.Model):
 		# if a Client membership is Active
 		return (self.is_active and any([r in ['Client','Super'] for r in self.active_roles]))
 
+	def get_eligible_memberships(self):
+		available=[]
+		if 'Nur' not in [r.role for r in self.memberships]:
+			available.append('Nur')
+		if 'Doc' not in [r.role for r in self.memberships]:
+			available.append('Doc')
+		return available
+	
+	def signup_membership(self,role,order_id):
+		# create new membership
+		new_membership=Membership(role=role,order_id=order_id,is_active=True)
+		new_membership.put()
+		
+		# add auditing record
+		my_audit=MyAudit(parent=self.key)
+		my_audit.owner=self.key
+		my_audit.field_name='Memberships'
+		my_audit.old_value=','.join([r.role for r in self.memberships])
+		my_audit.new_value='Adding %s by order ID %s' % (role, order_id)
+		my_audit.put_async() # async auditing
+		
+		self.memberships.append(new_membership)
+		
+		# remove Trial if new_membership !=Trial
+		if role != 'Trial':
+			self.me.memberships=[m for m in self.me.memberships if m.role !='Trial']		
+		self.put()
+	
+	def cancel_membership(self,role):
+		self.memberships=[r for r in self.memberships if r.role !=role]
+		self.put()
+		
+		# TODO: notify ADMIN!
+		
+	@classmethod
+	def cancel_membership_by_wallet(order_id):
+		# find order
+		order=GoogleWalletSubscriptionOrder.query(ancestor=ndb.Key('DummyAncestor','WalletRoot')).filter(GoogleWalletSubscriptionOrder.order_id==order_id).get()
+		assert order
+	
+		# add auditing record
+		contact=order.contact_key.get()
+		my_audit=MyAudit(parent=contact.key)
+		my_audit.owner=contact.key
+		my_audit.field_name='Memberships'
+		my_audit.old_value=','.join([r.role for r in contact.memberships])
+		my_audit.new_value='Removing %s by order ID %s' % (role, order_id)
+		my_audit.put_async() # async auditing
+		
+		# update Contact
+		contact.memberships=[r for r in contact.memberships if r.role !=role]
+		contact.put()
+
+class GoogleWalletSubscriptionOrder(ndb.Model):
+	# membership role
+	role=ndb.StringProperty(required=True)
+	
+	# order id
+	order_id=ndb.StringProperty(required=True)
+	
+	# JSON string from postback
+	order_detail=ndb.TextProperty(required=True)
+	
+	# object key -- what was this order for?
+	# eg. Contact, for membership
+	contact_key=ndb.KeyProperty(kind='Contact')
+		
 #######################################
 #
 # Abstract models
@@ -412,22 +439,6 @@ class UserComment(MyBaseModel):
 	comment=ndb.StringProperty()
 	rating=ndb.IntegerProperty() # 1-5
 
-#######################################
-#
-# Auditing models
-#
-#######################################
-class MyAudit(ndb.Model):
-	# when
-	created_time=ndb.DateTimeProperty(auto_now_add=True)
-	# by whome
-	owner=ndb.KeyProperty(kind='Contact')
-	# field name
-	field_name=ndb.StringProperty(required=True)
-	# old value
-	old_value=ndb.GenericProperty()
-	# new value
-	new_value=ndb.GenericProperty()
 
 #######################################
 #

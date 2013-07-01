@@ -51,8 +51,6 @@ routes = [
 	Route('/user/contact/preference',handler='anthem.ManageUserContactPreference',name='user-contact-preference'),	
 	Route('/user/contact',handler='anthem.ManageUserContact',name='user-contact'),	
 	Route('/user/membership/cancel/<role:\w+>/',handler='anthem.ManageUserMembershipCancel',name='user-membership-cancel'),	
-	Route('/user/membership/renew/<role:\w+>/',handler='anthem.ManageUserMembershipRenew',name='user-membership-renew'),	
-	Route('/user/membership/new',handler='anthem.ManageUserMembershipNew',name='user-membership-new'),	
 	Route('/user/membership',handler='anthem.ManageUserMembership',name='user-membership'),	
 	Route('/user/riskprofile',handler='anthem.ViewUserRiskProfile',name='user-risk-profile'),	
 	
@@ -73,6 +71,10 @@ routes = [
 	Route('/channel/send/message',handler='anthem.ChannelSendMessage',name='channel-send-message'),	
 	Route('/channel/read/message',handler='anthem.ChannelReadMessage',name='channel-read-message'),	
 
+	# google wallet
+	Route('/wallet/token',handler='anthem.GoogleWalletToken',name='google-wallet-token'),	
+	Route('/wallet/postback',handler='anthem.GoogleWalletPostBack',name='google-wallet-postback'),	
+	
 	# if everything falls out
 	Route('/', handler='anthem.MainPage'),  
 	

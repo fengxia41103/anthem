@@ -12,10 +12,12 @@ import json
 import cgi
 import logging
 import datetime
-
+import time
+import jwt # google wallet token
 import jinja2
 from models import *
 from myUtil import *
+from secrets import *
 
 JINJA_ENVIRONMENT = jinja2.Environment(
 	loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -94,10 +96,11 @@ class MyBaseHandler(webapp2.RequestHandler):
 		# initiate membership
 		# TODO: this needs to be replaced by a Membership signup page
 		if not me.memberships:
-			m=Membership(role='Trial')
-			m.member_pay(1) # always 1-month free trial
-			me.memberships.append(m)
-			me.put()
+			membership_orders=GoogleWalletSubscriptionOrder.query(ancestor=ndb.Key('DummyAncestor','WalletRoot')).filter(GoogleWalletSubscriptionOrder.contact_key==me.key)
+			if membership_orders.count()==0:
+			
+				# Trial membership has a special order number "000000"
+				me.signup_membership('Trial','000000')
 		return me
 
 	def get_open_cart(self):
@@ -743,13 +746,12 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 class MyUserBaseHandler(MyBaseHandler):
 	def __init__(self, request=None, response=None):
 		MyBaseHandler.__init__(self,request,response) # extend the base class
-		self.signed_memberships=[m.role for m in self.me.memberships]	
-		self.eligible_new_memberships=[x for x in MONTHLY_MEMBERSHIP_FEE if x not in self.signed_memberships]
+		self.signed_memberships=[m.role for m in self.me.memberships]
 
 
 class ManageUserMembership(MyUserBaseHandler):
 	def get(self):
-		self.template_values['membership_options']={x:MONTHLY_MEMBERSHIP_FEE[x] for x in self.eligible_new_memberships}
+		self.template_values['membership_options']=self.me.get_eligible_memberships()
 			
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserMembership.html')
@@ -757,51 +759,11 @@ class ManageUserMembership(MyUserBaseHandler):
 
 class ManageUserMembershipCancel(MyUserBaseHandler):
 	def post(self,role):	
-		for m in self.me.memberships:
-			if m.role==role:
-				m.member_cancel()		
-				break
+		self.me.cancel_membership(role)
 				
 		# update Contact
-		self.me.put()
 		self.response.write('0')
 
-class ManageUserMembershipRenew(MyUserBaseHandler):
-	def post(self, role):
-		for m in self.me.memberships:
-			if m.role==role:
-				logging.info('here')
-				m.member_pay(1)
-				break
-		self.me.put()
-		
-class ManageUserMembershipNew(MyUserBaseHandler):
-	def post(self):
-		data=json.loads(self.request.body)
-		
-		valid=all([r['role'] in self.eligible_new_memberships for r in data])
-		if not valid:
-			# if UI is built right, we should never hit here
-			# validate that no duplicate role can be created for a user
-			self.response.write('-1')
-			return
-		
-		# create a member request and inactive membership
-		for r in data:
-			try:
-				start_date=datetime.datetime.strptime(r['start date'],'%Y-%m-%d').date()
-			except:
-				start_date=datetime.datetime.strptime(r['start date'],'%m/%d/%Y').date()
-			m=Membership(role=r['role'])
-			m.member_pay(1) # this should be set by PayPal callback
-			self.me.memberships.append(m)
-			
-		# when adding new membership, remove Trial!
-		self.me.memberships=[m for m in self.me.memberships if m.role !='Trial']
-		self.me.put()
-						
-		self.response.write('0')
-		
 class ManageUserContact(MyBaseHandler):
 	def get(self):
 		# render
@@ -844,6 +806,79 @@ class ViewUserRiskProfile(MyBaseHandler):
 			})
 		self.response.write(json.dumps(data))
 		
+####################################################
+#
+# Google Wallet Controllers
+#
+####################################################
+class GoogleWalletToken(MyBaseHandler):
+	def post(self):
+		requesting_role=self.request.get('role')
+		jwt_token = jwt.encode(
+  			{
+  			"iss" : GOOGLE_SELLER_ID,
+  			"aud" : "Google",
+  			"typ" : "google/payments/inapp/item/v1",
+  			"exp" : int(time.time() + 3600),
+  			"iat" : int(time.time()),
+  			"request" :{
+				"name" : "%s Membership" % requesting_role,
+  				"description" : "%s membership subscriptions" % requesting_role,
+				"price" : MONTHLY_MEMBERSHIP_FEE[requesting_role],
+  				"currencyCode" : "USD",
+				"sellerData" : "%s" % self.me.key.id(),
+				"initialPayment" : {
+  					"price" : MONTHLY_MEMBERSHIP_FEE[requesting_role],
+					"currencyCode" : "USD",
+  					"paymentType" : "prorated",
+  				},
+  				"recurrence" : {
+					"price" : MONTHLY_MEMBERSHIP_FEE[requesting_role],
+  					"currencyCode" : "USD",
+					"startTime" : int(time.time() + 2600000),
+  					"frequency" : "monthly",
+					"numRecurrences" : "12",
+				}				
+			}
+  			},
+			GOOGLE_SELLER_SECRET)
+		self.response.write(jwt_token)
+		
+class GoogleWalletPostBack(MyBaseHandler):
+	def post(self):
+		result=json.load(self.request.get('jwt'))
+		contact_id=result['request']['sellerData']
+		order_id=result['response']['orderId']
+		try:
+			# there is status code
+			# cancellation
+			status_code=result['response']['statusCode']
+			if status_code == 'SUBSCRIPTION_CANCELED':
+				GoogleWalletSubscriptionOrder.cancel_membership_by_wallet(order_id)
+		except:
+			# look up Contact
+			contact=Contact.get_by_id(contact_id)
+			assert contact
+			
+			# updat Contact memberships
+			role=result['request']['name']
+			role=role[:3] # strip off " Membership"
+			
+			# update Contact
+			self.me.signup_membership(role,order_id)
+
+			# no status code, normal transaction
+			# create a separate order record
+			google_order=GoogleWalletSubscriptionOrder(parent=ndb.Key('DummyAncestor','WalletRoot'),
+				role=role, 
+				order_id=order_id,
+				order_detail=result,
+				contact_key=self.me)
+			google_order.put_async()			
+			
+			# https://developers.google.com/commerce/wallet/digital/docs/postback
+			self.response.write(order_id)
+			
 	
 ####################################################
 #
