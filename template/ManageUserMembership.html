@@ -84,15 +84,21 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 	<tbody>
 		<!-- signed memberships -->
 		{% for m in me.memberships %}
-			<tr><td>{{ m.get().role }}</td>
+			{% if m %}
+			<tr><td>
+					{{ m.get().role }}
+				</td>
 				<td>
 					Active
 				</td>
-				<td>{{ m.get().order_id }}</td>
+				<td>
+					{{ m.get().order_id }}
+				</td>
 				<td>
 					<span class="command-link" role="{{ m.get().role }}" item="cancel-membership">Cancel</span>
 				</td>
 			</tr>
+			{% endif %}
 		{% endfor %}
 		
 		<!-- unsigned memberships -->
