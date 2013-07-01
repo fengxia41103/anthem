@@ -84,22 +84,13 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 	<tbody>
 		<!-- signed memberships -->
 		{% for m in me.memberships %}
-			<tr><td>{{ m.role }}</td>
+			<tr><td>{{ m.get().role }}</td>
 				<td>
-					{% if m.is_active %}
-						Active
-					{% else %}
-						Expired
-					{% endif %}
+					Active
 				</td>
-				<td>{{ m.order_id }}</td>
+				<td>{{ m.get().order_id }}</td>
 				<td>
-					{% if m.is_active and m.role=='Trial' %}
-					{% elif m.is_active %}
-						<span class="command-link" role="{{ m.role }}" item="cancel-membership">Cancel</span>
-					{% else %}
-						<span class="command-link" role="{{ m.role }}" item="signup-membership">Signup</span>
-					{% endif %}
+					<span class="command-link" role="{{ m.role }}" item="cancel-membership">Cancel</span>
 				</td>
 			</tr>
 		{% endfor %}
@@ -108,6 +99,7 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 		{% for m in membership_options %}
 			<tr>
 				<td>{{ m }}
+				</td><td>
 				</td><td>
 				</td><td>
 					<span class="command-link" role="{{ m }}" item="signup-membership">Signup</span>

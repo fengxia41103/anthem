@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
 from google.appengine.api.users import User
+from google.appengine.api import mail
 import datetime
 from dateutil.relativedelta import relativedelta
 from secrets import *
@@ -36,23 +37,6 @@ class MyAudit(ndb.Model):
 #
 #######################################
 	
-class Membership(ndb.Model):
-	# StructuredProperty within a Contact
-	created_time=ndb.DateTimeProperty(auto_now_add=True)
-	
-	# membership payment
-	role=ndb.StringProperty(required=True,choices=MONTHLY_MEMBERSHIP_FEE.keys())
-	monthly_payment=ndb.ComputedProperty(lambda self: MONTHLY_MEMBERSHIP_FEE[self.role])
-	
-	# subscription date
-	subscription_date=datetime.date.today()
-
-	# order ID, from wallet callback
-	order_id=ndb.StringProperty(required=True)
-	
-	# auto detect whether memship can be active based on last_payment information
-	is_active=ndb.BooleanProperty(default=False)
-				
 class Contact(ndb.Model):
 	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
@@ -60,9 +44,9 @@ class Contact(ndb.Model):
 	communication=ndb.PickleProperty(default={'Phone':'','Facebook':'','Tweeter':''}) # a dict
 
 	# a Contact can sign up multiple membership kinds
-	memberships=ndb.StructuredProperty(Membership,repeated=True)
-	active_roles=ndb.ComputedProperty(lambda self: [m.role for m in self.memberships if m.is_active],repeated=True)
-	is_active=ndb.ComputedProperty(lambda self: any([m.is_active for m in self.memberships]))
+	memberships=ndb.KeyProperty(kind='GoogleWalletSubscriptionOrder',repeated=True)
+	active_roles=ndb.ComputedProperty(lambda self: [m.get().role for m in self.memberships if m],repeated=True)
+	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty(indexed=False,default='')
@@ -115,56 +99,67 @@ class Contact(ndb.Model):
 
 	def get_eligible_memberships(self):
 		available=[]
-		if 'Nur' not in [r.role for r in self.memberships]:
+		if 'Nur' not in self.active_roles:
 			available.append('Nur')
-		if 'Doc' not in [r.role for r in self.memberships]:
+		if 'Doc' not in self.active_roles:
 			available.append('Doc')
 		return available
 	
-	def signup_membership(self,role,order_id):
-		# create new membership
-		new_membership=Membership(role=role,order_id=order_id,is_active=True)
-		new_membership.put()
-		
+	def signup_membership(self,g_order):
 		# add auditing record
 		my_audit=MyAudit(parent=self.key)
 		my_audit.owner=self.key
 		my_audit.field_name='Memberships'
-		my_audit.old_value=','.join([r.role for r in self.memberships])
-		my_audit.new_value='Adding %s by order ID %s' % (role, order_id)
+		my_audit.old_value=','.join(self.active_roles)
+		my_audit.new_value='Adding %s by order ID %s' % (g_order.role, g_order.order_id)
 		my_audit.put_async() # async auditing
 		
-		self.memberships.append(new_membership)
+		self.memberships.append(g_order.key)
 		
 		# remove Trial if new_membership !=Trial
-		if role != 'Trial':
-			self.memberships=[m for m in self.memberships if m.role !='Trial']		
+		if g_order.role != 'Trial':
+			self.memberships=[m for m in self.memberships if m and m.get().role !='Trial']		
 		self.put()
 	
 	def cancel_membership(self,role):
-		self.memberships=[r for r in self.memberships if r.role !=role]
-		self.put()
+		batch=[]
 		
-		# TODO: notify ADMIN!
+		# get canceling key
+		being_canceled=[r for r in self.memberships if r.get().role==role]
+		order=being_canceled[0].get()
+		order.cancel_date=datetime.datetime.today()
+		batch.append(order)
+
+		# setting up audit		
+		my_audit=MyAudit(parent=self.key)
+		my_audit.owner=self.key
+		my_audit.field_name='Memberships'
+		my_audit.old_value=','.join(self.active_roles)
+		my_audit.new_value='Removing %s' % (role)
+		my_audit.put_async() # async auditing
+
+		# update contact
+		self.memberships=[r for r in self.memberships if r.get().role !=role]
+		batch.append(self)
 		
+		ndb.put_multi_async(batch)
+		
+		# notify ADMIN!
+		message = mail.EmailMessage(sender="System <anthem.marketplace@gmail.com>",
+                            subject="Subscription Cancelation")
+		message.to='anthem.marketplace@gmail.com'
+		message.body='User %s has canceled membership %s.' % (self.nickname, role)
+		message.send()		
+				
 	@classmethod
 	def cancel_membership_by_wallet(order_id):
 		# find order
 		order=GoogleWalletSubscriptionOrder.query(ancestor=ndb.Key('DummyAncestor','WalletRoot')).filter(GoogleWalletSubscriptionOrder.order_id==order_id).get()
 		assert order
 	
-		# add auditing record
-		contact=order.contact_key.get()
-		my_audit=MyAudit(parent=contact.key)
-		my_audit.owner=contact.key
-		my_audit.field_name='Memberships'
-		my_audit.old_value=','.join([r.role for r in contact.memberships])
-		my_audit.new_value='Removing %s by order ID %s' % (role, order_id)
-		my_audit.put_async() # async auditing
-		
 		# update Contact
-		contact.memberships=[r for r in contact.memberships if r.role !=role]
-		contact.put()
+		order.contact_key.get().cancel_membership(order.role)
+		
 
 class GoogleWalletSubscriptionOrder(ndb.Model):
 	# membership role
@@ -179,6 +174,10 @@ class GoogleWalletSubscriptionOrder(ndb.Model):
 	# object key -- what was this order for?
 	# eg. Contact, for membership
 	contact_key=ndb.KeyProperty(kind='Contact')
+	
+	# user cancel
+	cancel_date=ndb.DateProperty()
+	is_canceled=ndb.ComputedProperty(lambda self: self.cancel_date!=None)
 		
 #######################################
 #

@@ -95,12 +95,6 @@ class MyBaseHandler(webapp2.RequestHandler):
 			
 		# initiate membership
 		# TODO: this needs to be replaced by a Membership signup page
-		if not me.memberships:
-			membership_orders=GoogleWalletSubscriptionOrder.query(ancestor=ndb.Key('DummyAncestor','WalletRoot')).filter(GoogleWalletSubscriptionOrder.contact_key==me.key)
-			if membership_orders.count()==0:
-			
-				# Trial membership has a special order number "000000"
-				me.signup_membership('Trial','000000')
 		return me
 
 	def get_open_cart(self):
@@ -746,8 +740,6 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 class MyUserBaseHandler(MyBaseHandler):
 	def __init__(self, request=None, response=None):
 		MyBaseHandler.__init__(self,request,response) # extend the base class
-		self.signed_memberships=[m.role for m in self.me.memberships]
-
 
 class ManageUserMembership(MyUserBaseHandler):
 	def get(self):
@@ -868,9 +860,6 @@ class GoogleWalletPostback(webapp2.RequestHandler):
 				role=result['request']['name']
 				role=role[:3] # strip off " Membership"
 				
-				# update Contact
-				contact.signup_membership(role,order_id)
-	
 				# no status code, normal transaction
 				# create a separate order record
 				google_order=GoogleWalletSubscriptionOrder(parent=ndb.Key('DummyAncestor','WalletRoot'),
@@ -878,8 +867,11 @@ class GoogleWalletPostback(webapp2.RequestHandler):
 					order_id=order_id,
 					order_detail=json.dumps(result),
 					contact_key=contact.key)
-				google_order.put_async()			
-				
+				google_order.put()			
+
+				# update Contact
+				contact.signup_membership(google_order)
+					
   				# respond back to complete payment
   				self.response.out.write(order_id)
 
