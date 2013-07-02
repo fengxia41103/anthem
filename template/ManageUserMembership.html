@@ -73,6 +73,54 @@ You can <strong>add</strong> or <strong>cancel</strong> a membership at any time
 supporting your business. <a href="">Learn more</a> of different memberships and choose the ones that best fit your interest.
 </p>
 
+<blockquote>
+	<h3>Beta Testing</h3>
+	<p>
+	When beta testing, you can use the following credit card numbers:
+	</p>
+	
+	<table class="ariel-table table-row-border">
+	<thead>
+	<tr>
+  	<td>Card type</td>
+	<td>Card number</td>
+  	<td>CVC</td>
+	<td>Expiration date
+	</td></tr>
+	</thead>
+	<tbody>
+	
+	<tr>
+  	<td>American Express</td>
+	<td>3782 8224 6310 005</td>
+  	<td>any four digits</td>
+	<td>any future date</td>
+	</tr>
+	
+	<tr>
+  	<td>Discover</td>
+	<td>6011 1111 1111 1117</td>
+  	<td>any three digits</td>
+	<td>any future date</td>
+	</tr>
+	
+	<tr>
+  	<td>MasterCard</td>
+	<td>5555 5555 5555 4444</td>
+  	<td>any three digits</td>
+	<td>any future date</td>
+	</tr>
+	
+	<tr>
+  	<td>Visa</td>
+	<td>4111 1111 1111 1111</td>
+  	<td>any three digits</td>
+	<td>any future date</td>
+	</tr>
+	</tbody>
+	</table>
+</blockquote>
+
 <div class="quick-pane">
 	<table class="table-row-border">
 	<thead>	<tr><td>Role</td>
@@ -95,7 +143,9 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 					{{ m.get().order_id }}
 				</td>
 				<td>
+					{% if m.get().role != 'Trial' %}
 					<span class="command-link" role="{{ m.get().role }}" item="cancel-membership">Cancel</span>
+					{% endif %}
 				</td>
 			</tr>
 			{% endif %}

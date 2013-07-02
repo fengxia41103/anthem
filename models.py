@@ -44,9 +44,14 @@ class Contact(ndb.Model):
 	communication=ndb.PickleProperty(default={'Phone':'','Facebook':'','Tweeter':''}) # a dict
 
 	# a Contact can sign up multiple membership kinds
+	# each membership came from a GoogleWalletOrder so there is 1-1 relationship
+	# between a membership and an order ID!
 	memberships=ndb.KeyProperty(kind='GoogleWalletSubscriptionOrder',repeated=True)
 	active_roles=ndb.ComputedProperty(lambda self: [m.get().role for m in self.memberships if m],repeated=True)
 	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
+	
+	# Trial is a one-time deal
+	has_trialed=ndb.BooleanProperty(default=False)
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty(indexed=False,default='')
@@ -99,6 +104,8 @@ class Contact(ndb.Model):
 
 	def get_eligible_memberships(self):
 		available=[]
+		if not self.has_trialed:
+			available.append('Trial')
 		if 'Nur' not in self.active_roles:
 			available.append('Nur')
 		if 'Doc' not in self.active_roles:
@@ -115,17 +122,22 @@ class Contact(ndb.Model):
 		my_audit.put_async() # async auditing
 		
 		self.memberships.append(g_order.key)
+		if g_order.role=='Trial':
+			self.has_trialed=True
+		self.put()
 		
 		# remove Trial if new_membership !=Trial
 		if g_order.role != 'Trial':
-			self.memberships=[m for m in self.memberships if m and m.get().role !='Trial']		
-		self.put()
+			self.cancel_membership('Trial')
 	
 	def cancel_membership(self,role):
 		batch=[]
 		
 		# get canceling key
 		being_canceled=[r for r in self.memberships if r.get().role==role]
+		if len(being_canceled)==0: return # nothing to cancel
+		
+		# find candidate, go ahead
 		order=being_canceled[0].get()
 		order.cancel_date=datetime.datetime.today()
 		batch.append(order)
@@ -142,7 +154,7 @@ class Contact(ndb.Model):
 		self.memberships=[r for r in self.memberships if r.get().role !=role]
 		batch.append(self)
 		
-		ndb.put_multi_async(batch)
+		ndb.put_multi(batch)
 		
 		# notify ADMIN!
 		message = mail.EmailMessage(sender="System <anthem.marketplace@gmail.com>",

@@ -93,8 +93,14 @@ class MyBaseHandler(webapp2.RequestHandler):
 			nickname=user.nickname(),
 			cash=0)
 			
-		# initiate membership
-		# TODO: this needs to be replaced by a Membership signup page
+		# initiate membership with a Trial if contact has none
+		if len(me.memberships)==0:
+			fake_order=GoogleWalletSubscriptionOrder(role='Trial',
+				order_id='000000',
+				order_detail='',
+				contact_key=me.key)
+			fake_order.put()
+			me.signup_membership(fake_order)
 		return me
 
 	def get_open_cart(self):
@@ -355,7 +361,8 @@ class BrowseBuyOrder(MyBaseHandler):
 		# compose data structure for template
 		if queries:
 			queries=queries.fetch(100)
-			
+		logging.info(','.join([q.name for q in queries if q.owner==None]))
+	
 		self.template_values['buyorders']=queries		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')
 		self.response.write(template.render(self.template_values))
