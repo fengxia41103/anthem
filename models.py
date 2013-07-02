@@ -41,7 +41,7 @@ class Contact(ndb.Model):
 	# key_name will be the user_id()
 	email=ndb.StringProperty() # user email
 	nickname=ndb.StringProperty() # user name
-	communication=ndb.PickleProperty(default={'Phone':'','Facebook':'','Tweeter':''}) # a dict
+	communication=ndb.PickleProperty(default={'Phone':'','MITBBS':'','QQ':''}) # a dict
 
 	# a Contact can sign up multiple membership kinds
 	# each membership came from a GoogleWalletOrder so there is 1-1 relationship
@@ -51,7 +51,8 @@ class Contact(ndb.Model):
 	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
 	
 	# Trial is a one-time deal
-	has_trialed=ndb.BooleanProperty(default=False)
+	trial_time=ndb.DateProperty(default=datetime.datetime.today())
+	trial_age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.trial_time).total_seconds())
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty(indexed=False,default='')
@@ -104,8 +105,6 @@ class Contact(ndb.Model):
 
 	def get_eligible_memberships(self):
 		available=[]
-		if not self.has_trialed:
-			available.append('Trial')
 		if 'Nur' not in self.active_roles:
 			available.append('Nur')
 		if 'Doc' not in self.active_roles:
@@ -123,7 +122,7 @@ class Contact(ndb.Model):
 		
 		self.memberships.append(g_order.key)
 		if g_order.role=='Trial':
-			self.has_trialed=True
+			self.trial_time=datetime.datetime.today()
 		self.put()
 		
 		# remove Trial if new_membership !=Trial

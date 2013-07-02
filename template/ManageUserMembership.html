@@ -145,6 +145,11 @@ supporting your business. <a href="">Learn more</a> of different memberships and
 				<td>
 					{% if m.get().role != 'Trial' %}
 					<span class="command-link" role="{{ m.get().role }}" item="cancel-membership">Cancel</span>
+					{% elif me.trial_age > 30*24*3600 %}
+						Trial has expired
+					{% else %}
+						{% set day_left = 30-(me.trial_age/24/3600) %}
+						{{ '%0.1f'|format(day_left|float)  }} days left
 					{% endif %}
 				</td>
 			</tr>
