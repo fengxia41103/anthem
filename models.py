@@ -91,7 +91,7 @@ class Contact(ndb.Model):
 		# if it's in Trial period
 		# Trial is limited to 30-day beginning at first creation of this Contact record
 		# TODO: a CRON job to remove Trial from Contact based on 30-day age rule
-		return 'Trial' in self.active_roles] and self.trial_age<(30*24*3600)
+		return 'Trial' in self.active_roles and self.trial_age<(30*24*3600)
 		
 	def can_be_doc(self):
 		# if a Doc membership is Active
