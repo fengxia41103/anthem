@@ -89,19 +89,21 @@ class Contact(ndb.Model):
 
 	def is_trial(self):
 		# if it's in Trial period
-		return (self.is_active and any([r in ['Trial'] for r in self.active_roles]))
+		# Trial is limited to 30-day beginning at first creation of this Contact record
+		# TODO: a CRON job to remove Trial from Contact based on 30-day age rule
+		return 'Trial' in self.active_roles] and self.trial_age<(30*24*3600)
 		
 	def can_be_doc(self):
 		# if a Doc membership is Active
-		return (self.is_active and any([r in ['Doc','Trial','Super'] for r in self.active_roles]))
+		return any([r in ['Doc','Super'] for r in self.active_roles]) or self.is_trial()
 
 	def can_be_nur(self):
 		# if a Nur membership is Active
-		return (self.is_active and any([r in ['Nur','Trial','Super'] for r in self.active_roles]))
+		return any([r in ['Nur','Super'] for r in self.active_roles]) or self.is_trial()
 
 	def can_be_client(self):
 		# if a Client membership is Active
-		return (self.is_active and any([r in ['Client','Super'] for r in self.active_roles]))
+		return any([r in ['Client','Super'] for r in self.active_roles]) or self.is_trial()
 
 	def get_eligible_memberships(self):
 		available=[]
