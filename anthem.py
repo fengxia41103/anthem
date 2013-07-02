@@ -184,7 +184,13 @@ class PublishNewBuyOrder(MyBaseHandler):
 		
 		# create a new buyorder
 		client_email=self.request.POST['client'].strip()
+		
+		# product name
+		# special html symbols have to be converted!
 		product=self.request.POST['product'].strip()
+		product=product.replace("'",'&#39;')
+		product=product.replace('"','&quot;')
+		
 		description=self.request.POST['description'].strip()
 		
 		# to safeguard inputs
