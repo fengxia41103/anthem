@@ -51,8 +51,8 @@ class Contact(ndb.Model):
 	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
 	
 	# Trial is a one-time deal
-	trial_time=ndb.DateProperty(default=datetime.datetime.today())
-	trial_age=ndb.ComputedProperty(lambda self: (datetime.datetime.today()-self.trial_time).total_seconds())
+	trial_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	trial_age=ndb.ComputedProperty(lambda self: (datetime.datetime.now()-self.trial_time).total_seconds())
 	
 	# we don't need to know its residential
 	shipping_address=ndb.StringProperty(indexed=False,default='')
