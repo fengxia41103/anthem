@@ -1230,7 +1230,9 @@ class ChannelListOnlineUsers(webapp2.RequestHandler):
 	def post(self):
 		queries=ChatChannel.query(ChatChannel.in_use==True)
 		online_users=list(set([c.contact_name for c in queries]))
-		self.response.write(json.dumps(online_users))
+		if len(online_users):
+			self.response.write(json.dumps(online_users))
+		else: self.response.write('-1')
 		
 
 ####################################################
