@@ -780,7 +780,7 @@ class ManageUserContact(MyBaseHandler):
 		self.me.put()
 		
 		if 'mitbbs' in [k.lower() for k in self.me.communication.keys()]:
-			send_chat(self.me.nickname,'System','Requesting MITBBS integration')
+			send_chat(self.me.nickname,'System','%s (%s) is requesting MITBBS integration' % (self.me.nickname,self.me.email))
 		self.response.write('0')
 
 class ManageUserContactPreference(MyBaseHandler):
