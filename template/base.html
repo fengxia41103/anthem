@@ -127,12 +127,18 @@
 </table>
 
 <!-- message pane -->
-<span id="channel-visible-switch">Chat</span>
+<div id="channel-visible-switch">Chat
+<!-- online user list -->
+<select id="online-user-list" style="">
+	<option value=""></option>
+</select>
+</div>
+
 <div class="channel-message-container" style="display:none;" id="channel-container">
 	<div class="channel-message-displayer" id="channel-displayer"></div>
 	
 	<div class="channel-message-writer" style="width:100px;" id="channel-writer">
-		<input type="text" name="receiver-name" placeholder="@username"/>
+		<input type="text" name="receiver-name" placeholder="@username" value="@me"/>
 		<br />
 		<input type="text" name="channel-message" placeholder=""/>
 	</div>
@@ -141,8 +147,10 @@
 	
 </div>
 
+
 <div class="push"></div>
 </div>
+
 
 {% block footer %}
 <div class="footer">
@@ -256,21 +264,22 @@
  		}
  	}
  	
-	function pollChatMessage(){
+	function pollChatOnlineUsers(){
 		j$.post(
-			'/channel/read/message',
-			{'receiver':'{{ me.nickname }}'},
+			'/channel/list/onlineusers',
 			function(result){
 				switch(result){
 					case '-1':
-						//j$().toastmessage('showNoticeToast','You have no message');
+						j$().toastmessage('showNoticeToast','No one is availabe to chat at this moment');
 						break;
 					default:
-						var msg=j$.parseJSON(result);
-						if (msg.length>0) j$('#you-have-chat').show( "pulsate" );
-						for (var i=0;i<msg.length;i++){						
-							refreshChannelMessage(formatChannelMessage(msg[i]['sender'],msg[i]['message']));
+						var users=j$.parseJSON(result);
+						if (users.length>0) j$('#you-have-chat').show( "pulsate" );
+						var html='';
+						for (var i=0;i<users.length;i++){
+							html+='<option value="'+users[i]+'">'+users[i]+'</option>';
 						}
+						j$('#online-user-list').html(html);
 						break;
 				}// end of switch
 			}
@@ -278,13 +287,13 @@
 	}
 
 	function onOpened(){
-		console.log('channel opened');
+		//console.log('channel opened');
 	}
 	function onClose(){
-		console.log('channel closed');	
+		//console.log('channel closed');	
 	}
 	function onError(){
-		console.log('channel error');		
+		//console.log('channel error');		
 	}
 	function onMessage(msg){
 		var data=j$.parseJSON(msg.data);
@@ -307,7 +316,6 @@
 						j$().toastmessage('showNoticeToast','You have two chat windows open. Please close one and try me again.');
 						break;
 					default:
-						console.log('Received token: '+result);
 						channel = new goog.appengine.Channel(result);
 						socket = channel.open();
 						socket.onopen = onOpened;
@@ -320,7 +328,6 @@
 		);
 	}
 	function closeChatChannel(){
-		console.log('Closing socket');
 		if (typeof socket!= "undefined"){
 			socket.close();
 		}
@@ -331,7 +338,6 @@
 
 		// channel write message
 		j$('input[name="channel-message"]').keypress(function(event) {
-			
     		var keycode = (event.keyCode ? event.keyCode : event.which);
         	if(keycode == '13') {
 				var receiver_name=j$('input[name="receiver-name"]').val();
@@ -350,16 +356,14 @@
 							'receiver': receiver_name,
 							'message':message};
 					j$.post(
-						//'/channel/send/message',
 						'/channel/route',
 						data,
 						function(result){
 							switch (result){
 								case '-1':
-									j$().toastmessage('showNoticeToast','User is offline. Please try later.');
+									j$().toastmessage('showNoticeToast','User is offline. Your message has been sent in an email.');
 									break;
 								default:
-									//j$().toastmessage('showNoticeToast','Sent');
 									var html=formatChannelMessage('me',message);
     								refreshChannelMessage(html);
     								
@@ -386,15 +390,12 @@
 			});
 			j$(this).hide();
 			
-			// start poller
-			//chat_message_poller=setInterval(pollChatMessage,10000);
+			// apply token
 			applyChatToken();
 
 		});
 		j$('#channel-collapse-switch').click(function(){
 			// cancel polling
-			//clearInterval(chat_message_poller);
-			//chat_message_poller=0;
 			closeChatChannel();
 			
 			j$('#channel-container').hide();
@@ -405,6 +406,15 @@
 		j$(document).on('click','div.channel-message',function(){
 			var sender=j$(this).find('span.channel-sender:first').html();
 			j$('input[name="receiver-name"]').val('@'+sender);
+		});
+		
+		// refresh online user list
+		j$('#you-have-chat').click(function(){
+			pollChatOnlineUsers();		
+		});
+		
+		j$('#online-user-list').click(function(){
+			j$('input[name="receiver-name"]').val('@'+j$(this).val());			
 		});
 	});
 	</script>	

@@ -70,6 +70,7 @@ routes = [
 	Route('/channel/route',handler='anthem.ChannelRouteMessage',name='channel-route-message'),	
 	Route('/channel/send/message',handler='anthem.ChannelSendMessage',name='channel-send-message'),	
 	Route('/channel/read/message',handler='anthem.ChannelReadMessage',name='channel-read-message'),	
+	Route('/channel/list/onlineusers',handler='anthem.ChannelListOnlineUsers',name='channel-list-onlineusers'),	
 
 	# google wallet
 	Route('/wallet/token',handler='anthem.GoogleWalletToken',name='google-wallet-token'),	

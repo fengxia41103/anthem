@@ -778,6 +778,9 @@ class ManageUserContact(MyBaseHandler):
 	def post(self):
 		self.me.communication=self.request.POST
 		self.me.put()
+		
+		if 'mitbbs' in [k.lower() for k in self.me.communication.keys()]:
+			send_chat(self.me.nickname,'System','Requesting MITBBS integration')
 		self.response.write('0')
 
 class ManageUserContactPreference(MyBaseHandler):
@@ -1079,23 +1082,7 @@ class ReportBuyOrderPopular(MyBaseHandler):
 #
 ####################################################
 
-# this may break if multiple application instance is used
-# which means two message can end up on two unrelated servers
-# thus not visible to each other. If this happens, we need to resolve
-# to use datastore for persistence.
-message_queue={}
-
 def send_chat(sender,receiver,message):
-		# save to queue
-		#if receiver not in message_queue:
-		#	message_queue[receiver]=[{'sender':sender, 'message':message}]
-		#else:
-		#	message_queue[receiver].append({'sender':sender, 'message':message})
-		
-		# save to datastore
-		#chat_msg=ChatMessage(parent=ndb.Key(DummyAncestor,'ChatRoot'),sender_name=sender_name,receiver_name=receiver_name,message=msg)
-		#chat_msg.put()
-
 		# look up live receiver channel by name
 		queries=ChatChannel.query(ChatChannel.contact_name==receiver, ChatChannel.in_use==True)
 		
@@ -1105,62 +1092,31 @@ def send_chat(sender,receiver,message):
 				channel.send_message(c.client_id,json.dumps({'sender':sender,'message':message}))
 			return queries.count()
 		else:
+			# no live channel to receiver, we send an email alert
+			if sender.lower in ['system','admin','anthem.marketplace']:
+				from_email='anthem.marketplace@gmail.com'
+			else:
+				sender=Contact.query(Contact.nickname==sender).get()
+				if sender: from_email=sender.email
+				else: from_email=None
+			
+			if receiver.lower() in ['system','admin', 'anthem.marketplace']:
+				to_email='anthem.marketplace@gmail.com'
+			else:
+				receiver=Contact.query(Contact.nickname==receiver).get()
+				if receiver: to_email=receiver.email
+				else: to_email=None
+			
+			# if there is a valid receiver email
+			if from_email and to_email:
+				# user may put in a typo, so we use this IF instead of assert
+				mail.send_mail(sender=from_email,
+					to=to_email,
+					subject="You have got mail",
+					body=message
+				)
 			return 0
 			
-class ChannelSendMessage(webapp2.RequestHandler):
-	def post(self):
-		sender_name=self.request.get('sender')
-		
-		# strip off first '@'
-		receiver_name=self.request.get('receiver')
-		receiver_name=receiver_name[1:]
-		
-		msg=self.request.get('message')
-		send_chat(sender_name,receiver_name,msg)
-		
-		# status
-		self.response.write('0')
-		
-class ChannelReadMessage(webapp2.RequestHandler):
-	def post(self):
-		receiver_name=self.request.get('receiver')
-		
-		# let's try in-memory queue
-		if message_queue.has_key(receiver_name):
-			msg=message_queue[receiver_name]
-		
-			# clear queue
-			# this is risky, however, that there is no guarantee
-			# all msg will be delivered, thus deleting the entire queue
-			# can cause some msg to be lost
-			message_queue[receiver_name]=[]
-			
-			# send
-			self.response.write(json.dumps(msg))
-		else:
-			self.response.write('-1')
-		
-		# use datastore 
-		# the problem is that if record is not deleted within the next poll,
-		# it will be queried again and send again!
-		# so somehow we need to indicate this record is sent already.
-		# but even using a flag, what to guarantee that put() will finish before the next poll?
-		
-		# fetch 10 at a time
-		#stored_msg=ChatMessage.query(ancestor=ndb.Key(DummyAncestor,'ChatRoot')).filter(ChatMessage.receiver_name==receiver_name).fetch(10)
-		#if len(stored_msg)==0:
-		#	self.response.write('-1')
-		#else:
-		#	msg=[{'sender':s.sender_name,'message':s.message} for s in stored_msg]
-		#	ndb.delete_multi_async([s.key for s in stored_msg])
-			
-			# send to client
-		#	self.response.write(json.dumps(msg))
-
-# free app max list length will be 100
-# so iteration shouldn't be too bad
-# client_id: {'contact_id':user, 'contact_name': nickname, 'token':token, 'in_use':False, 'created_time':created_time)
-chat_channel_pool={}
 
 class ChannelConnected(webapp2.RequestHandler):
 	def post(self):
@@ -1184,7 +1140,6 @@ class ChannelConnected(webapp2.RequestHandler):
 		saved_channel.in_use=True
 		saved_channel.put()	
 		
-		logging.info('Connected: '+client_id)
 						
 class ChannelDisconnected(webapp2.RequestHandler):
 	def post(self):
@@ -1209,7 +1164,6 @@ class ChannelDisconnected(webapp2.RequestHandler):
 		saved_channel.in_use=False
 		saved_channel.put()	
 		
-		logging.info('Disconnected: '+client_id)
 		
 class ChannelToken(webapp2.RequestHandler):
 	# This is the token pool management controller.
@@ -1254,7 +1208,6 @@ class ChannelToken(webapp2.RequestHandler):
 				c.put()
 				 
 				# tell client token
-				logging.info('Issuing new token: '+random_token)
 				self.response.write(random_token)
 			
 			else: # user has 2 open channel already, deny new request
@@ -1272,6 +1225,13 @@ class ChannelRouteMessage(webapp2.RequestHandler):
 		# user offline
 		if send_chat(sender,receiver,message)==0:
 			self.response.write('-1')
+
+class ChannelListOnlineUsers(webapp2.RequestHandler):
+	def post(self):
+		queries=ChatChannel.query(ChatChannel.in_use==True)
+		online_users=list(set([c.contact_name for c in queries]))
+		self.response.write(json.dumps(online_users))
+		
 
 ####################################################
 #
