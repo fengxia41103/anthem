@@ -127,7 +127,8 @@
 </table>
 
 <!-- message pane -->
-<div id="channel-visible-switch" style="display:none;">Chat
+<div id="channel-visible-switch">
+Chat
 <!-- online user list -->
 <select id="online-user-list" style="">
 	<option value=""></option>
@@ -270,7 +271,6 @@
 			function(result){
 				switch(result){
 					case '-1':
-						j$('#channel-visible-switch').hide();						
 						j$().toastmessage('showNoticeToast','No one is availabe to chat at this moment');
 						break;
 					default:
@@ -282,9 +282,8 @@
 							html+='<option value="'+users[i]+'">'+users[i]+'</option>';
 						}
 						j$('#online-user-list').html(html);
-						j$('#channel-visible-switch').fadeIn(400);						
 						
-						j$().toastmessage('showNoticeToast',users.length+' users are online. Welcome to Anthem Market Place Chat.');
+						j$().toastmessage('showNoticeToast',users.length+' users are chatty');
 						break;
 				}// end of switch
 			}
