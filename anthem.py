@@ -98,6 +98,7 @@ class MyBaseHandler(webapp2.RequestHandler):
 			fake_order=GoogleWalletSubscriptionOrder(role='Trial',
 				order_id='000000',
 				order_detail='',
+				trial_time=datetime.datetime.now(),
 				contact_key=me.key)
 			fake_order.put()
 			me.signup_membership(fake_order)
