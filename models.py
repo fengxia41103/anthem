@@ -51,7 +51,7 @@ class Contact(ndb.Model):
 	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
 	
 	# Trial is a one-time deal
-	trial_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	trial_time=ndb.DateTimeProperty(auto_now_add=True)
 	trial_age=ndb.ComputedProperty(lambda self: (datetime.datetime.now()-self.trial_time).total_seconds())
 	
 	# we don't need to know its residential
@@ -199,7 +199,7 @@ class GoogleWalletSubscriptionOrder(ndb.Model):
 #######################################
 class MyBaseModel(ndb.Model):
 	# two time stamps
-	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
 	# object owner tied to a Contact
