@@ -127,7 +127,7 @@
 </table>
 
 <!-- message pane -->
-<div id="channel-visible-switch">Chat
+<div id="channel-visible-switch" style="display:none;">Chat
 <!-- online user list -->
 <select id="online-user-list" style="">
 	<option value=""></option>
@@ -275,13 +275,16 @@
 						break;
 					default:
 						var users=j$.parseJSON(result);
-						if (users.length>0) j$('#you-have-chat').show( "pulsate" );
+						
+						// populate online user list
 						var html='';
 						for (var i=0;i<users.length;i++){
 							html+='<option value="'+users[i]+'">'+users[i]+'</option>';
 						}
 						j$('#online-user-list').html(html);
 						j$('#channel-visible-switch').fadeIn(400);						
+						
+						j$().toastmessage('showNoticeToast',users.length+' users are online. Welcome to Anthem Market Place Chat.");
 						break;
 				}// end of switch
 			}
