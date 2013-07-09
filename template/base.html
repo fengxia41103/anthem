@@ -79,6 +79,12 @@
 				</a>
 			</li>
 			{% endif %}
+			
+			<li id="nav-help">
+				<a href="https://sites.google.com/site/anthemmarketplacehelp/">
+				Help
+				</a>
+			</li>
 		</ul>
 		</span>
 	</td><td>
@@ -368,14 +374,16 @@ Chat
 									j$().toastmessage('showNoticeToast','User is offline. Your message has been sent in an email.');
 									break;
 								default:
-									var html=formatChannelMessage('me',message);
-    								refreshChannelMessage(html);
-    								
-    								// clear input box
-    								j$('input[name="channel-message"]').val('');
 									break;								
 							}
-						
+							
+							// Since msg will be emailed if user is offline,
+							// we will update UI in all cases as if the msg was sent
+							var html=formatChannelMessage('me',message);
+    						refreshChannelMessage(html);
+    						
+    						// clear input box
+    						j$('input[name="channel-message"]').val('');
 						}
 					);
 							

@@ -191,7 +191,8 @@ class PublishNewBuyOrder(MyBaseHandler):
 		product=product.replace("'",'&#39;')
 		product=product.replace('"','&quot;')
 		
-		description=self.request.POST['description'].strip()
+		# escape newline!
+		description=self.request.POST['description'].strip().replace('\r','<br />').replace('\n','<br />')
 		
 		# to safeguard inputs
 		try:
