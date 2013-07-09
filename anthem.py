@@ -485,7 +485,7 @@ class ApproveCart(MyBaseHandler):
 				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
 				cart.status='Closed'
 				
-				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+				send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
 				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
 		else:
 			# TODO: give an assert now
@@ -690,6 +690,9 @@ class ShippingCartProcess(MyBaseHandler):
 			if (cart.seller_reconciled):
 				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
 				cart.status='Closed'
+
+				send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
 			
 		cart.put()	
 			
