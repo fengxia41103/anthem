@@ -109,7 +109,7 @@
 		<span>
 			{{ me.nickname }}
 		</span>
-		<a href="{{ url_logout }}" class="bubble-button" style="margin-right:50px;">Logout</a>
+		<a href="{{ url_logout }}" class="bubble-button" style="">Logout</a>
 	</td></tr>
 	</table>
 </div>
@@ -213,6 +213,9 @@ Chat
 	<script src="http://code.highcharts.com/highcharts.js"></script>
 	<script src="http://code.highcharts.com/highcharts-more.js"></script>
 	<script src="http://code.highcharts.com/modules/exporting.js"></script>
+
+	<!-- css3 multicol fallback -->
+	<script type="text/javascript" src="/static/css3ie/css3-multi-column.js"></script>
 	
 	<!-- google analytics -->
 	<script>
