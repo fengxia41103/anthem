@@ -458,7 +458,7 @@ class UserComment(MyBaseModel):
 #
 #######################################
 class ChatMessage(ndb.Model):
-	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
 	sender_name=ndb.StringProperty(required=True)
 	receiver_name=ndb.StringProperty(required=True)
 	message=ndb.StringProperty(required=True)
@@ -474,7 +474,7 @@ class ChatMessage(ndb.Model):
 	is_expired=ndb.ComputedProperty(lambda self: int(self.age)>7200)
 
 class ChatChannel(ndb.Model):
-	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
+	created_time=ndb.DateTimeProperty(auto_now_add=True)
 	client_id=ndb.StringProperty(required=True)
 	contact_id=ndb.StringProperty(required=True)
 	contact_name=ndb.StringProperty(required=True)
