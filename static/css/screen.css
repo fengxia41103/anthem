@@ -293,7 +293,14 @@ ul.tags li a{
 	-webkit-box-shadow: 0 0 5px #c0c0c0;
   	box-shadow:         0 0 5px #c0c0c0;
 }
-  
+
+.no-csscolumns div.pin{
+	max-width:25%;
+	width:20%;
+	float:left;
+	margin-right:10px;
+}
+ 
 .css3-columns{
 	width:100%;
 	-moz-column-count: 4;
@@ -308,10 +315,6 @@ ul.tags li a{
 }
   
 .pin { 
-	/*
-	max-width:282px;
-	width:260px;
-	*/
 	-moz-column-break-inside: avoid; 
 	-webkit-column-break-inside: avoid; 
 	column-break-inside: avoid; 
