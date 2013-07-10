@@ -233,6 +233,9 @@ Chat
 	// some global initialization
 	var j$=jQuery.noConflict();
 	
+	// fix IE getJSON issue
+	//j$.support.cors = true;	
+	
 	// set up chat polling
 	var chat_message_poller;
 	var channel, socket;
