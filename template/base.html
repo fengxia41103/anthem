@@ -431,6 +431,10 @@ Chat
 		j$('#online-user-list').click(function(){
 			j$('input[name="receiver-name"]').val('@'+j$(this).val());			
 		});
+		
+		// to begin with, pull online chat user list
+		pollChatOnlineUsers();		
+		
 	});
 	</script>	
 	
