@@ -199,7 +199,7 @@ class GoogleWalletSubscriptionOrder(ndb.Model):
 #######################################
 class MyBaseModel(ndb.Model):
 	# two time stamps
-	created_time=ndb.DateTimeProperty(auto_now_add=True)
+	created_time=ndb.DateTimeProperty(default=datetime.datetime.now())
 	last_modified_time=ndb.DateTimeProperty(auto_now=True)
 	
 	# object owner tied to a Contact
