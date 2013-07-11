@@ -111,11 +111,14 @@
 							tr.fadeOut(500,function(){
 								j$(this).remove();
 							});
-							
+							break;
+						case '-1': // this cart has been deleted
+							j$().toastmessage('showNoticeToast','This cart has been deleted');
 							// if this is the last row, we now have an empty cart
 							// redirect to browse page
-							//window.location.href = "/buyorder/browse";
+							window.location.href = "/buyorder/browse";
 							break;
+
 						default:
 							break;
 					}

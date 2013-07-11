@@ -573,6 +573,11 @@ class ReviewCart(MyBaseHandler):
 					order.filled_qty -= removing.qty
 					batch.append(order)					
 					
+					# clear cart broker field if all fills are being removed
+					if len(new_fills)==0:
+						# reset broker field, this is an empty cart
+						cart.broker=None
+					
 				# update client price
 				elif action=='update client price':
 					price=float(self.request.POST['price'])
@@ -600,11 +605,17 @@ class ReviewCart(MyBaseHandler):
 						# update fill
 						f.qty=qty
 						
-				# update affected order's if qty changed
+				# update affected order's qty if fill qty changed
 				ndb.put_multi(batch)
 			
 			# update cart
-			cart.put()
+			if len(cart.fills)==0 and cart.status in ['In Approval', 'Rejected']:
+				# if this is editing from a REJECTED cart, there may already be another OPEN
+ 				# cart! So we can not return this cart to OPEN. Rather, in this case, this cart should be deleted!
+				# delete this cart
+				cart.key.delete()
+				status='-1'
+			else: cart.put()
 			self.response.write(status)
 
 	
