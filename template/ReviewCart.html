@@ -119,6 +119,13 @@
 							window.location.href = "/buyorder/browse";
 							break;
 
+						case '-2': // this cart is OPEN and empty
+							j$().toastmessage('showNoticeToast','This cart is now empty. Go shopping.');
+							// if this is the last row, we now have an empty cart
+							// redirect to browse page
+							window.location.href = "/buyorder/browse";
+							break;
+
 						default:
 							break;
 					}

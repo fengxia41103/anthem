@@ -615,7 +615,11 @@ class ReviewCart(MyBaseHandler):
 				# delete this cart
 				cart.key.delete()
 				status='-1'
-			else: cart.put()
+			else: 
+				cart.put()
+				
+				# we now have an empty cart, should ask client to redirect to browse window
+				if len(cart.fills)==0: status='-2'
 			self.response.write(status)
 
 	
