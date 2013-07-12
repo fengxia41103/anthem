@@ -83,7 +83,7 @@
     	// now, based on conditions, we will enable certain inputs
     	j$('input[type="number"]').prop('disabled', true);
     	
-    	{% if cart.can_change_fill(me.key) %}
+    	{% if cart and cart.can_change_fill(me.key) %}
     		j$('input[type="number"]').prop('disabled', false);
     	{% endif %}
     	j$('input[item="client-price"]').prop('disabled',false);
@@ -91,7 +91,7 @@
     	// cart has been approved
     	// not allowing changing qty,price anymore
     	// but can start inputting shipping
-    	{% if cart.can_change_shipping(me.key) %}
+    	{% if cart and cart.can_change_shipping(me.key) %}
     		j$('input[name^="shipping"]').prop('disabled', false);
     	{% endif %}
     		

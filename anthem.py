@@ -474,19 +474,20 @@ class ApproveCart(MyBaseHandler):
 			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Your cart %s</a> has been REJECTED!' %(cart.key.id(),cart.key.id()))
 		
 		elif action.lower()=='seller reconcile':
-			cart.audit_me(self.me.key,'Seller Reconciled', cart.seller_reconciled,'True')
-			cart.seller_reconciled=True
-			
-			# TODO: send email to all parties here
-			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Seller of <a href="/cart/review?cart=%s">Cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
-
-			# if buyer reconciled also, close this cart
-			if (cart.buyer_reconciled):
-				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
-				cart.status='Closed'
+			if cart.can_seller_reconcile(self.me.key):
+				cart.audit_me(self.me.key,'Seller Reconciled', cart.seller_reconciled,'True')
+				cart.seller_reconciled=True
 				
-				send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
-				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+				# TODO: send email to all parties here
+				send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Seller of <a href="/cart/review?cart=%s">Cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
+	
+				# if buyer reconciled also, close this cart
+				if (cart.buyer_reconciled):
+					cart.audit_me(self.me.key,'Status',cart.status,'Closed')
+					cart.status='Closed'
+					
+					send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+					send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
 		else:
 			# TODO: give an assert now
 			raise Exception('Unknown path')
@@ -514,7 +515,7 @@ class ReviewCart(MyBaseHandler):
 		# get cart
 		if not cart:
 			self.template_values['cart']=None
-		
+			template = JINJA_ENVIRONMENT.get_template('/template/ReportIssue.html')
 		else:
 			assert cart
 			self.template_values['shipping_methods']=SHIPPING_METHOD
@@ -535,7 +536,10 @@ class ReviewCart(MyBaseHandler):
 			# auditing trail
 			if self.request.GET.has_key('audit'):
  				self.template_values['auditing']=MyAudit.query(ancestor=cart.key).order(-MyAudit.created_time)
-		template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
+			
+			template = JINJA_ENVIRONMENT.get_template('/template/ReviewCart.html')
+		
+		# render
 		self.response.write(template.render(self.template_values))
 	
 	def post(self):

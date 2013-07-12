@@ -51,7 +51,7 @@ class Contact(ndb.Model):
 	is_active=ndb.ComputedProperty(lambda self: len(self.active_roles)>0)
 	
 	# Trial is a one-time deal
-	trial_time=ndb.DateTimeProperty(auto_now_add=True)
+	trial_time=ndb.DateTimeProperty(default=datetime.datetime.now())
 	trial_age=ndb.ComputedProperty(lambda self: (datetime.datetime.now()-self.trial_time).total_seconds())
 	
 	# we don't need to know its residential
@@ -431,7 +431,7 @@ class BuyOrderCart(MyBaseModel):
 		# when payout>0, so seller get some kind of payment
 		# this assumes that a cart can keep both broker and seller happy even
 		# when its payable_balance>0
-		return float(self.payout)>0 and not self.seller_reconciled
+		return float(self.payout)>0 and not self.seller_reconciled and self.terminal_seller==user_key
 
 	def can_delete_payout(self,user_key):
 		# when can a user delete payout bankslip?
