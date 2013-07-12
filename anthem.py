@@ -464,7 +464,7 @@ class ApproveCart(MyBaseHandler):
 			ndb.put_multi(batch)
 			
 			# TODO: send email to all parties here
-			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Your cart %s has been APPROVED!' % cart.key.id())
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Your cart %s has been APPROVED! Remember to provide the buyer your payment preference.' % cart.key.id())
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'Rejected')
