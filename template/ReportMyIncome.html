@@ -107,12 +107,22 @@ Your current account balance is: {{ me.cash }}
 	<div class="quick-pane">
 		<table class="table-row-border">
 			<thead>
-				<tr><td></td><td>When</td><td>Registered By</td><td>Amount</td></tr>
+				<tr><td>For Cart</td><td>Parties</td><td>Transaction</td><td>When</td><td>Registered By</td><td>Amount To You</td></tr>
 			</thead>
 			<tbody>
 				{% for s in slips %}	
 					<tr><td>
-							Slip# {{ s.key.id() }}
+							<a href="/cart/review?cart={{ s.cart_key.id()}}&owner={{ s.cart_key.get().owner.id()}}">Cart #{{ s.cart_key.id() }}</a>
+						</td><td>
+							{{ s.party_a.get().nickname }}
+							{% if s.money_flow=='a-2-b' %}
+								&rarr;
+							{% else %}
+								&larr;
+							{% endif %}
+							{{ s.party_b.get().nickname }}
+						</td><td>
+							<a href="/cart/review?cart={{ s.cart_key.id()}}&owner={{ s.cart_key.get().owner.id()}}">Slip# {{ s.key.id() }}</a>
 						</td><td>
 							{{ s.created_time }}
 						</td><td>
