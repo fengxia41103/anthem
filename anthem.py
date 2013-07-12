@@ -450,7 +450,7 @@ class ApproveCart(MyBaseHandler):
 			cart.status='In Approval'
 			
 			# TODO: send email to all parties here
-			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> by %s needs APPROVAL!' %(cart.key.id(),cart.key.id(),cart.terminal_seller.get().nickname))
+			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Cart %s by %s needs APPROVAL!' %(cart.key.id(),cart.terminal_seller.get().nickname))
 			
 		elif action.lower()=='approve' and cart.status=='In Approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'Ready for Processing')
@@ -464,14 +464,14 @@ class ApproveCart(MyBaseHandler):
 			ndb.put_multi(batch)
 			
 			# TODO: send email to all parties here
-			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Your cart %s</a> has been APPROVED!' %(cart.key.id(),cart.key.id()))
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Your cart %s has been APPROVED!' % cart.key.id())
 			
 		elif action.lower()=='reject' and cart.status=='In Approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'Rejected')
 			cart.status='Rejected'
 
 			# TODO: send email to all parties here
-			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Your cart %s</a> has been REJECTED!' %(cart.key.id(),cart.key.id()))
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Your cart %s has been REJECTED!' %cart.key.id())
 		
 		elif action.lower()=='seller reconcile':
 			if cart.can_seller_reconcile(self.me.key):
@@ -479,15 +479,15 @@ class ApproveCart(MyBaseHandler):
 				cart.seller_reconciled=True
 				
 				# TODO: send email to all parties here
-				send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Seller of <a href="/cart/review?cart=%s">Cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
+				send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Seller of cart %s has RECONCILED!' % cart.key.id())
 	
 				# if buyer reconciled also, close this cart
 				if (cart.buyer_reconciled):
 					cart.audit_me(self.me.key,'Status',cart.status,'Closed')
 					cart.status='Closed'
 					
-					send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
-					send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+					send_chat('System',cart.broker.get().nickname,'Cart %s is now CLOSED!' % cart.key.id())
+					send_chat('System',cart.terminal_seller.get().nickname,'Cart %s is now CLOSED!' %cart.key.id())
 		else:
 			# TODO: give an assert now
 			raise Exception('Unknown path')
@@ -686,7 +686,7 @@ class ShippingCartProcess(MyBaseHandler):
 			cart.shipping_date=new_date
 
 			# TODO: email all parties
-			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> has been SHIPPED!' %(cart.key.id(),cart.key.id()))
+			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Cart %s has been SHIPPED by %s!' %(cart.key.id(),cart.owner.get().nickname))
 		    
 		cart.audit_me(self.me.key,'Shipping Status',cart.shipping_status,self.request.POST['action'])
 		cart.shipping_status=self.request.POST['action']
@@ -703,15 +703,15 @@ class ShippingCartProcess(MyBaseHandler):
 			cart.audit_me(self.me.key,'Buyer Reconciled',cart.buyer_reconciled,True)
 			cart.buyer_reconciled=True
 			
-			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has RECONCILED!' %(cart.key.id(),cart.key.id()))
+			send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of cart %s has RECONCILED!' % cart.key.id())
 
 			# if buyer reconciled also, close this cart
 			if (cart.seller_reconciled):
 				cart.audit_me(self.me.key,'Status',cart.status,'Closed')
 				cart.status='Closed'
 
-				send_chat('System',cart.broker.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
-				send_chat('System',cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is now CLOSED!' %(cart.key.id(),cart.key.id()))
+				send_chat('System',cart.broker.get().nickname,'Cart %s is now CLOSED!' % cart.key.id())
+				send_chat('System',cart.terminal_seller.get().nickname,'Cart %s is now CLOSED!' % cart.key.id())
 			
 		cart.put()	
 			
@@ -763,7 +763,7 @@ class ShippingCart(blobstore_handlers.BlobstoreUploadHandler):
 		cart.put()	
 
 		# notify seller
-		send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'<a href="/cart/review?cart=%s">Cart %s</a> is ready for SHIPPIING!' %(cart.key.id(),cart.key.id()))
+		send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer has created shipping information. Cart %s is ready for SHIPPIING!' % cart.key.id())
 
 		self.response.write('0')
 		
@@ -1353,7 +1353,7 @@ class BankingCart(MyBaseHandler):
 				slip.put() # has to save here, otherwise, cart update will fail for computed property being None!
 
 				# notify
-				send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of <a href="/cart/review?cart=%s">cart %s</a> has added a PAYMENT!' %(cart.key.id(),cart.key.id()))
+				send_chat(cart.broker.get().nickname,cart.terminal_seller.get().nickname,'Buyer of cart %s has added a PAYMENT!' % cart.key.id())
 				
 				# create an audit record
 				slip.audit_me(self.me.key,'Cart Status',cart.status,'')
