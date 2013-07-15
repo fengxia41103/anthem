@@ -7,13 +7,21 @@ import string,random
 CAT={
 	'ipad':['electronic','computer','gadget','personal device','portable computer'],
 	'iphone':['electronic','computer','gadget','personal device','portalble computer'],
+	'iphone4':['electronic','computer','gadget','personal device','portalble computer'],
 	'poster':['art','interior design','decoration'],
+	'nook':['electronic','e-book reader'],
+	'verizon':['electronic','phone','personal device','portable'],
+	'att':['electronic','phone','personal device','portal'],
 	'g-shock':['watch','sport watch','fashion'],
 	'bounty':['supply','cleaning','paper towel'],
 	'lcd':['computer','display','monitor','electronic'],
 	'redhat':['software','linux'],
 	'software':['software','programming'],
 	'kitty':['toy','decoration'],
+	'gift':['gift'],
+	'gc':['gift card'],
+	'asus':['computer','electronic'],
+	'toshiba':['computer','electronic']
 }
 
 def categorization(words):
