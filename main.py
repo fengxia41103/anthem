@@ -31,6 +31,8 @@ routes = [
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
 	Route('/buyorder/edit/<order_id:\d+>/', handler='anthem.EditBuyOrder',name='buyorder-edit'),
 	Route('/buyorder/delete/<order_id:\d+>/', handler='anthem.DeleteBuyOrder',name='buyorder-delete'),
+	Route('/buyorder/close/<order_id:\d+>/', handler='anthem.CloseBuyOrder',name='buyorder-close'),
+	Route('/buyorder/open/<order_id:\d+>/', handler='anthem.OpenBuyOrder',name='buyorder-open'),
 	Route('/buyorder/new', handler='anthem.PublishNewBuyOrder', name='buyorder-new'),
 	Route('/buyorder/browse/<order_id:\d+>/', handler='anthem.BrowseBuyOrderById',name='buyorder-browse-id'),
 	Route('/buyorder/browse', handler='anthem.BrowseBuyOrder',name='buyorder-browse'),

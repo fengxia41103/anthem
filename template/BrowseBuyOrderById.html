@@ -54,6 +54,32 @@
 				}
 			);	    
 	    });
+
+	    // close order
+	    j$('#btn-close').click(function(){
+	    	var id=j$(this).attr('itemId');
+			j$.post(
+				'/buyorder/close/'+id+'/',
+				[],
+				function(result){
+					j$().toastmessage('showNoticeToast',result);
+					window.location.reload();
+				}
+			);	    
+	    });
+
+	    // reopen order
+	    j$('#btn-open').click(function(){
+	    	var id=j$(this).attr('itemId');
+			j$.post(
+				'/buyorder/open/'+id+'/',
+				[],
+				function(result){
+					j$().toastmessage('showNoticeToast',result);	
+					window.location.reload();
+				}
+			);	    
+	    });
 	    
 		// level 1 navigation
 		j$('#nav-order').addClass('level-1-navigation-selected');
@@ -81,6 +107,11 @@
 				{% if order.can_close() %}
 					| 
 					<span class="command-link" itemId="{{ order.key.id() }}" id="btn-close">Close</span>
+				{% endif %}
+
+				{% if order.can_open() %}
+					| 
+					<span class="command-link" itemId="{{ order.key.id() }}" id="btn-open">Open</span>
 				{% endif %}
 				
             {% elif cart.broker %}

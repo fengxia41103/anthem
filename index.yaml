@@ -56,6 +56,11 @@ indexes:
 
 - kind: BuyOrder
   properties:
+  - name: owner
+  - name: unfilled_qty
+
+- kind: BuyOrder
+  properties:
   - name: tags
   - name: created_time
     direction: desc

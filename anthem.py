@@ -164,6 +164,32 @@ class DeleteBuyOrder(MyBaseHandler):
 		else:
 			return self.response.write('You do not have the right to edit this order.')
 				
+class CloseBuyOrder(MyBaseHandler):
+	def post(self, order_id):
+		order=BuyOrder.get_by_id(int(order_id))
+		assert order
+		
+		# only owner of this order or super can edit
+		if order.owner==self.me.key or self.me.can_be_super():
+			order.is_closed=True
+			order.put()
+			self.response.write('Order has been closed')
+		else:
+			return self.response.write('You do not have the right to close this order.')
+
+class OpenBuyOrder(MyBaseHandler):
+	def post(self, order_id):
+		order=BuyOrder.get_by_id(int(order_id))
+		assert order
+		
+		# only owner of this order or super can edit
+		if order.owner==self.me.key or self.me.can_be_super():
+			order.is_closed=False
+			order.put()
+			self.response.write('Order is now available to sellers')
+		else:
+			return self.response.write('You do not have the right to open this order.')
+
 class PublishNewBuyOrder(MyBaseHandler):
 	def get(self):
 		if not self.me.is_active:
@@ -285,7 +311,7 @@ class BrowseBuyOrderByOwner(MyBaseHandler):
 		self.template_values['owner']=owner_id
 		
 		# only live and non-0 posts
-		orders=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id),BuyOrder.unfilled_qty>0,BuyOrder.is_closed==False))
+		orders=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id),BuyOrder.unfilled_qty>0))
 		
 		# group them by "queues"
 		queue={}

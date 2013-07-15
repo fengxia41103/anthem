@@ -283,12 +283,16 @@ class BuyOrder(MyBaseModel):
 		# buyorder can only be deleted if there is openning cart
 		# meaning no user is exposed to this yet
 		return self.filled_qty==0 and not self.is_closed
+
+	def can_open(self):
+		# buyorder can only be opened if is_closed=True
+		return self.is_closed
 			
 	def can_close(self):
 		# buyorder can be closed by its author
 		# ongoing carts will continue in process
 		# but this post will not be browsable anymore
-		return True 
+		return self.is_closed==False
 			
 class BuyOrderFill(MyBaseModel):
 	# buyoreder reference
