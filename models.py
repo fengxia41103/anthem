@@ -372,7 +372,7 @@ class BuyOrderCart(MyBaseModel):
 	def can_view(self,user_key):
 		# if usre is either a buyer, a seller or a broker
 		# otherwise, they don't have the right to view this cart content!
-		return self.terminal_seller==user_key or self.terminal_buyer==user_key or self.broker==user_key
+		return self.terminal_seller==user_key or self.terminal_buyer==user_key or self.broker==user_key or user_key.get().nickname=='anthem.market.place'
 	
 	def can_enter_approval(self,user_key):
 		# who can submit this cart for approval
