@@ -23,7 +23,9 @@
 	<tbody>
 	{% for c in contacts %}
 	<tr><td>
+		<a href="http://anthem-market-place.appspot.com/user/contact?id={{ c.key.id() }}">
 		{{ c.nickname }}
+		</a>
 		</td><td>
 			<table class="sf-table">
 			<tbody>

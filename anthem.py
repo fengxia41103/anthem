@@ -819,7 +819,10 @@ class ManageUserMembershipCancel(MyUserBaseHandler):
 		self.response.write('0')
 
 class ManageUserContact(MyBaseHandler):
-	def get(self):
+	def get(self):	
+		try:
+			self.template_values['me']=Contact.get_by_id(self.request.get('id'))
+		except: pass
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserContact.html')
 		self.response.write(template.render(self.template_values))

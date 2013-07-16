@@ -18,8 +18,8 @@ handlers:
   script: main.app
 
 - url: /admin/.*
-  script: admin.py
-    login: admin
+  script: main.app
+  login: admin
 
 - url: /.*
   script: main.app
@@ -44,3 +44,5 @@ admin_console:
   pages:
   - name: Contact Admin
     url: /admin/contact
+  - name: Cart Admin
+    url: /admin/cart

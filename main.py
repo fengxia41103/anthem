@@ -29,6 +29,7 @@ routes = [
 
 	# admin pages
 	Route('/admin/contact', handler='admin.AdminContactHandler', name='admin-contact'),
+	Route('/admin/cart', handler='admin.AdminCartHandler', name='admin-cart'),
 	
 	# buyorder controllers
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
