@@ -1,0 +1,58 @@
+{% extends "/template/AdminBase.html" %}
+
+{% block customJS %}
+	<script type="text/javascript">
+		j$(document).ready(function(){
+			j$('table#contact-table').dataTable();
+		});
+	</script>
+{% endblock %}
+
+{% block main %}
+<table class="two-col-table" id="contact-table">
+	<thead>
+	<tr><td>
+			Nickname
+		</td><td>
+			Communication
+		</td><td>
+			Memberships
+		</td>
+	</tr>
+	</thead>
+	<tbody>
+	{% for c in contacts %}
+	<tr><td>
+		{{ c.nickname }}
+		</td><td>
+			<table class="sf-table">
+			<tbody>
+			{% for key, val in c.communication.iteritems() %}
+				<tr><td>{{ key }}
+					</td><td>{{ val }}
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+			</table>
+		</td><td>
+			<table class="ariel-table">
+			<tbody>
+				{% for m in c.memberships %}
+					<tr><td>
+							{{ m.get().role }}
+						</td><td>
+							{{ m.get().order_id }}
+						</td><td>
+							{{ m.get().cancel_date }}
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+			</table>
+		</td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

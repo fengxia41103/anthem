@@ -1446,3 +1446,4 @@ class BankingCart(MyBaseHandler):
 		
 		# return status
 		self.response.write(status)
+

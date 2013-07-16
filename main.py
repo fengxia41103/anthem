@@ -27,6 +27,9 @@ routes = [
 	Route('/auth/<provider>',handler='handlers.AuthHandler:_simple_auth', name='auth_login'),
 	Route('/auth/<provider>/callback', handler='handlers.AuthHandler:_auth_callback', name='auth_callback'),
 
+	# admin pages
+	Route('/admin/contact', handler='admin.AdminContactHandler', name='admin-contact'),
+	
 	# buyorder controllers
 	Route('/blob/serve/<resource:[^/]+>/', handler='anthem.ServeHandler',name='blobstore-serve'),
 	Route('/buyorder/edit/<order_id:\d+>/', handler='anthem.EditBuyOrder',name='buyorder-edit'),

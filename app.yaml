@@ -17,6 +17,10 @@ handlers:
 - url: /wallet/postback
   script: main.app
 
+- url: /admin/.*
+  script: admin.py
+    login: admin
+
 - url: /.*
   script: main.app
   login: required
@@ -34,3 +38,9 @@ pagespeed:
 
 inbound_services:
 - channel_presence
+
+
+admin_console:
+  pages:
+  - name: Contact Admin
+    url: /admin/contact
