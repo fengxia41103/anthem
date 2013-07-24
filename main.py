@@ -28,6 +28,8 @@ routes = [
 	Route('/auth/<provider>/callback', handler='handlers.AuthHandler:_auth_callback', name='auth_callback'),
 
 	# admin pages
+	Route('/admin/contact/reputation/link', handler='admin.AdminContactReputationLinkHandler', name='admin-contact-reputation-link'),
+	Route('/admin/contact/reputation/score', handler='admin.AdminContactReputationScoreHandler', name='admin-contact-reputation-score'),
 	Route('/admin/contact', handler='admin.AdminContactHandler', name='admin-contact'),
 	Route('/admin/cart', handler='admin.AdminCartHandler', name='admin-cart'),
 	

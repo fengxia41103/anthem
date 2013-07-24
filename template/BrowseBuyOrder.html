@@ -286,9 +286,20 @@
 {% block main %}
 	<h1 class="ariel-blue">Browse and Shop</h1>
 	<p class="ariel-blue ariel-p">
-	Browse or use the search box to find products people are looking to buy, and add product to your shopping cart if you want sell to the buyer.
+		{% if owner_id == None %}
+		Browse or use the search box to find products people are looking to buy, and add product to your shopping cart if you want sell to the buyer.
+		{% else %}
+			You are viewing orders posted by {{ order_owner.nickname }}.
+			<blockquote>
+			{% if order_owner.reputation_link %}
+				Check the user's current <span style="text-decoration:underline;"><a href="{{ order_owner.reputation_link }}">REPUTATION</a></span>.
+			{% else %}
+				This user has no existing reputation on file!
+			{% endif %}
+			</blockquote>
+		{% endif %}
 	</p>
-	<br />
+		<br />
 
 	<div class="searchbox">
 	<input type="text" placeholder="Enter a keyword" id="input-pinterest-filter" title="Search is case insensitive. Multiple terms are delimited by comma."/>

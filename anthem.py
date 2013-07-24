@@ -377,10 +377,11 @@ class BrowseBuyOrder(MyBaseHandler):
 				# RULE -- unique (broker,terminal-seller) OPEN cart rule
 				# thus, overriding owner_id parameter
 				owner_id = self.cart.fills[0].order.get().owner.id()
-
+				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			if owner_id and nd:
 				# owner_id and nd filters
 				queries=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.tags.IN(tokenize(nd))))
+				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			elif owner_id:
 				# owner_id filter only
 				queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
@@ -394,7 +395,6 @@ class BrowseBuyOrder(MyBaseHandler):
 		# compose data structure for template
 		if queries:
 			queries=queries.fetch(100)
-		logging.info(','.join([q.name for q in queries if q.owner==None]))
 	
 		self.template_values['buyorders']=queries		
 		template = JINJA_ENVIRONMENT.get_template('/template/BrowseBuyOrder.html')

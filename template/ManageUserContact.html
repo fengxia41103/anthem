@@ -92,7 +92,13 @@ by upating your Google account.
 
 <div class="quick-pane">
 	<label class="ss-label fixed-width-label">Reputation</label>
-	{{ me.reputation_score }}
+	{% if me.reputation_link %}
+		<a href="{{ me.reputation_link }}">
+			{{ me.reputation_score }}
+		</a>
+	{% else %}
+			{{ me.reputation_score }}	
+	{% endif %}
 </div>
 
 <div class="quick-pane">

@@ -4,6 +4,42 @@
 	<script type="text/javascript">
 		j$(document).ready(function(){
 			j$('table#contact-table').dataTable();
+			
+			j$('span.command-link[item="cancel-membership"]').click(function(){
+				var contactId=j$(this).attr('contactId');
+				var role=j$(this).attr('role');
+				j$.post(
+					'/admin/contact',
+					{'contact id':contactId,'role':role},
+					function(result){
+						j$().toastmessage('showSuccessToast','Membership has been canceled');
+						j$(this).parents('tr').remove();
+					}
+				);
+			});
+			
+			j$('input[item="reputation-link"]').change(function(){
+				var link=j$(this).val();
+				var contactId=j$(this).attr('contactId');
+				j$.post(
+					'/admin/contact/reputation/link',
+					{'contact id':contactId,'link':link},
+					function(result){
+						j$().toastmessage('showSuccessToast','Contact reputation link has been updated');
+					}
+				);				
+			});
+			j$('input[item="reputation-score"]').change(function(){
+				var score=j$(this).val();
+				var contactId=j$(this).attr('contactId');
+				j$.post(
+					'/admin/contact/reputation/score',
+					{'contact id':contactId,'score':score},
+					function(result){
+						j$().toastmessage('showSuccessToast','Contact reputation score has been updated');
+					}
+				);				
+			});
 		});
 	</script>
 {% endblock %}
@@ -35,6 +71,14 @@
 					</td>
 				</tr>
 			{% endfor %}
+				<tr><td>Reputation link
+					</td><td><input type="url" contactId="{{ c.key.id() }}" value="{{ c.reputation_link }}" item="reputation-link"/>
+					</td>
+				</tr>
+				<tr><td>Reputation
+					</td><td><input type="number" contactId="{{ c.key.id() }}" value="{{ c.reputation_score }}" item="reputation-score"/>
+					</td>
+				</tr>
 			</tbody>
 			</table>
 		</td><td>
@@ -47,6 +91,8 @@
 							{{ m.get().order_id }}
 						</td><td>
 							{{ m.get().cancel_date }}
+						</td><td>
+							<span class="command-link" contactId="{{c.key.id()}}" item="cancel-membership" role="{{m.get().role}}">Cancel</span>
 						</td>
 					</tr>
 				{% endfor %}

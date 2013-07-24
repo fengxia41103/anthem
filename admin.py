@@ -40,7 +40,35 @@ class AdminContactHandler(MyBaseHandler):
 		self.response.write(template.render(self.template_values))
 				
 	def post(self):
-		pass
+		contact_id=self.request.get('contact id')
+		role=self.request.get('role')
+		contact=Contact.get_by_id(contact_id)
+		assert contact
+		contact.cancel_membership(role)
+		
+		self.response.write('0')
+
+class AdminContactReputationLinkHandler(MyBaseHandler):
+	def post(self):
+		contact_id=self.request.get('contact id')
+		link=self.request.get('link')
+		contact=Contact.get_by_id(contact_id)
+		assert contact
+		contact.reputation_link=link
+		contact.put()
+		
+		self.response.write('0')
+
+class AdminContactReputationScoreHandler(MyBaseHandler):
+	def post(self):
+		contact_id=self.request.get('contact id')
+		score=self.request.get('score')
+		contact=Contact.get_by_id(contact_id)
+		assert contact
+		contact.reputation_score=int(score)
+		contact.put()
+		
+		self.response.write('0')
 
 class AdminCartHandler(MyBaseHandler):
 	def get(self):

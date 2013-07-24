@@ -54,7 +54,8 @@ AUTH_CONFIG = {
 }
 
 # Membership
-MONTHLY_MEMBERSHIP_FEE={'Nur':0.01,'Doc':0.01,'Client':0.01,'Super':100,'Trial':0.01}
+MONTHLY_MEMBERSHIP_FEE={'Nur':5.0,'Doc':20.0,'Client':0.01,'Super':100,'Trial':0.01}
+TRIAL_DAYS=90
 
 # Shipping methods
 SHIPPING_METHOD=['UPS','FedEx','DHL','USPS','Other']

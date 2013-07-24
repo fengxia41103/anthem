@@ -77,7 +77,8 @@ class Contact(ndb.Model):
 	# thus allowing super user to manually set its value.
 	# this is potentially needed to help user transit a status
 	# from other site to ours
-	reputation_score=ndb.IntegerProperty(default=0)
+	reputation_score=ndb.IntegerProperty(default=100)
+	reputation_link=ndb.StringProperty()
 	
 	# bank ending balance
 	# this is how much money this user has on his account
@@ -91,7 +92,7 @@ class Contact(ndb.Model):
 		# if it's in Trial period
 		# Trial is limited to 30-day beginning at first creation of this Contact record
 		# TODO: a CRON job to remove Trial from Contact based on 30-day age rule
-		return 'Trial' in self.active_roles and self.trial_age<(30*24*3600)
+		return 'Trial' in self.active_roles and self.trial_age<(TRIAL_DAYS*24*3600)
 		
 	def can_be_doc(self):
 		# if a Doc membership is Active
@@ -160,8 +161,8 @@ class Contact(ndb.Model):
 		# notify ADMIN!
 		message = mail.EmailMessage(sender="System <anthem.marketplace@gmail.com>",
                             subject="Subscription Cancelation")
-		message.to='anthem.marketplace@gmail.com'
-		message.body='User %s has canceled membership %s.' % (self.nickname, role)
+		message.to='%s,%s'%('anthem.marketplace@gmail.com',self.email)
+		message.body='User %s membership %s has been canceled.' % (self.nickname, role)
 		message.send()		
 				
 	@classmethod
