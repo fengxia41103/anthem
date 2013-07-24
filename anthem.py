@@ -385,6 +385,7 @@ class BrowseBuyOrder(MyBaseHandler):
 			elif owner_id:
 				# owner_id filter only
 				queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
+				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			elif nd:
 				# this will be OR tag test, meaning that any tag is in the ND list will be True
 				queries=BuyOrder.query(BuyOrder.tags.IN(tokenize(nd)))
