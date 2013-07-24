@@ -3,7 +3,7 @@
 {% block customJS %}
 	<script type="text/javascript">
 		j$(document).ready(function(){
-			j$('table#contact-table').dataTable();
+			//j$('table#contact-table').dataTable();
 			
 			j$('span.command-link[item="cancel-membership"]').click(function(){
 				var contactId=j$(this).attr('contactId');
@@ -45,7 +45,7 @@
 {% endblock %}
 
 {% block main %}
-<table class="two-col-table" id="contact-table">
+<table class="table-row-border" width="100%" id="contact-table">
 	<thead>
 	<tr><td>
 			Nickname
