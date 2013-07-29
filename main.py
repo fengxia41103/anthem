@@ -81,6 +81,7 @@ routes = [
 	# google wallet
 	Route('/wallet/token',handler='anthem.GoogleWalletToken',name='google-wallet-token'),	
 	Route('/wallet/postback',handler='anthem.GoogleWalletPostback',name='google-wallet-postback'),	
+	Route('/wallet',handler='anthem.GoogleWalletPostback',name='google-wallet-postback'),	
 	
 	# if everything falls out
 	Route('/', handler='anthem.MainPage'),  
