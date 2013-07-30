@@ -226,15 +226,14 @@
 
 		// list view
 		{% if buyorders %}
-		var data=[];
+		var html='';
 		{% for b in buyorders %}
 			data.push([
-				'<a href="/buyorder/browse?owner={{b.owner.id()}}"><p class="product-list-item-footer-user" name="{{b.owner.get().nickname}}">{{ 
-				b.owner.get().nickname }}</p></a>',
-				'<a href="/buyorder/browse/{{b.key.id()}}/">{{ b.name }}</a>',
-				'{{ b.description }}<br />{{b.owner.get().shipping_preference}}<br />{{b.owner.get().payment_preference}}',
-				'{{ b.unfilled_qty }}',
-				'{{ b.price }}'
+			'<a href="/buyorder/browse?owner={{b.owner.id()}}"><p class="product-list-item-footer-user" name="{{b.owner.get().nickname}}">{{ b.owner.get().nickname }}</p></a>',
+			'<a href="/buyorder/browse/{{b.key.id()}}/">{{ b.name }}</a>',
+			'{{ b.description }}',
+			'{{ b.unfilled_qty }}',
+			'{{ b.price }}'
 			]);
 		{% endfor %}
 		j$('#buyorder-list-view').dataTable( {

@@ -821,9 +821,12 @@ class ManageUserMembershipCancel(MyUserBaseHandler):
 
 class ManageUserContact(MyBaseHandler):
 	def get(self):	
-		try:
+		#try:
+		if self.me.can_be_super():
 			self.template_values['me']=Contact.get_by_id(self.request.get('id'))
-		except: pass
+			logging.debug('person identity swap')
+		else: pass
+		#except: pass
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageUserContact.html')
 		self.response.write(template.render(self.template_values))

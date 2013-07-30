@@ -93,7 +93,10 @@ class Contact(ndb.Model):
 		# Trial is limited to 30-day beginning at first creation of this Contact record
 		# TODO: a CRON job to remove Trial from Contact based on 30-day age rule
 		return 'Trial' in self.active_roles and self.trial_age<(TRIAL_DAYS*24*3600)
-		
+
+	def can_be_super(self):
+		return self.nickname=='anthem.market.place'
+				
 	def can_be_doc(self):
 		# if a Doc membership is Active
 		return any([r in ['Doc','Super'] for r in self.active_roles]) or self.is_trial()

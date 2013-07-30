@@ -23,7 +23,7 @@
 			j$.each(j$('#table-comm tbody tr'),function(index,val){
 				var name=j$(val).find('input[item="name"]').val();
 				var value=j$(val).find('input[item="value"]').val();
-				data[name]=value;
+				data[name]=value.replace(/(\n)+/g, '<br />').replace(/(\r)+/g,'<br />');
 			});
 			
 			j$.post(
@@ -136,12 +136,12 @@ by upating your Google account.
 		<tr><td>
 				<label class="ss-label">Shpping Preference</label>
 				<br />
-				<textarea value="{{ me.shipping_preference }}" item="shipping-preference"></textarea>
+				<textarea item="shipping-preference">{{me.shipping_preference}}</textarea>
 			</td>
 			<td>
 				<label class="ss-label">Payment Preference</label>
 				<br />
-				<textarea value="{{ me.payment_preference }}" item="payment-preference"></textarea>
+				<textarea item="payment-preference">{{me.payment_preference}}</textarea>
 			</td>
 		</tr>
 	</table>

@@ -21,7 +21,8 @@ CAT={
 	'gift':['gift'],
 	'gc':['gift card'],
 	'asus':['computer','electronic'],
-	'toshiba':['computer','electronic']
+	'toshiba':['computer','electronic'],
+	'diablo':['computer game','entertainment']
 }
 
 def categorization(words):
