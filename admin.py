@@ -5,6 +5,7 @@ from google.appengine.api import images
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.blobstore import delete, delete_async
 from google.appengine.api import channel
+from google.appengine.api import mail
 from webapp2 import uri_for,redirect
 import os
 import urllib
@@ -80,3 +81,5 @@ class AdminCartHandler(MyBaseHandler):
 				
 	def post(self):
 		pass
+
+						
