@@ -88,4 +88,4 @@ routes = [
 	
 ]
 
-app = WSGIApplication(routes, config=app_config, debug=True)
+app = WSGIApplication(routes, config=app_config, debug=False)

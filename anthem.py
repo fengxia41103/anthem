@@ -380,11 +380,11 @@ class BrowseBuyOrder(MyBaseHandler):
 				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			if owner_id and nd:
 				# owner_id and nd filters
-				queries=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.tags.IN(tokenize(nd))))
+				queries=BuyOrder.query(ndb.AND(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.tags.IN(tokenize(nd))), BuyOrder.unfilled_qty>0, BuyOrder.is_closed==False)
 				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			elif owner_id:
 				# owner_id filter only
-				queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id))
+				queries=BuyOrder.query(BuyOrder.owner==ndb.Key(Contact,owner_id), BuyOrder.unfilled_qty>0, BuyOrder.is_closed==False)
 				self.template_values['order_owner']=owner=Contact.get_by_id(owner_id)
 			elif nd:
 				# this will be OR tag test, meaning that any tag is in the ND list will be True

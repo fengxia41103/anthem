@@ -227,8 +227,9 @@
 		// list view
 		{% if buyorders %}
 		var html='';
+		var bData=[];
 		{% for b in buyorders %}
-			data.push([
+			bData.push([
 			'<a href="/buyorder/browse?owner={{b.owner.id()}}"><p class="product-list-item-footer-user" name="{{b.owner.get().nickname}}">{{ b.owner.get().nickname }}</p></a>',
 			'<a href="/buyorder/browse/{{b.key.id()}}/">{{ b.name }}</a>',
 			'{{ b.description }}',
@@ -237,7 +238,7 @@
 			]);
 		{% endfor %}
 		j$('#buyorder-list-view').dataTable( {
-		         "aaData": data,
+		         "aaData": bData,
 		         "aoColumns":[
 		         	{ "sTitle": "Buyer" },
 		         	{ "sTitle": "Product" },
