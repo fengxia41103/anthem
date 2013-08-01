@@ -472,9 +472,11 @@ class ApproveCart(MyBaseHandler):
 		
 		batch=[]
 		action=self.request.POST['action']
+		seller_notes=self.request.POST['seller_notes']
 		if action.lower()=='submit for approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'In Approval')
 			cart.status='In Approval'
+			cart.seller_notes=seller_notes.strip()
 			
 			# TODO: send email to all parties here
 			send_chat(cart.terminal_seller.get().nickname,cart.broker.get().nickname,'Cart %s by %s needs APPROVAL!' %(cart.key.id(),cart.terminal_seller.get().nickname))

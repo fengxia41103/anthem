@@ -82,9 +82,11 @@
     	// disable all inputs
     	// now, based on conditions, we will enable certain inputs
     	j$('input[type="number"]').prop('disabled', true);
+    	j$('textarea').prop('disabled',true);
     	
     	{% if cart and cart.can_change_fill(me.key) %}
     		j$('input[type="number"]').prop('disabled', false);
+    		j$('textarea').prop('disabled',false);
     	{% endif %}
     	j$('input[item="client-price"]').prop('disabled',false);
     	
@@ -192,9 +194,11 @@
 		// approval process
 		j$(document).on('click','button[item="approval-process"]',function(){
 			var action=j$(this).html();
+			var seller_notes=j$('#seller-notes').val();
+			
 			j$.post(
 				'/cart/approve/{{ cart.owner.id() }}/{{ cart.key.id() }}/',
-				{'action':action},
+				{'action':action,'seller_notes':seller_notes},
 				function(result){
 					j$().toastmessage('showNoticeToast','Cart status has been updated');
 					
@@ -456,6 +460,12 @@
 				<td>{{ cart.buyer_reconciled }}</td>
 				<td>Seller Reconciled</td>
 				<td>{{ cart.seller_reconciled }}</td>
+			</tr>
+			
+			<tr><td>Seller Notes</td>
+				<td>
+					<textarea id="seller-notes" rows="3" style="padding:10px;">{{ cart.seller_notes }}</textarea>
+				</td>
 			</tr>
 		</table>
 		</div>					
