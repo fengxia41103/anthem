@@ -472,7 +472,10 @@ class ApproveCart(MyBaseHandler):
 		
 		batch=[]
 		action=self.request.POST['action']
-		seller_notes=self.request.POST['seller_notes']
+		try:
+			seller_notes=self.request.POST['seller_notes']
+		except:
+			seller_notes=''
 		if action.lower()=='submit for approval':
 			cart.audit_me(self.me.key,'Status',cart.status,'In Approval')
 			cart.status='In Approval'
@@ -684,7 +687,8 @@ class ManageCartAsBuyer(MyBaseHandler):
 		
 		# get all carts that this user is the broker
 		# these are ones need approval
-		self.template_values['broker_carts']=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed').order(BuyOrderCart.status,-BuyOrderCart.last_modified_time)
+		orders=BuyOrderCart.query(BuyOrderCart.broker==self.me.key).filter(BuyOrderCart.status!='Closed').order(BuyOrderCart.status,-BuyOrderCart.last_modified_time)
+		self.template_values['broker_carts']=[o for o in orders if o.status!='Open']
 		
 		# render
 		template = JINJA_ENVIRONMENT.get_template('/template/ManageCartAsBuyer.html')
