@@ -1,4 +1,0 @@
-anthem
-======
-
-Anthem platform migration
